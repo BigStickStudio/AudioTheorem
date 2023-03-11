@@ -47,7 +47,7 @@ impl Events {
         println!("\nConnecting .. press [enter] to exit.");
         
         let a_ = midi_in.connect(in_port, "readin", move |stamp, message, _| {
-            println!("{:?}", f(message[1]));
+            println!("{:?}", f(message[1]).names());
         }, ())?;
         
         input.clear();
