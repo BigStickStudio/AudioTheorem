@@ -18,20 +18,13 @@ fn run() -> Result<(), Box<dyn Error>> {
     let mut midi_in = MidiInput::new("midir reading input")?;
     midi_in.ignore(Ignore::None);
     
-    // Get an input port (read from console if multiple are available)
     let in_ports = midi_in.ports();
     let in_port = match in_ports.len() {
-        0 => return Err("no input port found".into()),
-        1 => {
-            println!("Choosing the only available input port: {}", midi_in.port_name(&in_ports[0]).unwrap());
-            &in_ports[0]
-        },
         _ => {
-            println!("\nAvailable input ports:");
             for (i, p) in in_ports.iter().enumerate() {
                 println!("{}: {}", i, midi_in.port_name(p).unwrap());
             }
-            print!("Please select input port: ");
+            println!("\nSelect an input device:");
             stdout().flush()?;
             let mut input = String::new();
             stdin().read_line(&mut input)?;
@@ -40,19 +33,14 @@ fn run() -> Result<(), Box<dyn Error>> {
         }
     };
     
-    println!("\nOpening connection");
-    let in_port_name = midi_in.port_name(in_port)?;
-
-    // _conn_in needs to be a named parameter, because it needs to be kept alive until the end of the scope
-    let _conn_in = midi_in.connect(in_port, "midir-read-input", move |stamp, message, _| {
+    println!("\nConnecting .. press [enter] to exit.");
+    
+    let a_ = midi_in.connect(in_port, "readin", move |stamp, message, _| {
         println!("{:?}", message[1]);
     }, ())?;
     
-    println!("Connection open, reading input from '{}' (press enter to exit) ...", in_port_name);
-
     input.clear();
-    stdin().read_line(&mut input)?; // wait for next enter key press
+    stdin().read_line(&mut input)?; // waiting for exit 
 
-    println!("Closing connection");
     Ok(())
 }
