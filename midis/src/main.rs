@@ -45,13 +45,13 @@ fn run() -> Result<(), Box<dyn Error>> {
 
     // _conn_in needs to be a named parameter, because it needs to be kept alive until the end of the scope
     let _conn_in = midi_in.connect(in_port, "midir-read-input", move |stamp, message, _| {
-        println!("{}: {:?} (len = {})", stamp, message, message.len());
+        println!("{:?}", message[1]);
     }, ())?;
     
     println!("Connection open, reading input from '{}' (press enter to exit) ...", in_port_name);
 
     input.clear();
-    stdin().read_line(&mut input.first())?; // wait for next enter key press
+    stdin().read_line(&mut input)?; // wait for next enter key press
 
     println!("Closing connection");
     Ok(())
