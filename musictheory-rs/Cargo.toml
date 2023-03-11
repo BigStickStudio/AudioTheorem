@@ -1,0 +1,13 @@
+[package]
+name = "musictheory"
+version = "0.1.0"
+edition = "2018"
+authors = [ "Hans W. Uhlig <huhlig@gmail.com>", "Richard I. Christopher <SoulFilledDirt@gmail.com>" ]
+description = "An attempt at encoding musical theory into a usable library"
+
+[dependencies]
+byteorder = "1.3.4"
+tracing = "0.1.13"
+
+[[example]]
+name = "test"

@@ -1,0 +1,42 @@
+language: rust
+sudo: false
+cache: cargo
+
+rust:
+  - stable
+  - beta
+  - nightly
+
+jobs:
+  allow_failures:
+    - rust: nightly
+  fast_finish: true
+
+before_script: |
+  if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
+    cargo install cargo-tarpaulin
+  fi
+
+script: 
+  - cargo build --verbose
+  - cargo test --verbose
+  - cargo doc --verbose
+
+after_success: |
+  if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
+    cargo tarpaulin --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
+  fi
+
+before_deploy:
+  - cargo doc --verbose
+  - echo '<meta http-equiv="refresh" content="0; url=musictheory/index.html" /> ' > target/doc/index.html
+  - cp -r target/doc public
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  keep_history: true
+  local_dir: public
+  on:
+    branch: master
