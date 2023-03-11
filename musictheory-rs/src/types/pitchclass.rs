@@ -1,4 +1,4 @@
-//
+ //
 // Copyright 2019-2020 Hans W. Uhlig, Richard I. Christopher. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,7 +55,7 @@ pub enum PitchClass {
 impl PitchClass {
     /// DO NOT USE - Internal only
     /// TODO: Deprecate?
-    pub(crate) fn from_index(index: u8) -> PitchClass {
+    pub fn from_index(index: u8) -> PitchClass {
         match index {
             0 => PitchClass::Cn,
             1 => PitchClass::Cs,

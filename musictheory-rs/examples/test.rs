@@ -15,6 +15,7 @@
 //
 
 use musictheory::types::*;
+use musictheory::midi::*;
 use std::ops::Add;
 
 fn intervals() {
@@ -29,10 +30,15 @@ fn intervals() {
 fn chords() {
     let f_sharp_sus4 = Scale::tritonic(Note::F(Accidental::Sharp), 
                                        sequences::TritonicSequence::Sus4Triad).unwrap();
-    println!("F# Sus4: {:?}", f_sharp_sus4.0);
+    println!("F# Sus4: {:?}", f_sharp_sus4);
+}
+
+fn midi() {
+    Events::read_midi(|n| PitchClass::from_index(n % 12));
 }
 
 pub fn main() {
     // intervals();
-    chords();
+    //chords();
+    midi();
 }

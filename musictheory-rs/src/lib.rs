@@ -22,9 +22,9 @@
 #![allow(dead_code)]
 
 pub mod analysis;
-//pub mod midi;
 mod scratchpad;
 pub mod types;
+pub mod midi;
 
 #[cfg(test)]
 mod tests {
