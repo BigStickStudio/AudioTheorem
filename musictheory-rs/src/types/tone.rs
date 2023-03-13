@@ -35,6 +35,10 @@ impl Tone {
         return Tone { octave, note };
     }
 
+    pub fn to_index(&self) -> u8 {
+        self.octave.to_index() * 12 + self.note.pitch_class().to_index()
+    }
+
     /// Create a new [Tone](musictheory::types::Tone) from a [Note](musictheory::types::Note) and an
     /// [Octave](musictheory::types::Octave).
     pub fn from_parts(octave: Octave, note: Note) -> Tone {

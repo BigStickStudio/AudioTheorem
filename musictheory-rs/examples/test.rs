@@ -22,8 +22,6 @@ fn _chords() {
     println!("F# Sus4: {:?}", f_sharp_sus4);
 }
 
-
-
 fn midi() {
     let mut sequence = Sequence::new();
 

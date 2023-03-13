@@ -22,10 +22,8 @@ impl Sequence {
     }
 
     fn delete_tone(&mut self, index: u8) {
-        self.tones.retain(|&t| t.octave().to_index() != index / 12 && 
-                          t.pitch_class().to_index() != index % 12);
-            self.size = self.tones.len() as u8;
-        
+        self.tones.retain(|&t| t.to_index() != index);
+        self.size = self.tones.len() as u8;
     }
 
     pub fn process_input(&mut self, index: u8, velocity: u8) {
