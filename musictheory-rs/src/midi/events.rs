@@ -15,14 +15,14 @@ use midir::{MidiInput, Ignore};
 pub struct Events;
 
 impl Events {
-    pub fn read_midi(f: fn(u8, u8)) {
+    pub fn read_midi(f: impl FnMut(u8, u8) + Send + 'static) {
         match Events::midi_in(f) {
             Ok(_) => (),
             Err(err) => println!("Error: {}", err)
         }
     }
 
-    fn midi_in(f: fn(u8, u8)) -> Result<(), Box<dyn Error>> {
+    fn midi_in(mut f: impl FnMut(u8, u8) + Send + 'static) -> Result<(), Box<dyn Error>> {
         let mut input = String::new();
         
         let mut midi_in = MidiInput::new("midir reading input")?;

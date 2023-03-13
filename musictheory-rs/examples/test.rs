@@ -3,10 +3,9 @@
 //
 
 
-use std::process::Command;
+// use std::process::Command;
 use musictheory::types::*;
 use musictheory::midi::*;
-use std::ops::Add;
 
 fn _intervals() {
     let l = Note::A(Accidental::Natural);
@@ -23,20 +22,12 @@ fn _chords() {
     println!("F# Sus4: {:?}", f_sharp_sus4);
 }
 
-fn midi_fn(index: u8, velocity: u8) {
-    let mut sequence: Vec<u8> = Vec::new();
 
-    if velocity > 0 {
-        sequence.push(index);
-        let t = Tone::from_index(index);
-        println!("     {:?}: {}{} \t{:?}", t.pitch(), t.octave(), t.note(), t.pitch_class().names());
-    } else {
-        sequence.retain(|idx| *idx != index);
-    }
-}
 
 fn midi() {
-    Events::read_midi(midi_fn);
+    let mut sequence = Sequence::new();
+
+    Events::read_midi(move |index, velocity| sequence.process_input(index, velocity));
 }
 
 pub fn main() {
