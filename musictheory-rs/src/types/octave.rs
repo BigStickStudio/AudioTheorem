@@ -53,7 +53,7 @@ impl Octave {
     }
     /// DO NOT USE - Internal only
     /// TODO: Deprecate?
-    pub(crate) fn from_index(index: u8) -> Option<Octave> {
+    pub fn from_index(index: u8) -> Option<Octave> {
         match index {
             0 => Some(Octave::DoubleContra),
             1 => Some(Octave::SubContra),

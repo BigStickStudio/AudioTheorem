@@ -28,6 +28,13 @@ pub struct Tone {
 }
 
 impl Tone {
+    // creates a new [Tone](musictheory::types::Tone) from an index
+    pub fn from_index(index: u8) -> Tone {
+        let octave = Octave::from_index(index / 12 - 1).unwrap();
+        let note = Pitch::from_index(index % 12).note();
+        return Tone { octave, note };
+    }
+
     /// Create a new [Tone](musictheory::types::Tone) from a [Note](musictheory::types::Note) and an
     /// [Octave](musictheory::types::Octave).
     pub fn from_parts(octave: Octave, note: Note) -> Tone {

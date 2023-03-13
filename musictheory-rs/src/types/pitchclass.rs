@@ -74,7 +74,7 @@ impl PitchClass {
     }
     /// DO NOT USE - Internal only
     /// TODO: Deprecate?
-    pub(crate) fn to_index(&self) -> u8 {
+    pub fn to_index(&self) -> u8 {
         match *self {
             PitchClass::Cn => 0,
             PitchClass::Cs => 1,

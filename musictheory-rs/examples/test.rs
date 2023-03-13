@@ -11,7 +11,7 @@ use std::ops::Add;
 fn _intervals() {
     let l = Note::A(Accidental::Natural);
     let c = Note::C(Accidental::Natural);
-    let r = l.add(Interval::Fifth(PerfectQuality::Perfect)).unwrap();
+    let r = (l + Interval::Fifth(PerfectQuality::Perfect)).unwrap();
     let d1 = Interval::distance(l, c);
     let d2 = Interval::distance(c, r);
     println!("Interval::distance({}, {}, {}) -> {:?} - {:?}", l, c, r, d1, d2);
@@ -24,10 +24,14 @@ fn _chords() {
 }
 
 fn midi_fn(index: u8, velocity: u8) {
+    let mut sequence: Vec<u8> = Vec::new();
+
     if velocity > 0 {
-        let octave = index / 12 - 1;
-        let pitch = musictheory::types::Pitch::from_index(index);
-        println!(" - {:?} {}{} \t{:?}", pitch, octave, pitch.note(), pitch.names());
+        sequence.push(index);
+        let t = Tone::from_index(index);
+        println!("     {:?}: {}{} \t{:?}", t.pitch(), t.octave(), t.note(), t.pitch_class().names());
+    } else {
+        sequence.retain(|idx| *idx != index);
     }
 }
 
@@ -36,11 +40,11 @@ fn midi() {
 }
 
 pub fn main() {
-    if cfg!(target_os = "windows") {
-        Command::new("cls").status().unwrap();
-    } else {
-        Command::new("clear").status().unwrap();
-    };
+//    if cfg!(target_os = "windows") {
+//        Command::new("cls").status().unwrap();
+//    } else {
+//        Command::new("clear").status().unwrap();
+//    };
 
     println!("!!! Audio Theorem !!!");
     println!("=====================");

@@ -44,11 +44,11 @@ impl Events {
             }
         };
         
-        if cfg!(target_os = "windows") {
-            Command::new("cls").status().unwrap();
-        } else {
-            Command::new("clear").status().unwrap();
-        };
+    //    if cfg!(target_os = "windows") {
+    //        Command::new("cls").status().unwrap();
+    //    } else {
+    //        Command::new("clear").status().unwrap();
+    //    };
 
         println!("Connected to {}.\nPress [enter] to Exit.\n", midi_in.port_name(in_port)?);
         
