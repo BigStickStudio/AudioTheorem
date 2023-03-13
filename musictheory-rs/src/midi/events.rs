@@ -5,11 +5,10 @@
 //
 
 extern crate midir;
-
+use std::process::Command;
 use crate::types::*;
 use std::io::{stdin, stdout, Write};
 use std::error::Error;
-
 use midir::{MidiInput, Ignore};
 
 #[derive(Copy, Clone, Debug)]
@@ -34,7 +33,7 @@ impl Events {
             _ => {
                 println!("\nAvailable Midi Devices:");
                 for (i, p) in in_ports.iter().enumerate() {
-                    println!("{}: {}", i, midi_in.port_name(p).unwrap());
+                    println!("\t{}: {}", i, midi_in.port_name(p).unwrap());
                 }
                 println!("\nSelect an input device:");
                 stdout().flush()?;
@@ -45,7 +44,13 @@ impl Events {
             }
         };
         
-        println!("\nConnected to {}.\n Press [enter] to Exit.", input);
+        if cfg!(target_os = "windows") {
+            Command::new("cls").status().unwrap();
+        } else {
+            Command::new("clear").status().unwrap();
+        };
+
+        println!("Connected to {}.\nPress [enter] to Exit.\n", midi_in.port_name(in_port)?);
         
         let a_ = midi_in.connect(in_port, "readin", move |stamp, message, _| { f(message[1], message[2]); }, ())?;
         

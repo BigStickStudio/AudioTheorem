@@ -25,6 +25,7 @@ pub mod analysis;
 mod scratchpad;
 pub mod types;
 pub mod midi;
+pub mod graphics;
 
 #[cfg(test)]
 mod tests {

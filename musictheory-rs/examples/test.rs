@@ -1,19 +1,9 @@
 //
-// Copyright 2019 Hans W. Uhlig, Richard I. Christopher. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Copyright 2023 Richard I. Christopher, NeoTec Digital. All Rights Reserved.
 //
 
+
+use std::process::Command;
 use musictheory::types::*;
 use musictheory::midi::*;
 use std::ops::Add;
@@ -37,8 +27,7 @@ fn midi_fn(index: u8, velocity: u8) {
     if velocity > 0 {
         let octave = index / 12 - 1;
         let pitch = musictheory::types::Pitch::from_index(index);
-        let pc = pitch.pitch_class();
-        println!("{:?} {}{}: {:?}", pitch, pitch.note(), octave, pitch.names());
+        println!(" - {:?} {}{} \t{:?}", pitch, octave, pitch.note(), pitch.names());
     }
 }
 
@@ -47,8 +36,14 @@ fn midi() {
 }
 
 pub fn main() {
+    if cfg!(target_os = "windows") {
+        Command::new("cls").status().unwrap();
+    } else {
+        Command::new("clear").status().unwrap();
+    };
+
     println!("!!! Audio Theorem !!!");
-    println!("=====================\n");
+    println!("=====================");
     // _intervals();
     // _chords();
     midi();
