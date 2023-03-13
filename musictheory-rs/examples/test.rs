@@ -18,7 +18,7 @@ use musictheory::types::*;
 use musictheory::midi::*;
 use std::ops::Add;
 
-fn intervals() {
+fn _intervals() {
     let l = Note::A(Accidental::Natural);
     let c = Note::C(Accidental::Natural);
     let r = l.add(Interval::Fifth(PerfectQuality::Perfect)).unwrap();
@@ -27,18 +27,29 @@ fn intervals() {
     println!("Interval::distance({}, {}, {}) -> {:?} - {:?}", l, c, r, d1, d2);
 }
 
-fn chords() {
+fn _chords() {
     let f_sharp_sus4 = Scale::tritonic(Note::F(Accidental::Sharp), 
                                        sequences::TritonicSequence::Sus4Triad).unwrap();
     println!("F# Sus4: {:?}", f_sharp_sus4);
 }
 
+fn midi_fn(index: u8, velocity: u8) {
+    if velocity > 0 {
+        let octave = index / 12 - 1;
+        let pitch = musictheory::types::Pitch::from_index(index);
+        let pc = pitch.pitch_class();
+        println!("{:?} {}{}: {:?}", pitch, pitch.note(), octave, pitch.names());
+    }
+}
+
 fn midi() {
-    Events::read_midi(|n| PitchClass::from_index(n % 12));
+    Events::read_midi(midi_fn);
 }
 
 pub fn main() {
-    // intervals();
-    //chords();
+    println!("!!! Audio Theorem !!!");
+    println!("=====================\n");
+    // _intervals();
+    // _chords();
     midi();
 }

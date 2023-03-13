@@ -62,7 +62,7 @@ pub struct Pitch(u8);
 
 impl Pitch {
     /// Not for External Use
-    pub(crate) const fn from_index(index: u8) -> Pitch {
+    pub const fn from_index(index: u8) -> Pitch {
         Pitch(index)
     }
     /// Not for External Use
