@@ -27,7 +27,7 @@ impl<'a> Events<'a> {
         let in_port = Events::getInputPort(&mut midi_in);
         let mut midi_out = &mut MidiOutput::new("MT_out").unwrap();
         let out_port = Events::getOutputPort(&mut midi_out);
-        let conn_out = midi_out.connect(&out_port, "out").unwrap();
+        let conn_out = &midi_out.connect(&out_port, "out").unwrap();
         let input = String::new();
 
         Events{
@@ -35,7 +35,7 @@ impl<'a> Events<'a> {
             in_port,
             midi_out,
             out_port,
-            conn_out: &mut conn_out,
+            conn_out: &mut conn_out,c
             input
         }
     }
