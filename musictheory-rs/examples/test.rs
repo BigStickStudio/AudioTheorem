@@ -3,7 +3,6 @@
 //
 
 
-// use std::process::Command;
 use musictheory::types::*;
 use musictheory::midi::*;
 
@@ -29,14 +28,10 @@ fn midi() {
 }
 
 pub fn main() {
-    if cfg!(target_os = "windows") {
-        Command::new("cls").status().unwrap();
-    } else {
-        Command::new("clear").status().unwrap();
-    };
-
+    print!("\x1B[2J\x1B[1;1H");
     println!("!!! Audio Theorem !!!");
     println!("=====================");
+    
     // _intervals();
     // _chords();
     midi();

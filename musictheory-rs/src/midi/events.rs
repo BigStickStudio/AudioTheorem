@@ -9,6 +9,8 @@ use std::io::{stdin, stdout, Write};
 use std::error::Error;
 use midir::{MidiInput, MidiOutput, MidiOutputPort, Ignore};
 
+
+
 #[derive(Copy, Clone, Debug)]
 pub struct Events;
 
@@ -35,7 +37,7 @@ impl Events {
                 for (i, p) in in_ports.iter().enumerate() {
                     println!("\t{}: {}", i, midi_in.port_name(p).unwrap());
                 }
-                println!("\nSelect an Input Device:");
+                print!("\nSelect an Input Device: ");
                 stdout().flush()?;
                 let mut input = String::new();
                 stdin().read_line(&mut input)?;
@@ -44,13 +46,17 @@ impl Events {
             }
         };
 
+        print!("\x1B[2J\x1B[1;1H");
+        println!("!!! Audio Theorem !!!");
+        println!("=====================");
+
         let out_port: &MidiOutputPort = match out_ports.len() {
             _ => {
                 println!("\nAvailable Output Devices:");
                 for (i, p) in out_ports.iter().enumerate() {
-                    println!("{}: {}", i, midi_out.port_name(p).unwrap());
+                    println!("\t{}: {}", i, midi_out.port_name(p).unwrap());
                 }
-                print!("Select an Output Device: ");
+                print!("\nSelect an Output Device: ");
                 stdout().flush()?;
                 let mut input = String::new();
                 stdin().read_line(&mut input)?;
@@ -59,13 +65,11 @@ impl Events {
             }
         };
         
-        if cfg!(target_os = "windows") {
-            Command::new("cls").status().unwrap();
-        } else {
-            Command::new("clear").status().unwrap();
-        };
-
-        println!("\nConnected to Input: {}.\nSending to Output: {}.\n Press [enter] to Exit.\n", midi_in.port_name(in_port)?, midi_out.port_name(out_port)?);
+        print!("\x1B[2J\x1B[1;1H");
+        println!("!!! Audio Theorem !!!");
+        println!("=====================\n");
+        println!("Connected to Input: {}.\nSending to Output: {}.\n", midi_in.port_name(in_port)?, midi_out.port_name(out_port)?);
+        println!("Press [enter] to Exit.\n");
         
         let mut conn_out = midi_out.connect(out_port, "midir-test")?;
         let a_ = midi_in.connect(in_port, "readin", move |stamp, message, _| { 
@@ -75,12 +79,12 @@ impl Events {
             // process audio as Sequence<Tone>
             f(index, velocity); 
 
+            // play audio
             if velocity > 0 {
                 let _ = conn_out.send(&[0x90, index, velocity]);
             } else {
                 let _ = conn_out.send(&[0x80, index, velocity]);
             }
-
         }, ())?;
         
         input.clear();

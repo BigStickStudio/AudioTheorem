@@ -9,6 +9,7 @@ use crate::types::tone::Tone;
 pub struct Sequence {
     size: u8,
     tones: Vec<Tone>,
+
 }
 
 impl Sequence {
@@ -19,6 +20,7 @@ impl Sequence {
     fn add_tone(&mut self, index: u8) {
         self.size += 1;
         self.tones.push(Tone::from_index(index));
+        self.tones.sort_by_key(|t| t.to_index());
     }
 
     fn delete_tone(&mut self, index: u8) {
@@ -36,6 +38,9 @@ impl Sequence {
     }
 
     pub fn print_state(&self) {
+        print!("\x1B[2J\x1B[1;1H");
+        println!("!!! Audio Theorem !!!");
+        println!("=====================\n");
         println!("{:#?}", *self);
     }
 }
