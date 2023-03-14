@@ -9,25 +9,24 @@ use std::process::Command;
 use crate::types::*;
 use std::error::Error;
 use std::io::{stdin, stdout, Write};
-use midir::{MidiInput, MidiOutput, MidiInputPort, MidiOutputPort, MidiOutputConnection, Ignore};
+use std::boxed::Box;
+use midir::{MidiInput, MidiOutput, MidiInputPort, MidiOutputPort, MidiOutputConnection, ConnectError, Ignore};
 
 pub struct Events<'a> {
-    midi_in: &'a MidiInput,
-    in_port: &'a MidiInputPort,
-    midi_out: &'a MidiOutput,
-    out_port: &'a MidiOutputPort,
-    conn_out: &'a mut MidiOutputConnection,
+    midi_in: Box<&'a mut MidiInput>,
+    in_port: Box<&'a MidiInputPort>,
+    midi_out: Box<&'a mut MidiOutput>,
+    out_port: Box<&'a MidiOutputPort>,
     input: String
 }
 
 impl<'a> Events<'a> {
     pub fn new() -> Events<'a> {
-        let mut midi_in = &mut MidiInput::new("MT_in").unwrap();
-        midi_in.ignore(Ignore::None);
-        let in_port = Events::getInputPort(&mut midi_in);
-        let mut midi_out = &mut MidiOutput::new("MT_out").unwrap();
-        let out_port = Events::getOutputPort(&mut midi_out);
-        let conn_out = &midi_out.connect(&out_port, "out").unwrap();
+        let midi_in = Box::new(&mut MidiInput::new("MT_in").unwrap());
+        let in_port = Box::new(Events::getInputPort(midi_in));
+        let midi_out = Box::new(&mut MidiOutput::new("MT_out").unwrap());
+        let out_port = Box::new(Events::getOutputPort(midi_out));
+        
         let input = String::new();
 
         Events{
@@ -35,18 +34,22 @@ impl<'a> Events<'a> {
             in_port,
             midi_out,
             out_port,
-            conn_out: &mut conn_out,c
             input
         }
     }
 
-    fn getInputPort(midi_in: &mut MidiInput) -> &MidiInputPort {
+    fn unbox<T>(value: Box<T>) -> T {
+        *value
+    }
+
+    fn getInputPort(midi_in: Box<&mut MidiInput>) -> &'a MidiInputPort {
         let mut input = String::new();
-        let in_ports = midi_in.ports();
+        Events::unbox(midi_in).ignore(Ignore::None);
+        let in_ports = Events::unbox(midi_in).ports();
 
         println!("\nAvailable input devices:");
         for (i, p) in in_ports.iter().enumerate() {
-            println!("\t{}: {}", i, midi_in.port_name(p).unwrap());
+            println!("\t{}: {}", i, Events::unbox(midi_in).port_name(p).unwrap());
         }
         println!("\nSelect an input device:");
         stdout().flush();
@@ -54,17 +57,16 @@ impl<'a> Events<'a> {
         in_ports.get(input.trim().parse::<usize>().unwrap_or_default()).unwrap()
     }
 
-    fn getOutputPort(midi_out: &mut MidiOutput) -> &MidiOutputPort {
-        let out_ports = midi_out.ports();
-
+    fn getOutputPort(midi_out: Box<&mut MidiOutput>) -> &'a MidiOutputPort {
+        let mut input = String::new();
+        let out_ports = Events::unbox(midi_out).ports();
 
         println!("\nAvailable output devices:");
         for (i, p) in out_ports.iter().enumerate() {
-            println!("{}: {}", i, midi_out.port_name(p).unwrap());
+            println!("{}: {}", i, Events::unbox(midi_out).port_name(p).unwrap());
         }
         print!("Select an output device: ");
         stdout().flush();
-        let mut input = String::new();
         stdin().read_line(&mut input);
         out_ports.get(input.trim().parse::<usize>().unwrap_or_default()).unwrap()
     }
@@ -106,9 +108,9 @@ impl<'a> Events<'a> {
 
     fn midi_out(&mut self, pitch: u8, velocity: u8) -> Result<(), Box<dyn Error>> {
         if velocity > 0 {
-            let _ = self.conn_out.send(&[0x90, pitch, velocity]);
+            let _ = Events::unbox(self.midi_out).connect(*self.out_port, "out")?.send(&[0x90, pitch, velocity]);
         } else {
-            let _ = self.conn_out.send(&[0x80, pitch, velocity]);
+            let _ = Events::unbox(self.midi_out).connect(*self.out_port, "out")?.send(&[0x80, pitch, velocity]);
         }
 
         Ok(())
