@@ -29,11 +29,11 @@ fn midi() {
 }
 
 pub fn main() {
-//    if cfg!(target_os = "windows") {
-//        Command::new("cls").status().unwrap();
-//    } else {
-//        Command::new("clear").status().unwrap();
-//    };
+    if cfg!(target_os = "windows") {
+        Command::new("cls").status().unwrap();
+    } else {
+        Command::new("clear").status().unwrap();
+    };
 
     println!("!!! Audio Theorem !!!");
     println!("=====================");
