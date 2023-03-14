@@ -7,75 +7,69 @@
 extern crate midir;
 use std::process::Command;
 use crate::types::*;
-use std::io::{stdin, stdout, Write};
 use std::error::Error;
-use midir::{MidiInput, MidiInputPort, MidiOutput, MidiOutputPort, MidiOutputConnection, ConnectError, InitError, Ignore};
+use std::io::{stdin, stdout, Write};
+use midir::{MidiInput, MidiOutput, MidiInputPort, MidiOutputPort, MidiOutputConnection, Ignore};
 
 pub struct Events<'a> {
-    midi_in: MidiInput,
+    midi_in: &'a MidiInput,
     in_port: &'a MidiInputPort,
-    midi_out: MidiOutput,
+    midi_out: &'a MidiOutput,
     out_port: &'a MidiOutputPort,
-    conn_out: MidiOutputConnection,
+    conn_out: &'a mut MidiOutputConnection,
     input: String
 }
 
-impl Events<'_> {
-    pub fn new(&mut self) -> Events {
+impl<'a> Events<'a> {
+    pub fn new() -> Events<'a> {
+        let mut midi_in = &mut MidiInput::new("MT_in").unwrap();
+        midi_in.ignore(Ignore::None);
+        let in_port = Events::getInputPort(&mut midi_in);
+        let mut midi_out = &mut MidiOutput::new("MT_out").unwrap();
+        let out_port = Events::getOutputPort(&mut midi_out);
+        let conn_out = midi_out.connect(&out_port, "out").unwrap();
+        let input = String::new();
+
         Events{
-            midi_in: MidiInput::new("MT_in").unwrap(),
-            in_port: Events::get_midi_in(self).unwrap(),
-            midi_out: MidiOutput::new("MT_out").unwrap(),
-            out_port: Events::get_midi_out(self).unwrap(),
-            conn_out: self.midi_out.connect(self.out_port, "out").unwrap(),
-            input: String::new()
+            midi_in,
+            in_port,
+            midi_out,
+            out_port,
+            conn_out: &mut conn_out,
+            input
         }
     }
 
-    fn get_midi_in(&mut self) -> Option<&MidiInputPort> {
-        self.midi_in.ignore(Ignore::None);
-        let in_ports = self.midi_in.ports();
+    fn getInputPort(midi_in: &mut MidiInput) -> &MidiInputPort {
+        let mut input = String::new();
+        let in_ports = midi_in.ports();
 
-        let mut in_port = match in_ports.len() {
-            _ => {
-                println!("\nAvailable input devices:");
-                for (i, p) in in_ports.iter().enumerate() {
-                    println!("\t{}: {}", i, self.midi_in.port_name(p).unwrap());
-                }
-                println!("\nSelect an input device:");
-                stdout().flush().ok()?;
-                let mut input = String::new();
-                stdin().read_line(&mut input).ok()?;
-                in_ports.get(input.trim().parse::<usize>().ok()?)
-                        .ok_or("invalid input port selected").ok()?
-            }
-        };
-
-        return Some(in_port);
+        println!("\nAvailable input devices:");
+        for (i, p) in in_ports.iter().enumerate() {
+            println!("\t{}: {}", i, midi_in.port_name(p).unwrap());
+        }
+        println!("\nSelect an input device:");
+        stdout().flush();
+        stdin().read_line(&mut input);
+        in_ports.get(input.trim().parse::<usize>().unwrap_or_default()).unwrap()
     }
 
-    fn get_midi_out(&mut self) -> Option<&MidiOutputPort> {
-        let out_ports = self.midi_out.ports();
+    fn getOutputPort(midi_out: &mut MidiOutput) -> &MidiOutputPort {
+        let out_ports = midi_out.ports();
 
-        let mut out_port: &MidiOutputPort = match out_ports.len() {
-            _ => {
-                println!("\nAvailable output devices:");
-                for (i, p) in out_ports.iter().enumerate() {
-                    println!("{}: {}", i, self.midi_out.port_name(p).unwrap());
-                }
-                print!("Select an output device: ");
-                stdout().flush().ok()?;
-                let mut input = String::new();
-                stdin().read_line(&mut input).ok()?;
-                out_ports.get(input.trim().parse::<usize>().ok()?)
-                            .ok_or("invalid output port selected").ok()?
-            }
-        };
 
-        return Some(out_port);
+        println!("\nAvailable output devices:");
+        for (i, p) in out_ports.iter().enumerate() {
+            println!("{}: {}", i, midi_out.port_name(p).unwrap());
+        }
+        print!("Select an output device: ");
+        stdout().flush();
+        let mut input = String::new();
+        stdin().read_line(&mut input);
+        out_ports.get(input.trim().parse::<usize>().unwrap_or_default()).unwrap()
     }
 
-    pub fn read_midi(self, f: impl FnMut(u8, u8) + Send + 'static) {
+    pub fn read_midi(&mut self, f: impl FnMut(u8, u8) + Send + 'static) {
         //    if cfg!(target_os = "windows") {
         //        Command::new("cls").status().unwrap();
         //    } else {
@@ -91,10 +85,10 @@ impl Events<'_> {
         }
     }
 
-    fn midi_connect(self, mut f: impl FnMut(u8, u8) + Send + 'static) -> Result<(), Box<dyn Error>> {
-        println!("Connected to {}.\nPress [enter] to Exit.\n", self.midi_in.port_name(self.in_port)?);
+    fn midi_connect(&mut self, mut f: impl FnMut(u8, u8) + Send + 'static) -> Result<(), Box<dyn Error>> {
+        println!("Connected to {}.\nPress [enter] to Exit.\n", self.midi_in.port_name(&self.in_port)?);
 
-        let a_ = self.midi_in.connect(self.in_port, "readin", move |stamp, message, _| { f(message[1], message[2]); }, ())?;
+        let a_ = self.midi_in.connect(&self.in_port, "readin", move |stamp, message, _| { f(message[1], message[2]); }, ())?;
 
         self.input.clear();
 
@@ -103,14 +97,14 @@ impl Events<'_> {
         Ok(())
     }
 
-    pub fn play_midi(self, pitch: u8, velocity: u8) {
+    pub fn play_midi(&mut self, pitch: u8, velocity: u8) {
         match Events::midi_out(self, pitch, velocity) {
             Ok(_) => (),
             Err(err) => println!("Error: {}", err)
         }
     }
 
-    fn midi_out(self, pitch: u8, velocity: u8) -> Result<(), Box<dyn Error>> {
+    fn midi_out(&mut self, pitch: u8, velocity: u8) -> Result<(), Box<dyn Error>> {
         if velocity > 0 {
             let _ = self.conn_out.send(&[0x90, pitch, velocity]);
         } else {
