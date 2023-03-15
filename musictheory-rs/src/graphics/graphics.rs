@@ -4,8 +4,9 @@
 
 use crate::types::Dynamic;
 use winit::event::*;
+use winit::dpi::PhysicalSize;
 use winit::event_loop::{ControlFlow, EventLoop};
-use winit::window::WindowBuilder;
+use winit::window::{Window, WindowBuilder};
 
 const SCREEN_WIDTH: f32 = 1200.0;
 const SCREEN_HEIGHT: f32 = 800.0;
@@ -88,25 +89,63 @@ impl Grid {
 }
 
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Debug)]
 pub struct Graphics {
     grid: Grid,
     surface: wgpu::Surface,
     device: wgpu::Device,
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
-    size: winit::dpi::PhysicalSize<u32>,
+    size: PhysicalSize<u32>,
 
 }
 
 impl Graphics {
-    pub fn new() -> Graphics {
+    pub fn new(window: Window) -> Self {
         env_logger::init();
 
-        Graphics { grid: Grid::new() }
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+            backends: wgpu::Backends::all(),
+            dx12_shader_compiler: Default::default()
+        })
+
+        let surface = unsafe { instance.create_surface(&window) }.unwrap();
+
+        let adapter = instance.request_adapter(
+            &wgpu::RequestAdapterOptions {
+                power_preference: wgpu::PowerPreference::default(),
+                compatible_surface: Some(&surface),
+                force_fallback_adapter: false,
+            },
+        ).await.unwrap()
+
+        Graphics { 
+            grid: Grid::new(),
+            surface: ,
+            device: ,
+            queue: ,
+            config: ,
+            size: 
+        }
     }
 
     pub fn window(&self) -> &Window { &self.window }
+
+    fn resize(&mut self, new_size: PhysicalSize<u32>) {
+        todo!()
+    }
+
+    fn input(&mut self, event: &WindowEvent) -> bool {
+        todo!()
+    }
+
+    fn update(&mut self) {
+        todo!()
+    }
+
+    fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+        todo!()
+    }
 
     pub fn run(&self) {
         let event_loop = EventLoop::new();
