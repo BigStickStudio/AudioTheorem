@@ -1,3 +1,4 @@
+
 #[derive(Copy, Clone, Debug)]
 pub struct MidiNotes {
     index: [u8; 0],

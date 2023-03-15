@@ -5,7 +5,7 @@
 
 use audiotheorem::types::*;
 use audiotheorem::midi::*;
-use audiotheorem::graphics::Display;
+use audiotheorem::graphics::*;
 
 fn _intervals() {
     let l = Note::A(Accidental::Natural);
@@ -29,9 +29,7 @@ fn _midi() {
 }
 
 fn gfx() {
-    let mut app = Display::create();
-    app.init();
-    app.run();
+    Graphics::render();
 }
 
 pub fn main() {

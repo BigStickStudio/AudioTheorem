@@ -1,3 +1,3 @@
 mod graphics;
 
-pub use self::graphics::Display;
+pub use self::graphics::Graphics;
