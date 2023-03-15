@@ -2,7 +2,6 @@
 // Copyright 2023 Richard I. Christopher, NeoTec Digital. All Rights Reserved.
 //
 
-
 use audiotheorem::types::*;
 use audiotheorem::midi::*;
 use audiotheorem::graphics::*;
@@ -29,8 +28,8 @@ fn _midi() {
 }
 
 fn gfx() {
-    let graphics = Graphics::init();
-    let _ = graphics.render();
+    let graphics = Graphics::new();
+    graphics.run();
 }
 
 pub fn main() {

@@ -2,10 +2,10 @@
 // Copyright 2023 Richard I. Christopher, NeoTec Digital. All Rights Reserved.
 //
 
-use ggez::{event, Context, GameResult};
-use ggez::graphics::{Canvas, Rect, Quad, Color, DrawParam};
-use ggez::mint::Point2;
 use crate::types::Dynamic;
+use winit::event::*;
+use winit::event_loop::{ControlFlow, EventLoop};
+use winit::window::WindowBuilder;
 
 const SCREEN_WIDTH: f32 = 1200.0;
 const SCREEN_HEIGHT: f32 = 800.0;
@@ -35,20 +35,14 @@ impl Position {
         Position { x: x as i32, y: y as i32 }
     }
 
-    fn to_rect(&self) -> Rect {
-        Rect::new_i32(
+    // X, Y, Width, Height
+    fn to_slice(&self) -> [i32; 4] {
+        [
             self.x * SQUARE_SIZE + SQUARE_SIZE,
             self.y * SQUARE_SIZE + SQUARE_SIZE,
             SQUARE_SIZE - 1,
             SQUARE_SIZE - 1,
-        )
-    }
-
-    fn to_point2(&self) -> Point2<f32> {
-        Point2 {
-            x: (self.x * SQUARE_SIZE + SQUARE_SIZE) as f32,
-            y: (self.y * SQUARE_SIZE + SQUARE_SIZE) as f32,
-        }
+        ]
     }
 }
 
@@ -96,48 +90,46 @@ impl Grid {
 
 #[derive(Copy, Clone, Debug)]
 pub struct Graphics {
-    state: Grid
+    grid: Grid,
+    surface: wgpu::Surface,
+    device: wgpu::Device,
+    queue: wgpu::Queue,
+    config: wgpu::SurfaceConfiguration,
+    size: winit::dpi::PhysicalSize<u32>,
+
 }
 
 impl Graphics {
-    pub fn init() -> Graphics {
-        Graphics { state: Grid::new() }
+    pub fn new() -> Graphics {
+        env_logger::init();
+
+        Graphics { grid: Grid::new() }
     }
 
-    pub fn render(&self) -> GameResult {
-        println!("here we are again!");
+    pub fn window(&self) -> &Window { &self.window }
 
-        let (ctx, events_loop) = ggez::ContextBuilder::new("Audio Theorem", "NeoTec Digital")
-                                .window_setup(ggez::conf::WindowSetup::default().title("Audio Theorem"))
-                                .window_mode(ggez::conf::WindowMode::default().dimensions(SCREEN_WIDTH, SCREEN_HEIGHT))
-                                .build()?;
+    pub fn run(&self) {
+        let event_loop = EventLoop::new();
+        let window = WindowBuilder::new().build(&event_loop).unwrap();
 
-        event::run(ctx, events_loop, self.state)
-    }
-}
-
-impl event::EventHandler<ggez::GameError> for Grid {
-    fn update(&mut self, ctx: &mut Context) -> GameResult {
-        while ctx.time.check_update_time(DESIRED_FPS) {}
-        Ok(())
-    }
-
-    fn draw(&mut self, ctx: &mut Context) -> GameResult {
-        let mut canvas = Canvas::from_frame(ctx, Color::from([0.1, 0.1, 0.1, 1.0]));
-
-        for sq in self.grid.iter() {
-            canvas.draw(
-                &Quad,
-                DrawParam::default()
-                        .scale([50., 70.])
-                        .dest(sq.position.to_point2())
-                        .color(Color::RED)
-            );
-        }
-
-        canvas.finish(ctx)?;
-        ggez::timer::yield_now();
-
-        Ok(())
-    }
+        event_loop.run(move |event, _, control_flow| match event {
+            Event::WindowEvent {
+                ref event,
+                window_id,
+            } if window_id == window.id() => match event {
+                WindowEvent::CloseRequested
+                | WindowEvent::KeyboardInput {
+                    input:
+                        KeyboardInput {
+                            state: ElementState::Pressed,
+                            virtual_keycode: Some(VirtualKeyCode::Escape),
+                            ..
+                        },
+                    ..
+                } => *control_flow = ControlFlow::Exit,
+                _ => {}
+            },
+            _ => {}
+        });
+    } 
 }
