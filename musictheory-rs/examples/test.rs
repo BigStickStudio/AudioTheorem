@@ -29,7 +29,8 @@ fn _midi() {
 }
 
 fn gfx() {
-    Graphics::render();
+    let graphics = Graphics::init();
+    let _ = graphics.render();
 }
 
 pub fn main() {

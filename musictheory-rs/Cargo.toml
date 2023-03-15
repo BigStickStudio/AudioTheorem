@@ -16,8 +16,8 @@ opt-level = 3
 byteorder = "1.3.4"
 tracing = "0.1.13"
 midir = "0.9.1"
-bevy = "0.10"
 libloading = "0.7.4"
+ggez = "0.8.1"
 
 [[example]]
 name = "test"
