@@ -3,8 +3,9 @@
 //
 
 
-use musictheory::types::*;
-use musictheory::midi::*;
+use audiotheorem::types::*;
+use audiotheorem::midi::*;
+use audiotheorem::graphics::Display;
 
 fn _intervals() {
     let l = Note::A(Accidental::Natural);
@@ -21,18 +22,25 @@ fn _chords() {
     println!("F# Sus4: {:?}", f_sharp_sus4);
 }
 
-fn midi() {
+fn _midi() {
     let mut sequence = Sequence::new();
 
     Events::read_midi(move |index, velocity| sequence.process_input(index, velocity));
 }
 
+fn gfx() {
+    let mut app = Display::create();
+    app.init();
+    app.run();
+}
+
 pub fn main() {
-    print!("\x1B[2J\x1B[1;1H");
+    //cprint!("\x1B[2J\x1B[1;1H");
     println!("!!! Audio Theorem !!!");
     println!("=====================");
     
     // _intervals();
     // _chords();
-    midi();
+    // _midi();
+    gfx();
 }
