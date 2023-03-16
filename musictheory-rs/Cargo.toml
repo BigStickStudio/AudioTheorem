@@ -2,7 +2,7 @@
 name = "audiotheorem"
 version = "0.2.0"
 edition = "2021"
-authors = [ "Hans W. Uhlig <huhlig@gmail.com>", "Richard I. Christopher <SoulFilledDirt@gmail.com>" ]
+authors = [ "Hans W. Uhlig <huhlig@gmail.com>", "Richard I. Christopher <rchris@neotec.dev>" ]
 description = "An attempt at encoding musical theory into a usable library"
 resolver = "2"
 
@@ -22,9 +22,8 @@ midir = "0.9.1"
 libloading = "0.7.4"
 winit = "0.28.2"
 env_logger = "0.10.0"
-log = "0.4.17"
-wgpu = "0.15.1"
-cfg-if = "1.0.0"
+pollster = "0.3.0"
+wgpu = "0.15"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = "0.1.6"

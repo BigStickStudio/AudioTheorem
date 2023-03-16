@@ -28,8 +28,7 @@ fn _midi() {
 }
 
 fn gfx() {
-    let graphics = Graphics::new();
-    graphics.run();
+    pollster::block_on(Graphics::run());
 }
 
 pub fn main() {

@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#![forbid(unsafe_code)]
+// #![forbid(unsafe_code)]
 #![warn(clippy::pedantic)]
 // TODO: Remove These
 #![allow(unused_imports)]
