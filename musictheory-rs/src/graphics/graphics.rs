@@ -97,7 +97,7 @@ pub struct Graphics {
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
     size: PhysicalSize<u32>,
-    window: Window
+    window: Window,
     pipeline: wgpu::RenderPipeline,
 }
 
@@ -151,7 +151,7 @@ impl Graphics {
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
-            source: wgpu::ShaderSource
+            source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
         });
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -166,7 +166,7 @@ impl Graphics {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: "vs_main",
-                bufers: &[]
+                buffers: &[]
             },
             fragment: Some(wgpu::FragmentState {
                 module: &shader,
@@ -193,7 +193,7 @@ impl Graphics {
                 alpha_to_coverage_enabled: false,
             },
             multiview: None,
-        })
+        });
 
 
         Self { 
