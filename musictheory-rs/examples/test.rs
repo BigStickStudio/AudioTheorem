@@ -28,7 +28,7 @@ fn _midi() {
 }
 
 fn gfx() {
-    pollster::block_on(Graphics::run());
+    Gui::start();
 }
 
 pub fn main() {
