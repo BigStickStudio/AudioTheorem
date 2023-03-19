@@ -38,8 +38,8 @@ pub struct AnalysisRecord {
 pub struct Analyzer;
 
 impl Analyzer {
-    /// Find which [PitchGroups](musictheory::types::PitchGroup) a given set of provided
-    /// [Note](musictheory::types::Note) belong to.
+    /// Find which [PitchGroups](audiotheorem::types::PitchGroup) a given set of provided
+    /// [Note](audiotheorem::types::Note) belong to.
     #[rustfmt::skip]
     pub fn score(notes: &[Note]) -> Result<Analysis, &'static str> {
         let mut a = Analysis {

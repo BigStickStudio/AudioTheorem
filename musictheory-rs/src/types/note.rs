@@ -19,8 +19,8 @@ use crate::types::note::Accidental::Natural;
 use crate::types::{Interval, MajorQuality, PerfectQuality, Steps};
 use std::{cmp, fmt};
 
-/// [Notes](musictheory::types::Note) are names given to a specific
-/// [PitchClass](musictheory::types::PitchClass).
+/// [Notes](audiotheorem::types::Note) are names given to a specific
+/// [PitchClass](audiotheorem::types::PitchClass).
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum Note {
     A(Accidental),
@@ -67,7 +67,7 @@ impl Note {
             B(Natural),
         ]
     }
-    /// True if a [Note](musictheory::types::Note) is sharp or double sharp.
+    /// True if a [Note](audiotheorem::types::Note) is sharp or double sharp.
     pub fn sharp(&self) -> bool {
         match self.accidental() {
             Accidental::DoubleFlat => false,
@@ -77,7 +77,7 @@ impl Note {
             Accidental::DoubleSharp => true,
         }
     }
-    /// True if a [Note](musictheory::types::Note) is flat or double flat.
+    /// True if a [Note](audiotheorem::types::Note) is flat or double flat.
     pub fn flat(&self) -> bool {
         match self.accidental() {
             Accidental::DoubleFlat => true,
@@ -87,7 +87,7 @@ impl Note {
             Accidental::DoubleSharp => false,
         }
     }
-    /// True if a [Note](musictheory::types::Note) is natural.
+    /// True if a [Note](audiotheorem::types::Note) is natural.
     pub fn natural(&self) -> bool {
         match self.accidental() {
             Accidental::DoubleFlat => false,
@@ -97,7 +97,7 @@ impl Note {
             Accidental::DoubleSharp => false,
         }
     }
-    /// Return associated [Accidental](musictheory::types::Accidental).
+    /// Return associated [Accidental](audiotheorem::types::Accidental).
     pub fn accidental(&self) -> Accidental {
         match *self {
             Note::A(acc) => acc,
@@ -109,7 +109,7 @@ impl Note {
             Note::G(acc) => acc,
         }
     }
-    /// [PitchClass](musictheory::types::PitchClass) of this [Note](musictheory::types::Note).
+    /// [PitchClass](audiotheorem::types::PitchClass) of this [Note](audiotheorem::types::Note).
     pub fn pitch_class(&self) -> PitchClass {
         let x1 = match *self {
             Note::C(_) => 0,
@@ -129,7 +129,7 @@ impl Note {
         };
         PitchClass::from_index((x1 + x2) % 12 as u8)
     }
-    /// Is this [Note](musictheory::types::Note) enharmonic.
+    /// Is this [Note](audiotheorem::types::Note) enharmonic.
     pub fn enharmonic(&self) -> bool {
         use PitchClass::*;
         [Cn, Dn, En, Fn, Gn, An, Bn].contains(&self.pitch_class())
@@ -165,8 +165,8 @@ impl fmt::Debug for Note {
     }
 }
 
-/// [Accidentals](musictheory::types::Accidental) describe if a
-/// [Note](musictheory::types::Note) is natural, sharp or flat.
+/// [Accidentals](audiotheorem::types::Accidental) describe if a
+/// [Note](audiotheorem::types::Note) is natural, sharp or flat.
 #[derive(Copy, Clone, Ord, Eq, PartialOrd, PartialEq)]
 pub enum Accidental {
     DoubleFlat,
@@ -177,7 +177,7 @@ pub enum Accidental {
 }
 
 impl Accidental {
-    /// True if a [Note](musictheory::types::Note) is sharp or double sharp.
+    /// True if a [Note](audiotheorem::types::Note) is sharp or double sharp.
     pub fn sharp(&self) -> bool {
         match *self {
             Accidental::DoubleFlat => false,
@@ -187,7 +187,7 @@ impl Accidental {
             Accidental::DoubleSharp => true,
         }
     }
-    /// True if a [Note](musictheory::types::Note) is flat or double flat.
+    /// True if a [Note](audiotheorem::types::Note) is flat or double flat.
     pub fn flat(&self) -> bool {
         match *self {
             Accidental::DoubleFlat => true,
@@ -197,7 +197,7 @@ impl Accidental {
             Accidental::DoubleSharp => false,
         }
     }
-    /// True if a [Note](musictheory::types::Note) is natural.
+    /// True if a [Note](audiotheorem::types::Note) is natural.
     pub fn natural(&self) -> bool {
         match *self {
             Accidental::DoubleFlat => false,

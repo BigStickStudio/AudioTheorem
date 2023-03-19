@@ -18,13 +18,13 @@ use super::Cents;
 use crate::types::PitchClass;
 use std::fmt;
 
-/// [Steps](musictheory::types::Steps) is the distance in semitones between two
-/// [PitchClasses](musictheory::types::PitchClass).
+/// [Steps](audiotheorem::types::Steps) is the distance in semitones between two
+/// [PitchClasses](audiotheorem::types::PitchClass).
 #[derive(Copy, Clone, PartialOrd, PartialEq)]
 pub struct Steps(u16);
 
 impl Steps {
-    /// Get the distance between two [PitchClasses](musictheory::types::PitchClass).
+    /// Get the distance between two [PitchClasses](audiotheorem::types::PitchClass).
     pub fn distance(l: &PitchClass, r: &PitchClass) -> Steps {
         let l = l.to_index() as u16;
         let r = r.to_index() as u16;
@@ -34,11 +34,11 @@ impl Steps {
             (12 + r - l) % 12
         })
     }
-    /// [Cents](musictheory::types::Cents) represented by this [Steps](musictheory::types::Steps).
+    /// [Cents](audiotheorem::types::Cents) represented by this [Steps](audiotheorem::types::Steps).
     pub fn cents(&self) -> Cents {
         Cents::from(self.0 * 100)
     }
-    /// Number of [Steps](musictheory::types::Steps).
+    /// Number of [Steps](audiotheorem::types::Steps).
     pub fn value(&self) -> u16 {
         self.0
     }

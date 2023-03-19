@@ -29,7 +29,7 @@ after_success: |
 
 before_deploy:
   - cargo doc --verbose
-  - echo '<meta http-equiv="refresh" content="0; url=musictheory/index.html" /> ' > target/doc/index.html
+  - echo '<meta http-equiv="refresh" content="0; url=audiotheorem/index.html" /> ' > target/doc/index.html
   - cp -r target/doc public
 
 deploy:

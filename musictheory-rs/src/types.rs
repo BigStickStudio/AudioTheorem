@@ -16,23 +16,23 @@
 
 //!
 //! Core Types:
-//! * [Pitch](musictheory::types::Pitch) - Discrete [PitchClass](musictheory::types::PitchClass) at a given [Octave](musictheory::types::Octave) pinned to a tuned frequency.
-//! * [PitchClass](musictheory::types::PitchClass) - [Notes](musictheory::types::Note) reduced to the 12 discrete Semitones.
-//! * [PitchGroup](musictheory::types::PitchGroup) - `Musical Key`s reduced to the 12 discrete [PitchClass](musictheory::types::PitchClass) Combinations.
-//! * [Octave](musictheory::types::Octave) - Pitch range for a given set of [Pitches](musictheory::types::Pitch).
-//! * [Cents](musictheory::types::Cents) - Logarithmic distance between two Pitches.
-//! * [Steps](musictheory::types::Steps) - Distance between two Pitches measured in Semitonal Steps.
+//! * [Pitch](audiotheorem::types::Pitch) - Discrete [PitchClass](audiotheorem::types::PitchClass) at a given [Octave](audiotheorem::types::Octave) pinned to a tuned frequency.
+//! * [PitchClass](audiotheorem::types::PitchClass) - [Notes](audiotheorem::types::Note) reduced to the 12 discrete Semitones.
+//! * [PitchGroup](audiotheorem::types::PitchGroup) - `Musical Key`s reduced to the 12 discrete [PitchClass](audiotheorem::types::PitchClass) Combinations.
+//! * [Octave](audiotheorem::types::Octave) - Pitch range for a given set of [Pitches](audiotheorem::types::Pitch).
+//! * [Cents](audiotheorem::types::Cents) - Logarithmic distance between two Pitches.
+//! * [Steps](audiotheorem::types::Steps) - Distance between two Pitches measured in Semitonal Steps.
 //!
 //! Music Theory Types:
-//! * [Tone](musictheory::types::Tone) - A [Note](musictheory::types::Note) at a given [Octave](musictheory::types::Octave).
-//! * [Note](musictheory::types::Note) - Various Names given to [PitchClasses](musictheory::types::PitchClass) in Musical Theory.
+//! * [Tone](audiotheorem::types::Tone) - A [Note](audiotheorem::types::Note) at a given [Octave](audiotheorem::types::Octave).
+//! * [Note](audiotheorem::types::Note) - Various Names given to [PitchClasses](audiotheorem::types::PitchClass) in Musical Theory.
 //! * [Key]() - Unimplemented
-//! * [Octave](musictheory::types::Octave) - Range for a given set of [Tones](musictheory::types::Tone).
-//! * [Interval](musictheory::types::Interval) - Distance Between Two [Pitches](musictheory::types::Pitch)
-//!   * [PerfectQuality](musictheory::types::PerfectQuality) - Quality of First, Fourth, Fifth, and Seventh [Intervals](musictheory::types::Interval).
-//!   * [MajorQuality](musictheory::types::MajorQuality) - Quality of the Second, Third, and Sixth [Intervals](musictheory::types::Interval).
-//! * [Degree](musictheory::types::Degree)  - [Note](musictheory::types::Note) Positions in a [Scale](musictheory::types::Scale)
-//! * [Scale](musictheory::types::Scale) - In music theory, a scale is any set of musical notes ordered by fundamental frequency or pitch. A scale ordered by increasing pitch is an ascending scale, and a scale ordered by decreasing pitch is a descending scale.
+//! * [Octave](audiotheorem::types::Octave) - Range for a given set of [Tones](audiotheorem::types::Tone).
+//! * [Interval](audiotheorem::types::Interval) - Distance Between Two [Pitches](audiotheorem::types::Pitch)
+//!   * [PerfectQuality](audiotheorem::types::PerfectQuality) - Quality of First, Fourth, Fifth, and Seventh [Intervals](audiotheorem::types::Interval).
+//!   * [MajorQuality](audiotheorem::types::MajorQuality) - Quality of the Second, Third, and Sixth [Intervals](audiotheorem::types::Interval).
+//! * [Degree](audiotheorem::types::Degree)  - [Note](audiotheorem::types::Note) Positions in a [Scale](audiotheorem::types::Scale)
+//! * [Scale](audiotheorem::types::Scale) - In music theory, a scale is any set of musical notes ordered by fundamental frequency or pitch. A scale ordered by increasing pitch is an ascending scale, and a scale ordered by decreasing pitch is a descending scale.
 //!
 
 mod cents;

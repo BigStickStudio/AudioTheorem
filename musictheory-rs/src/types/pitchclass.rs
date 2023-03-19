@@ -20,10 +20,10 @@ use super::{
 use crate::types::Interval;
 use std::fmt;
 
-/// [PitchClass](musictheory::types::PitchClass) is the unified representation of the 12 semitone
+/// [PitchClass](audiotheorem::types::PitchClass) is the unified representation of the 12 semitone
 /// harmonics used in western music.
 ///
-/// X Axis on Note Table and the [Matrix](musictheory::types::Matrix).
+/// X Axis on Note Table and the [Matrix](audiotheorem::types::Matrix).
 #[derive(Copy, Clone, Debug, Hash, PartialOrd, PartialEq)]
 pub enum PitchClass {
     /// C Neutral
@@ -124,8 +124,8 @@ impl PitchClass {
             PitchClass::Bn => false,
         }
     }
-    /// Get [Note](musictheory::types::Notes) for a given
-    /// [PitchClass](musictheory::types::PitchClass) if available.
+    /// Get [Note](audiotheorem::types::Notes) for a given
+    /// [PitchClass](audiotheorem::types::PitchClass) if available.
     pub fn name(&self, n: Note) -> Option<Note> {
         use super::{Accidental::*, Note::*, PitchClass::*};
         match (self, n) {
@@ -183,8 +183,8 @@ impl PitchClass {
             }
         }
     }
-    /// Get a slice of [Notes](musictheory::types::Notes) for a given
-    /// [PitchClass](musictheory::types::PitchClass).
+    /// Get a slice of [Notes](audiotheorem::types::Notes) for a given
+    /// [PitchClass](audiotheorem::types::PitchClass).
     pub fn names(&self) -> &'static [Note] {
         use super::{Accidental::*, Note::*};
         match self {
@@ -202,8 +202,8 @@ impl PitchClass {
             PitchClass::Gs => &[G(Sharp), A(Flat)],
         }
     }
-    /// Get an slice of [Pitches](musictheory::types::Pitch) for a given
-    /// [PitchClasses](musictheory::types::PitchClass).
+    /// Get an slice of [Pitches](audiotheorem::types::Pitch) for a given
+    /// [PitchClasses](audiotheorem::types::PitchClass).
     pub fn tones(&self) -> &'static [Pitch] {
         match *self {
             PitchClass::Cn => &CN_PITCHES,
@@ -220,8 +220,8 @@ impl PitchClass {
             PitchClass::Bn => &BN_PITCHES,
         }
     }
-    /// Get [PitchGroup](musictheory::types::PitchGroup) this
-    /// [PitchClasses](musictheory::types::PitchClass) is the root of.
+    /// Get [PitchGroup](audiotheorem::types::PitchGroup) this
+    /// [PitchClasses](audiotheorem::types::PitchClass) is the root of.
     pub fn group(&self) -> PitchGroup {
         match *self {
             PitchClass::Cn => PitchGroup::Cn,
@@ -238,8 +238,8 @@ impl PitchClass {
             PitchClass::Bn => PitchGroup::Bn,
         }
     }
-    /// Get an unordered array of [PitchGroups](musictheory::types::PitchGroup) this
-    /// [PitchClass](musictheory::types::PitchClass) is a member of.
+    /// Get an unordered array of [PitchGroups](audiotheorem::types::PitchGroup) this
+    /// [PitchClass](audiotheorem::types::PitchClass) is a member of.
     pub fn groups(&self) -> [PitchGroup; 7] {
         use super::PitchGroup::*;
         match *self {
@@ -257,7 +257,7 @@ impl PitchClass {
             PitchClass::Bn => [Cn, Gn, Dn, An, En, Bn, Fs],
         }
     }
-    /// Advance to the next [PitchClass](musictheory::types::PitchClass).
+    /// Advance to the next [PitchClass](audiotheorem::types::PitchClass).
     pub fn advance(&self) -> PitchClass {
         match *self {
             PitchClass::Cn => PitchClass::Cs,
@@ -274,7 +274,7 @@ impl PitchClass {
             PitchClass::Bn => PitchClass::Cn,
         }
     }
-    /// Get the distance between two [PitchClasses](musictheory::types::PitchClass).
+    /// Get the distance between two [PitchClasses](audiotheorem::types::PitchClass).
     pub fn distance(&self, other: &PitchClass) -> Steps {
         Steps::distance(self, other)
     }

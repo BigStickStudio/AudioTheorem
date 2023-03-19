@@ -18,8 +18,8 @@ use super::Degree;
 use crate::types::{Cents, Note, Steps};
 use std::fmt;
 
-/// [PerfectQuality](musictheory::types::PerfectQuality) is the
-/// [Interval](musictheory::types::Interval) Quality of the First, Fourth, and Fifth.
+/// [PerfectQuality](audiotheorem::types::PerfectQuality) is the
+/// [Interval](audiotheorem::types::Interval) Quality of the First, Fourth, and Fifth.
 #[derive(Copy, Clone, PartialOrd, PartialEq, Debug)]
 pub enum PerfectQuality {
     TripleDiminished,
@@ -31,7 +31,7 @@ pub enum PerfectQuality {
     TripleAugmented,
 }
 
-/// [MajorQuality](musictheory::types::MajorQuality) is the [Interval](musictheory::types::Interval)
+/// [MajorQuality](audiotheorem::types::MajorQuality) is the [Interval](audiotheorem::types::Interval)
 /// Quality of the Second, Third, Sixth, and Seventh.
 #[derive(Copy, Clone, PartialOrd, PartialEq, Debug)]
 pub enum MajorQuality {
@@ -74,8 +74,8 @@ impl fmt::Display for MajorQuality {
     }
 }
 
-/// [Interval](musictheory::types::Interval) is the distance between two
-/// [PitchClasses](musictheory::types::PitchClass).
+/// [Interval](audiotheorem::types::Interval) is the distance between two
+/// [PitchClasses](audiotheorem::types::PitchClass).
 #[derive(Copy, Clone, PartialOrd, PartialEq, Debug)]
 pub enum Interval {
     First(PerfectQuality),
@@ -95,8 +95,8 @@ pub enum Interval {
 }
 
 impl Interval {
-    /// [Degrees](musictheory::types::Degree) are matched to
-    /// [Interval](musictheory::types::Interval).
+    /// [Degrees](audiotheorem::types::Degree) are matched to
+    /// [Interval](audiotheorem::types::Interval).
     pub fn degree(&self) -> Degree {
         match *self {
             Interval::First(_) => Degree::Tonic,
@@ -115,8 +115,8 @@ impl Interval {
             Interval::Fourteenth(_) => Degree::Subtonic,
         }
     }
-    /// Get [Steps](musictheory::types::Steps) measurement for this
-    /// [Interval](musictheory::types::Interval).
+    /// Get [Steps](audiotheorem::types::Steps) measurement for this
+    /// [Interval](audiotheorem::types::Interval).
     pub fn steps(&self) -> Steps {
         fn ptou(base: u16, q: PerfectQuality) -> Steps {
             let steps = match q {
@@ -1045,8 +1045,8 @@ impl Interval {
         }
     }
 
-    /// Get [Cents](musictheory::types::Cents) measurement for this
-    /// [Interval](musictheory::types::Interval).
+    /// Get [Cents](audiotheorem::types::Cents) measurement for this
+    /// [Interval](audiotheorem::types::Interval).
     pub fn cents(&self) -> Cents {
         self.steps().cents()
     }

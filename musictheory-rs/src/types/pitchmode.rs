@@ -17,8 +17,8 @@
 use crate::types::PitchClass;
 use std::fmt;
 
-/// Sequence of [PitchClasses](musictheory::types::PitchClass) in modal order for a given
-/// [PitchGroup](musictheory::types::PitchGroup).
+/// Sequence of [PitchClasses](audiotheorem::types::PitchClass) in modal order for a given
+/// [PitchGroup](audiotheorem::types::PitchGroup).
 #[derive(Copy, Clone, PartialOrd, PartialEq, Debug)]
 pub enum PitchMode {
     Ionian([PitchClass; 7]),
@@ -63,38 +63,38 @@ impl PitchMode {
             PitchMode::Locrian(notes) => notes,
         }
     }
-    /// Get [PitchClass](musictheory::types::PitchClass) in the Tonic position of this
-    /// [PitchMode](musictheory::types::PitchMode).
+    /// Get [PitchClass](audiotheorem::types::PitchClass) in the Tonic position of this
+    /// [PitchMode](audiotheorem::types::PitchMode).
     pub fn tonic(&self) -> PitchClass {
         self.notes()[0]
     }
-    /// Get [PitchClass](musictheory::types::PitchClass) in the Supertonic position of this
-    /// [PitchMode](musictheory::types::PitchMode).
+    /// Get [PitchClass](audiotheorem::types::PitchClass) in the Supertonic position of this
+    /// [PitchMode](audiotheorem::types::PitchMode).
     pub fn supertonic(&self) -> PitchClass {
         self.notes()[1]
     }
-    /// Get [PitchClass](musictheory::types::PitchClass) in the Mediant position of this
-    /// [PitchMode](musictheory::types::PitchMode).
+    /// Get [PitchClass](audiotheorem::types::PitchClass) in the Mediant position of this
+    /// [PitchMode](audiotheorem::types::PitchMode).
     pub fn mediant(&self) -> PitchClass {
         self.notes()[2]
     }
-    /// Get [PitchClass](musictheory::types::PitchClass) in the Subdominant position of this
-    /// [PitchMode](musictheory::types::PitchMode).
+    /// Get [PitchClass](audiotheorem::types::PitchClass) in the Subdominant position of this
+    /// [PitchMode](audiotheorem::types::PitchMode).
     pub fn subdominant(&self) -> PitchClass {
         self.notes()[3]
     }
-    /// Get [PitchClass](musictheory::types::PitchClass) in the Dominant position of this
-    /// [PitchMode](musictheory::types::PitchMode).
+    /// Get [PitchClass](audiotheorem::types::PitchClass) in the Dominant position of this
+    /// [PitchMode](audiotheorem::types::PitchMode).
     pub fn dominant(&self) -> PitchClass {
         self.notes()[4]
     }
-    /// Get [PitchClass](musictheory::types::PitchClass) in the Submediant position of this
-    /// [PitchMode](musictheory::types::PitchMode).
+    /// Get [PitchClass](audiotheorem::types::PitchClass) in the Submediant position of this
+    /// [PitchMode](audiotheorem::types::PitchMode).
     pub fn submediant(&self) -> PitchClass {
         self.notes()[5]
     }
-    /// Get [PitchClass](musictheory::types::PitchClass) in the Subtonic position of this
-    /// [PitchMode](musictheory::types::PitchMode).
+    /// Get [PitchClass](audiotheorem::types::PitchClass) in the Subtonic position of this
+    /// [PitchMode](audiotheorem::types::PitchMode).
     pub fn subtonic(&self) -> PitchClass {
         self.notes()[6]
     }

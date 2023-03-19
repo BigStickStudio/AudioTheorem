@@ -19,8 +19,8 @@ use crate::types::interval::PerfectQuality::Augmented;
 use crate::types::{Interval, PerfectQuality};
 use std::fmt;
 
-/// [Tone](musictheory::types::Tone) is a [Note](musictheory::types::Note) at a specific
-/// [Octave](musictheory::types::Octave).
+/// [Tone](audiotheorem::types::Tone) is a [Note](audiotheorem::types::Note) at a specific
+/// [Octave](audiotheorem::types::Octave).
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Tone {
     octave: Octave,
@@ -28,7 +28,7 @@ pub struct Tone {
 }
 
 impl Tone {
-    // creates a new [Tone](musictheory::types::Tone) from an index
+    // creates a new [Tone](audiotheorem::types::Tone) from an index
     pub fn from_index(index: u8) -> Tone {
         let octave = Octave::from_index(index / 12 - 1).unwrap();
         let note = Pitch::from_index(index % 12).note();
@@ -39,24 +39,24 @@ impl Tone {
         (self.octave.to_index() + 1) * 12 + self.note.pitch_class().to_index()
     }
 
-    /// Create a new [Tone](musictheory::types::Tone) from a [Note](musictheory::types::Note) and an
-    /// [Octave](musictheory::types::Octave).
+    /// Create a new [Tone](audiotheorem::types::Tone) from a [Note](audiotheorem::types::Note) and an
+    /// [Octave](audiotheorem::types::Octave).
     pub fn from_parts(octave: Octave, note: Note) -> Tone {
         Tone { octave, note }
     }
-    /// Convert a [Tone](musictheory::types::Tone) into a [Note](musictheory::types::Note).
+    /// Convert a [Tone](audiotheorem::types::Tone) into a [Note](audiotheorem::types::Note).
     pub fn note(&self) -> Note {
         self.note
     }
-    /// Convert a [Tone](musictheory::types::Tone) into a [Pitch](musictheory::types::Pitch).
+    /// Convert a [Tone](audiotheorem::types::Tone) into a [Pitch](audiotheorem::types::Pitch).
     pub fn pitch(&self) -> Pitch {
         Pitch::from((12 * self.octave.to_index()) + self.note.pitch_class().to_index())
     }
-    /// Convert a [Tone](musictheory::types::Tone) into a [PitchClass](musictheory::types::PitchClass).
+    /// Convert a [Tone](audiotheorem::types::Tone) into a [PitchClass](audiotheorem::types::PitchClass).
     pub fn pitch_class(&self) -> PitchClass {
         self.note.pitch_class()
     }
-    /// Convert a [Tone](musictheory::types::Tone) into an [Octave](musictheory::types::Octave).
+    /// Convert a [Tone](audiotheorem::types::Tone) into an [Octave](audiotheorem::types::Octave).
     pub fn octave(&self) -> Octave {
         self.octave
     }

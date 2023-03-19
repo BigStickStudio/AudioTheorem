@@ -16,7 +16,7 @@
 
 use std::fmt;
 
-/// [Octave](musictheory::types::Octave) of a [Pitch](musictheory::types::Pitch).
+/// [Octave](audiotheorem::types::Octave) of a [Pitch](audiotheorem::types::Pitch).
 #[derive(Copy, Clone, PartialOrd, PartialEq)]
 pub enum Octave {
     DoubleContra,
@@ -88,7 +88,7 @@ impl Octave {
             Octave::SevenLine => 11,
         }
     }
-    /// Scientific value for [Octave](musictheory::types::Octave).
+    /// Scientific value for [Octave](audiotheorem::types::Octave).
     pub fn scientific(&self) -> i8 {
         match *self {
             Octave::DoubleContra => -1,
@@ -105,7 +105,7 @@ impl Octave {
             Octave::SevenLine => 10,
         }
     }
-    /// Next [Octave](musictheory::types::Octave).
+    /// Next [Octave](audiotheorem::types::Octave).
     pub fn next(&self) -> Option<Octave> {
         match *self {
             Octave::DoubleContra => Some(Octave::SubContra),
@@ -122,7 +122,7 @@ impl Octave {
             Octave::SevenLine => None,
         }
     }
-    /// Next [Octave](musictheory::types::Octave).
+    /// Next [Octave](audiotheorem::types::Octave).
     pub fn prev(&self) -> Option<Octave> {
         match *self {
             Octave::DoubleContra => None,

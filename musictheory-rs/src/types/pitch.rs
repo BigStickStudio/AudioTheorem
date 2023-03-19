@@ -19,7 +19,7 @@ use crate::types::interval::PerfectQuality::{Augmented, Diminished};
 use crate::types::{Interval, Matrix, Tone};
 use std::ops;
 
-/// A4 [Pitch](musictheory::types::Pitch) [Tuning](musictheory::types::Tuning).
+/// A4 [Pitch](audiotheorem::types::Pitch) [Tuning](audiotheorem::types::Tuning).
 pub enum Tuning {
     A4_432Hz = 0,
     A4_434Hz = 1,
@@ -32,12 +32,12 @@ pub enum Tuning {
 }
 
 ///
-/// [Pitch](musictheory::types::Pitch) is the unique Combination of
-/// [PitchClass](musictheory::types::PitchClass) and [Octave](musictheory::types::Octave).
+/// [Pitch](audiotheorem::types::Pitch) is the unique Combination of
+/// [PitchClass](audiotheorem::types::PitchClass) and [Octave](audiotheorem::types::Octave).
 ///
 /// Midi Note Table
-/// * X - [PitchClass](musictheory::types::PitchClass)
-/// * Y - [Octave](musictheory::types::Octave)
+/// * X - [PitchClass](audiotheorem::types::PitchClass)
+/// * Y - [Octave](audiotheorem::types::Octave)
 /// * C - Midi Note Id
 ///
 /// |    | Cn   | Cs   | Dn   | Ds   | En   | Fn   | Fs   | Gn   | Gs   | An   | As   | Bn   |
@@ -78,25 +78,25 @@ impl Pitch {
     pub fn tone(&self) -> Tone {
         Tone::from_parts(self.octave(), self.note())
     }
-    /// Get [Notes](musictheory::types::Pitch) for this [Pitch](musictheory::types::Pitch).
+    /// Get [Notes](audiotheorem::types::Pitch) for this [Pitch](audiotheorem::types::Pitch).
     pub fn names(&self) -> &'static [Note] {
         self.pitch_class().names()
     }
-    /// Get [PitchClass](musictheory::types::PitchClass) of this [Pitch](musictheory::types::Pitch)
+    /// Get [PitchClass](audiotheorem::types::PitchClass) of this [Pitch](audiotheorem::types::Pitch)
     pub fn pitch_class(&self) -> PitchClass {
         PitchClass::from_index(self.0 % 12)
     }
-    /// Get [Octave](musictheory::types::Octave) of this [Pitch](musictheory::types::Pitch)
+    /// Get [Octave](audiotheorem::types::Octave) of this [Pitch](audiotheorem::types::Pitch)
     pub fn octave(&self) -> Octave {
         Octave::from_index(self.0 / 12).unwrap()
     }
-    /// Get the semitone steps between two [Pitches](musictheory::types::Pitch).
+    /// Get the semitone steps between two [Pitches](audiotheorem::types::Pitch).
     pub fn distance(&self, other: &Pitch) -> Steps {
         let l = self.to_index() as u16;
         let r = other.to_index() as u16;
         Steps::from(if r > l { r - l } else { l - r })
     }
-    /// Get Frequency of [Pitch](musictheory::types::Pitch).
+    /// Get Frequency of [Pitch](audiotheorem::types::Pitch).
     pub fn frequency(&self, tuning: Tuning) -> f32 {
         FREQUENCIES[self.0 as usize][tuning as usize]
     }

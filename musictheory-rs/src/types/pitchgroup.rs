@@ -37,7 +37,7 @@ pub enum PitchGroup {
 }
 
 impl PitchGroup {
-    /// Get All [PitchGroups](musictheory::types::PitchGroup).
+    /// Get All [PitchGroups](audiotheorem::types::PitchGroup).
     pub fn all() -> [PitchGroup; 12] {
         use PitchGroup::*;
         [Cn, Gn, Dn, An, En, Bn, Fs, Cs, Gs, Ds, As, Fn]
@@ -115,8 +115,8 @@ impl PitchGroup {
             PitchGroup::Fn => 1,
         }
     }
-    /// Convert a [PitchGroup](musictheory::types::PitchGroup) to its equivalent
-    /// [PitchClass](musictheory::types::PitchClass).
+    /// Convert a [PitchGroup](audiotheorem::types::PitchGroup) to its equivalent
+    /// [PitchClass](audiotheorem::types::PitchClass).
     pub fn pitch_class(&self) -> PitchClass {
         match *self {
             PitchGroup::Cn => PitchClass::Cn,
@@ -133,7 +133,7 @@ impl PitchGroup {
             PitchGroup::Fn => PitchClass::Fn,
         }
     }
-    /// Get the Major key for this [PitchGroup](musictheory::types::PitchGroup) (Co5).
+    /// Get the Major key for this [PitchGroup](audiotheorem::types::PitchGroup) (Co5).
     pub fn major_key(&self) -> Note {
         use super::{Accidental::*, Note::*};
         match *self {
@@ -151,7 +151,7 @@ impl PitchGroup {
             PitchGroup::Fn => F(Natural),
         }
     }
-    /// Get the Minor key for this [PitchGroup](musictheory::types::PitchGroup) (Co5).
+    /// Get the Minor key for this [PitchGroup](audiotheorem::types::PitchGroup) (Co5).
     pub fn minor_key(&self) -> Note {
         use super::{Accidental::*, Note::*};
         match *self {
@@ -205,8 +205,8 @@ impl PitchGroup {
             PitchGroup::Fn => F(Natural),
         }
     }
-    /// Get an unordered set of [PitchClass](musictheory::types::PitchClass) used by this
-    /// [PitchGroup](musictheory::types::PitchGroup).
+    /// Get an unordered set of [PitchClass](audiotheorem::types::PitchClass) used by this
+    /// [PitchGroup](audiotheorem::types::PitchGroup).
     pub fn pitch_classes(&self) -> [PitchClass; 7] {
         use PitchClass::*;
         match *self {
@@ -224,8 +224,8 @@ impl PitchGroup {
             PitchGroup::Fn => [Cn, Dn, En, Fn, Gn, An, As],
         }
     }
-    /// Get Ionian [PitchMode](musictheory::types::PitchMode) for this
-    /// [PitchGroup](musictheory::types::PitchGroup).
+    /// Get Ionian [PitchMode](audiotheorem::types::PitchMode) for this
+    /// [PitchGroup](audiotheorem::types::PitchGroup).
     pub fn ionian(&self) -> PitchMode {
         use super::PitchClass::*;
         match *self {
@@ -243,8 +243,8 @@ impl PitchGroup {
             PitchGroup::Fn => PitchMode::ionian([Fn, Gn, An, As, Cn, Dn, En]),
         }
     }
-    /// Get Dorian [PitchMode](musictheory::types::PitchMode) for this
-    /// [PitchGroup](musictheory::types::PitchGroup).
+    /// Get Dorian [PitchMode](audiotheorem::types::PitchMode) for this
+    /// [PitchGroup](audiotheorem::types::PitchGroup).
     pub fn dorian(&self) -> PitchMode {
         use super::PitchClass::*;
         match *self {
@@ -262,8 +262,8 @@ impl PitchGroup {
             PitchGroup::Fn => PitchMode::dorian([Gn, An, As, Cn, Dn, En, Fn]),
         }
     }
-    /// Get Phrygian  [PitchMode](musictheory::types::PitchMode) for this
-    /// [PitchGroup](musictheory::types::PitchGroup).
+    /// Get Phrygian  [PitchMode](audiotheorem::types::PitchMode) for this
+    /// [PitchGroup](audiotheorem::types::PitchGroup).
     pub fn phrygian(&self) -> PitchMode {
         use super::PitchClass::*;
         match *self {
@@ -281,8 +281,8 @@ impl PitchGroup {
             PitchGroup::Fn => PitchMode::phrygian([An, As, Cn, Dn, En, Fn, Gn]),
         }
     }
-    /// Get Lydian [PitchMode](musictheory::types::PitchMode) for this
-    /// [PitchGroup](musictheory::types::PitchGroup).
+    /// Get Lydian [PitchMode](audiotheorem::types::PitchMode) for this
+    /// [PitchGroup](audiotheorem::types::PitchGroup).
     pub fn lydian(&self) -> PitchMode {
         use super::PitchClass::*;
         match *self {
@@ -300,8 +300,8 @@ impl PitchGroup {
             PitchGroup::Fn => PitchMode::lydian([As, Cn, Dn, En, Fn, Gn, An]),
         }
     }
-    /// Get Mixolydian [PitchMode](musictheory::types::PitchMode) for this
-    /// [PitchGroup](musictheory::types::PitchGroup).
+    /// Get Mixolydian [PitchMode](audiotheorem::types::PitchMode) for this
+    /// [PitchGroup](audiotheorem::types::PitchGroup).
     pub fn mixolydian(&self) -> PitchMode {
         use super::PitchClass::*;
         match *self {
@@ -343,8 +343,8 @@ impl PitchGroup {
             }
         }
     }
-    /// Get Aeolian [PitchMode](musictheory::types::PitchMode) for this
-    /// [PitchGroup](musictheory::types::PitchGroup).
+    /// Get Aeolian [PitchMode](audiotheorem::types::PitchMode) for this
+    /// [PitchGroup](audiotheorem::types::PitchGroup).
     pub fn aeolian(&self) -> PitchMode {
         use super::PitchClass::*;
         match *self {
@@ -362,8 +362,8 @@ impl PitchGroup {
             PitchGroup::Fn => PitchMode::aeolian([Dn, En, Fn, Gn, An, As, Cn]),
         }
     }
-    /// Get Locrian [PitchMode](musictheory::types::PitchMode) for this
-    /// [PitchGroup](musictheory::types::PitchGroup).
+    /// Get Locrian [PitchMode](audiotheorem::types::PitchMode) for this
+    /// [PitchGroup](audiotheorem::types::PitchGroup).
     pub fn locrian(&self) -> PitchMode {
         use super::PitchClass::*;
         match *self {
@@ -382,8 +382,8 @@ impl PitchGroup {
         }
     }
 
-    /// Find which [PitchGroups](musictheory::types::PitchGroup) a given set of provided
-    /// [Note](musictheory::types::Note) belong to.  
+    /// Find which [PitchGroups](audiotheorem::types::PitchGroup) a given set of provided
+    /// [Note](audiotheorem::types::Note) belong to.  
     #[instrument]
     pub fn find(notes: &[Note]) -> Result<Vec<PitchGroup>, &'static str> {
         debug!("Notes: {:?}", &notes);

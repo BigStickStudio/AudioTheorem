@@ -23,11 +23,11 @@ use std::fmt;
 pub struct Cents(u16);
 
 impl Cents {
-    /// [Steps](musictheory::types::Steps) represented by this [Cents](musictheory::types::Cents).
+    /// [Steps](audiotheorem::types::Steps) represented by this [Cents](audiotheorem::types::Cents).
     pub fn steps(&self) -> Steps {
         Steps::from((self.0 as f64 / 100.0).round() as u16)
     }
-    /// Get numeric value of [Cents](musictheory::types::Cents).
+    /// Get numeric value of [Cents](audiotheorem::types::Cents).
     pub fn cents(&self) -> u16 {
         self.0
     }

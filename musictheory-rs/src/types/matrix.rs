@@ -17,13 +17,13 @@
 use super::{Degree, Interval, Note, PerfectQuality, PitchClass, PitchGroup};
 
 /// The Pitch Matrix is a set of static Reference Tables containing Ordered
-/// [Note](musictheory::types::Note) [Accidentals](musictheory::types::Accidental),
-/// [Interval](musictheory::types::Interval), and [Degree](musictheory::types::Degree) based on
-/// [PitchClass](musictheory::types::PitchClass) and [PitchGroup](musictheory::types::PitchGroup).
+/// [Note](audiotheorem::types::Note) [Accidentals](audiotheorem::types::Accidental),
+/// [Interval](audiotheorem::types::Interval), and [Degree](audiotheorem::types::Degree) based on
+/// [PitchClass](audiotheorem::types::PitchClass) and [PitchGroup](audiotheorem::types::PitchGroup).
 ///
 /// Pitch Matrix
-/// * X - [PitchClass](musictheory::types::PitchClass)
-/// * Y - [PitchGroup](musictheory::types::PitchGroup)
+/// * X - [PitchClass](audiotheorem::types::PitchClass)
+/// * Y - [PitchGroup](audiotheorem::types::PitchGroup)
 /// * Cell - Result
 ///
 /// |    | Cn | Cs | Dn | Ds | En | Fn | Fs | Gn | Gs | An | As | Bn |

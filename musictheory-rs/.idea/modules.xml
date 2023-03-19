@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/musictheory-rs.iml" filepath="$PROJECT_DIR$/.idea/musictheory-rs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/audiotheorem-rs.iml" filepath="$PROJECT_DIR$/.idea/audiotheorem-rs.iml" />
     </modules>
   </component>
 </project>
