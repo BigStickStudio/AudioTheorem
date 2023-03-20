@@ -45,31 +45,52 @@ pub enum MajorQuality {
     TripleAugmented,
 }
 
-impl fmt::Display for PerfectQuality {
+impl fmt::Display for PerfectQuality {w
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match *self {
-            PerfectQuality::TripleDiminished => write!(f, "ddd"),
-            PerfectQuality::DoubleDiminished => write!(f, "dd"),
-            PerfectQuality::Diminished => write!(f, "d"),
-            PerfectQuality::Perfect => write!(f, "P"),
-            PerfectQuality::Augmented => write!(f, "A"),
-            PerfectQuality::DoubleAugmented => write!(f, "AA"),
-            PerfectQuality::TripleAugmented => write!(f, "AAA"),
+        if f.alternate() {
+            PerfectQuality::TripleDiminished => write!(f, "Triple Diminished"),
+            PerfectQuality::DoubleDiminished => write!(f, "Double Diminished"),
+            PerfectQuality::Diminished => write!(f, "Diminished"),
+            PerfectQuality::Perfect => write!(f, "Perfect"),
+            PerfectQuality::Augmented => write!(f, "Augmented"),
+            PerfectQuality::DoubleAugmented => write!(f, "Double Augmented"),
+            PerfectQuality::TripleAugmented => write!(f, "Triple Augmented"),
+        } else {
+            match *self {
+                PerfectQuality::TripleDiminished => write!(f, "ddd"),
+                PerfectQuality::DoubleDiminished => write!(f, "dd"),
+                PerfectQuality::Diminished => write!(f, "d"),
+                PerfectQuality::Perfect => write!(f, "P"),
+                PerfectQuality::Augmented => write!(f, "A"),
+                PerfectQuality::DoubleAugmented => write!(f, "AA"),
+                PerfectQuality::TripleAugmented => write!(f, "AAA"),
+            }
         }
     }
 }
 
 impl fmt::Display for MajorQuality {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match *self {
-            MajorQuality::TripleDiminished => write!(f, "ddd"),
-            MajorQuality::DoubleDiminished => write!(f, "dd"),
-            MajorQuality::Diminished => write!(f, "d"),
-            MajorQuality::Major => write!(f, "M"),
-            MajorQuality::Minor => write!(f, "m"),
-            MajorQuality::Augmented => write!(f, "A"),
-            MajorQuality::DoubleAugmented => write!(f, "AA"),
-            MajorQuality::TripleAugmented => write!(f, "AA"),
+        if f.alternate() {
+            MajorQuality::TripleDiminished => write!(f, "Triple Diminished"),
+            MajorQuality::DoubleDiminished => write!(f, "Double Diminished"),
+            MajorQuality::Diminished => write!(f, "Diminished"),
+            MajorQuality::Major => write!(f, "Major"),
+            MajorQuality::Minor => write!(f, "Minor"),
+            MajorQuality::Augmented => write!(f, "Augmented"),
+            MajorQuality::DoubleAugmented => write!(f, "Double Augmented"),
+            MajorQuality::TripleAugmented => write!(f, "Triple Augmented"),
+        } else {
+            match *self {
+                MajorQuality::TripleDiminished => write!(f, "ddd"),
+                MajorQuality::DoubleDiminished => write!(f, "dd"),
+                MajorQuality::Diminished => write!(f, "d"),
+                MajorQuality::Major => write!(f, "M"),
+                MajorQuality::Minor => write!(f, "m"),
+                MajorQuality::Augmented => write!(f, "A"),
+                MajorQuality::DoubleAugmented => write!(f, "AA"),
+                MajorQuality::TripleAugmented => write!(f, "AA"),
+            }
         }
     }
 }
@@ -99,20 +120,20 @@ impl Interval {
     /// [Interval](audiotheorem::types::Interval).
     pub fn degree(&self) -> Degree {
         match *self {
-            Interval::First(_) => Degree::Tonic,
-            Interval::Second(_) => Degree::Supertonic,
-            Interval::Third(_) => Degree::Mediant,
-            Interval::Fourth(_) => Degree::Subdominant,
-            Interval::Fifth(_) => Degree::Dominant,
-            Interval::Sixth(_) => Degree::Submediant,
-            Interval::Seventh(_) => Degree::Subtonic,
-            Interval::Octave(_) => Degree::Tonic,
-            Interval::Ninth(_) => Degree::Supertonic,
-            Interval::Tenth(_) => Degree::Mediant,
-            Interval::Eleventh(_) => Degree::Subdominant,
-            Interval::Twelfth(_) => Degree::Dominant,
-            Interval::Thirteenth(_) => Degree::Submediant,
-            Interval::Fourteenth(_) => Degree::Subtonic,
+            Interval::First(q) => Degree::Tonic(q),
+            Interval::Second(q) => Degree::Supertonic(q),
+            Interval::Third(q) => Degree::Mediant(q),
+            Interval::Fourth(q) => Degree::Subdominant(q),
+            Interval::Fifth(q) => Degree::Dominant(q),
+            Interval::Sixth(q) => Degree::Submediant(q),
+            Interval::Seventh(q) => Degree::Subtonic(q),
+            Interval::Octave(q) => Degree::Tonic(q),
+            Interval::Ninth(q) => Degree::Supertonic(q),
+            Interval::Tenth(q) => Degree::Mediant(q),
+            Interval::Eleventh(q) => Degree::Subdominant(q),
+            Interval::Twelfth(q) => Degree::Dominant(q),
+            Interval::Thirteenth(q) => Degree::Submediant(q),
+            Interval::Fourteenth(q) => Degree::Subtonic(q),
         }
     }
     /// Get [Steps](audiotheorem::types::Steps) measurement for this
@@ -1054,21 +1075,38 @@ impl Interval {
 
 impl fmt::Display for Interval {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match *self {
-            Interval::First(q) => write!(f, "{}1", q),
-            Interval::Second(q) => write!(f, "{}2", q),
-            Interval::Third(q) => write!(f, "{}3", q),
-            Interval::Fourth(q) => write!(f, "{}4", q),
-            Interval::Fifth(q) => write!(f, "{}5", q),
-            Interval::Sixth(q) => write!(f, "{}6", q),
-            Interval::Seventh(q) => write!(f, "{}7", q),
-            Interval::Octave(q) => write!(f, "{}8", q),
-            Interval::Ninth(q) => write!(f, "{}9", q),
-            Interval::Tenth(q) => write!(f, "{}10", q),
-            Interval::Eleventh(q) => write!(f, "{}11", q),
-            Interval::Twelfth(q) => write!(f, "{}12", q),
-            Interval::Thirteenth(q) => write!(f, "{}13", q),
-            Interval::Fourteenth(q) => write!(f, "{}14", q),
+        if f.alternate() {
+                Interval::First(q) => write!(f, "{} First", q),
+                Interval::Second(q) => write!(f, "{} Second", q),
+                Interval::Third(q) => write!(f, "{} Third", q),
+                Interval::Fourth(q) => write!(f, "{} Fourth", q),
+                Interval::Fifth(q) => write!(f, "{} Fifth", q),
+                Interval::Sixth(q) => write!(f, "{} Sixth", q),
+                Interval::Seventh(q) => write!(f, "{} Seventh", q),
+                Interval::Octave(q) => write!(f, "{} Eighth", q),
+                Interval::Ninth(q) => write!(f, "{} Ninth", q),
+                Interval::Tenth(q) => write!(f, "{} Tenth", q),
+                Interval::Eleventh(q) => write!(f, "{} Eleventh", q),
+                Interval::Twelfth(q) => write!(f, "{} Twelfth", q),
+                Interval::Thirteenth(q) => write!(f, "{} Thirteenth", q),
+                Interval::Fourteenth(q) => write!(f, "{} Fourteenth", q),
+        } else {
+            match *self {
+                Interval::First(q) => write!(f, "{}1", q),
+                Interval::Second(q) => write!(f, "{}2", q),
+                Interval::Third(q) => write!(f, "{}3", q),
+                Interval::Fourth(q) => write!(f, "{}4", q),
+                Interval::Fifth(q) => write!(f, "{}5", q),
+                Interval::Sixth(q) => write!(f, "{}6", q),
+                Interval::Seventh(q) => write!(f, "{}7", q),
+                Interval::Octave(q) => write!(f, "{}8", q),
+                Interval::Ninth(q) => write!(f, "{}9", q),
+                Interval::Tenth(q) => write!(f, "{}10", q),
+                Interval::Eleventh(q) => write!(f, "{}11", q),
+                Interval::Twelfth(q) => write!(f, "{}12", q),
+                Interval::Thirteenth(q) => write!(f, "{}13", q),
+                Interval::Fourteenth(q) => write!(f, "{}14", q),
+            }
         }
     }
 }

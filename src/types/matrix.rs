@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use super::{Degree, Interval, Note, PerfectQuality, PitchClass, PitchGroup};
+use super::{Degree, Interval, Note, PerfectQuality, MajorQuality, PitchClass, PitchGroup};
 
 /// The Pitch Matrix is a set of static Reference Tables containing Ordered
 /// [Note](audiotheorem::types::Note) [Accidentals](audiotheorem::types::Accidental),
@@ -169,10 +169,11 @@ impl Matrix {
     /// Get the Degree from Key Root for the provided position in the Degree table.
     pub fn degree(pc: &PitchClass, pg: &PitchGroup) -> Option<Degree> {
         use crate::types::Degree::*;
+        use crate::types::{MajorQuality::*, PerfectQuality::*};
         match (pc, pg) {
             // Column 0
-            (PitchClass::Cn, PitchGroup::Cn) => Some(Tonic), // Row 0
-            (PitchClass::Cn, PitchGroup::Gn) => Some(Subdominant), // Row 1
+            (PitchClass::Cn, PitchGroup::Cn) => Some(Tonic()),        // Row 0
+            (PitchClass::Cn, PitchGroup::Gn) => Some(Subdominant),  // Row 1
             (PitchClass::Cn, PitchGroup::Cs) => Some(Subtonic), // Row 7
             (PitchClass::Cn, PitchGroup::Gs) => Some(Mediant), // Row 8
             (PitchClass::Cn, PitchGroup::Ds) => Some(Submediant), // Row 9
