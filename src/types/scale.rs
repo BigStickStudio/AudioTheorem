@@ -79,7 +79,7 @@ impl Scale {
     pub fn monotonic(root: Note) -> Option<Scale> {
         use self::{Interval::*, PerfectQuality::*};
         Some(Scale::Monotonic([Position {
-            degree: Degree::Tonic,
+            degree: Degree::Tonic(Perfect),
             note: root,
             interval: First(Perfect),
         }]))
@@ -177,7 +177,7 @@ impl Scale {
             Position {
                 degree: intervals[3].degree(),
                 note: (root + intervals[3])?,
-                interval: intervals[4],
+                interval: intervals[3],
             },
             Position {
                 degree: intervals[4].degree(),
@@ -210,7 +210,7 @@ impl Scale {
             Position {
                 degree: intervals[3].degree(),
                 note: (root + intervals[3])?,
-                interval: intervals[4],
+                interval: intervals[3],
             },
             Position {
                 degree: intervals[4].degree(),
@@ -248,7 +248,7 @@ impl Scale {
             Position {
                 degree: intervals[3].degree(),
                 note: (root + intervals[3])?,
-                interval: intervals[4],
+                interval: intervals[3],
             },
             Position {
                 degree: intervals[4].degree(),
@@ -291,7 +291,7 @@ impl Scale {
             Position {
                 degree: intervals[3].degree(),
                 note: (root + intervals[3])?,
-                interval: intervals[4],
+                interval: intervals[3],
             },
             Position {
                 degree: intervals[4].degree(),
@@ -339,7 +339,7 @@ impl Scale {
             Position {
                 degree: intervals[3].degree(),
                 note: (root + intervals[3])?,
-                interval: intervals[4],
+                interval: intervals[3],
             },
             Position {
                 degree: intervals[4].degree(),

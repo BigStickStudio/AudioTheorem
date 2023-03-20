@@ -54,42 +54,49 @@ impl TetratonicSequence {
 
 /// -- Four Note Scales --
 // Tetrachord sequences
-const MAJOR_TETRA: [Interval; 4] =
-    [First(Perfect), Second(Major), Third(Major), Fourth(Perfect)];
-const MINOR_TETRA: [Interval; 4] =
-    [First(Perfect), Second(Major), Third(Minor), Fourth(Perfect)];
-const PHRYGIAN_TETRA: [Interval; 4] =
-    [First(Perfect), Second(Minor), Third(Minor), Fourth(Perfect)];
+const MAJOR_TETRA: [Interval; 4] = [First(Perfect), Second(Major), Third(Major), Fourth(Perfect)];
+
+const MINOR_TETRA: [Interval; 4] = [First(Perfect), Second(Major), Third(Minor), Fourth(Perfect)];
+
+const PHRYGIAN_TETRA: [Interval; 4] = [First(Perfect), Second(Minor), Third(Minor), Fourth(Perfect)];
+
 const WHOLETONE_TETRA: [Interval; 4] = [
     First(Perfect),
     Second(Major),
     Third(Major),
     Fourth(PerfectQuality::Augmented),
 ];
+
 const DIMINISHED_TETRA: [Interval; 4] = [
     First(Perfect),
     Second(Minor),
     Third(Minor),
     Fourth(PerfectQuality::Diminished),
 ];
+
 const HARMONIC_TETRA: [Interval; 4] =
     [First(Perfect), Second(Minor), Third(Major), Fourth(Perfect)];
+
 const MIXOLYDIAN_BLUES_TETRA: [Interval; 4] =
     [First(Perfect), Second(Major), Third(Minor), Third(Major)];
+
 const BLUES1_TETRA: [Interval; 4] = [
     First(Perfect),
     Third(Minor),
     Fourth(Perfect),
     Fourth(PerfectQuality::Augmented),
 ];
+
 const BLUES2_TETRA: [Interval; 4] = [
     First(Perfect),
     Second(Minor),
     Third(Major),
     Fourth(PerfectQuality::Augmented),
 ];
+
 const FLAT_CHROMATIC_TETRA: [Interval; 4] =
     [First(Perfect), Second(Minor), Second(Major), Third(Minor)];
+
 const SHARP_CHROMATIC_TETRA: [Interval; 4] = [
     First(Perfect),
     First(PerfectQuality::Augmented),

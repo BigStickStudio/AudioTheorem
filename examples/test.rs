@@ -6,21 +6,6 @@ use audiotheorem::types::*;
 use audiotheorem::midi::*;
 use audiotheorem::graphics::*;
 
-fn _intervals() {
-    let l = Note::A(Accidental::Natural);
-    let c = Note::C(Accidental::Natural);
-    let r = (l + Interval::Fifth(PerfectQuality::Perfect)).unwrap();
-    let d1 = Interval::distance(l, c);
-    let d2 = Interval::distance(c, r);
-    println!("Interval::distance({}, {}, {}) -> {:?} - {:?}", l, c, r, d1, d2);
-}
-
-fn _chords() {
-    let f_sharp_sus4 = Scale::tritonic(Note::F(Accidental::Sharp), 
-                                       sequences::TritonicSequence::Sus4Triad).unwrap();
-    println!("F# Sus4: {:?}", f_sharp_sus4);
-}
-
 fn _midi() {
     let mut sequence = Sequence::new();
 

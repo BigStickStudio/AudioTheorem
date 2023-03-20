@@ -54,7 +54,7 @@ impl fmt::Display for Degree {
                 Degree::Tonic(PerfectQuality::TripleAugmented) => format_args!("I+++").fmt(f),
 
                 Degree::Supertonic(MajorQuality::TripleDiminished) => format_args!("ii°°°").fmt(f),
-                Degree::Supertonic(MajorQuality::DoubledDiminished) => format_args!("ii°°").fmt(f),
+                Degree::Supertonic(MajorQuality::DoubleDiminished) => format_args!("ii°°").fmt(f),
                 Degree::Supertonic(MajorQuality::Diminished) => format_args!("ii°").fmt(f),
                 Degree::Supertonic(MajorQuality::Minor) => format_args!("ii").fmt(f),
                 Degree::Supertonic(MajorQuality::Major) => format_args!("II").fmt(f),
@@ -63,7 +63,7 @@ impl fmt::Display for Degree {
                 Degree::Supertonic(MajorQuality::TripleAugmented) => format_args!("II+++").fmt(f),
 
                 Degree::Mediant(MajorQuality::TripleDiminished) => format_args!("iii°°°").fmt(f),
-                Degree::Mediant(MajorQuality::DoubledDiminished) => format_args!("iii°°").fmt(f),
+                Degree::Mediant(MajorQuality::DoubleDiminished) => format_args!("iii°°").fmt(f),
                 Degree::Mediant(MajorQuality::Diminished) => format_args!("iii°").fmt(f),
                 Degree::Mediant(MajorQuality::Minor) => format_args!("iii").fmt(f),
                 Degree::Mediant(MajorQuality::Major) => format_args!("III").fmt(f),
@@ -88,7 +88,7 @@ impl fmt::Display for Degree {
                 Degree::Dominant(PerfectQuality::TripleAugmented) => format_args!("V+++").fmt(f),
 
                 Degree::Submediant(MajorQuality::TripleDiminished) => format_args!("vi°°°").fmt(f),
-                Degree::Submediant(MajorQuality::DoubledDiminished) => format_args!("vi°°").fmt(f),
+                Degree::Submediant(MajorQuality::DoubleDiminished) => format_args!("vi°°").fmt(f),
                 Degree::Submediant(MajorQuality::Diminished) => format_args!("vi°").fmt(f),
                 Degree::Submediant(MajorQuality::Minor) => format_args!("vi").fmt(f),
                 Degree::Submediant(MajorQuality::Major) => format_args!("VI").fmt(f),
@@ -97,7 +97,7 @@ impl fmt::Display for Degree {
                 Degree::Submediant(MajorQuality::TripleAugmented) => format_args!("VI+++").fmt(f),
 
                 Degree::Subtonic(MajorQuality::TripleDiminished) => format_args!("vii°°°").fmt(f),
-                Degree::Subtonic(MajorQuality::DoubledDiminished) => format_args!("vii°°").fmt(f),
+                Degree::Subtonic(MajorQuality::DoubleDiminished) => format_args!("vii°°").fmt(f),
                 Degree::Subtonic(MajorQuality::Diminished) => format_args!("vii°").fmt(f),
                 Degree::Subtonic(MajorQuality::Minor) => format_args!("vii").fmt(f),
                 Degree::Subtonic(MajorQuality::Major) => format_args!("VII").fmt(f),

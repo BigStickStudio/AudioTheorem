@@ -45,16 +45,18 @@ pub enum MajorQuality {
     TripleAugmented,
 }
 
-impl fmt::Display for PerfectQuality {w
+impl fmt::Display for PerfectQuality {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if f.alternate() {
-            PerfectQuality::TripleDiminished => write!(f, "Triple Diminished"),
-            PerfectQuality::DoubleDiminished => write!(f, "Double Diminished"),
-            PerfectQuality::Diminished => write!(f, "Diminished"),
-            PerfectQuality::Perfect => write!(f, "Perfect"),
-            PerfectQuality::Augmented => write!(f, "Augmented"),
-            PerfectQuality::DoubleAugmented => write!(f, "Double Augmented"),
-            PerfectQuality::TripleAugmented => write!(f, "Triple Augmented"),
+            match *self {
+                PerfectQuality::TripleDiminished => write!(f, "Triple Diminished"),
+                PerfectQuality::DoubleDiminished => write!(f, "Double Diminished"),
+                PerfectQuality::Diminished => write!(f, "Diminished"),
+                PerfectQuality::Perfect => write!(f, "Perfect"),
+                PerfectQuality::Augmented => write!(f, "Augmented"),
+                PerfectQuality::DoubleAugmented => write!(f, "Double Augmented"),
+                PerfectQuality::TripleAugmented => write!(f, "Triple Augmented"),
+            }
         } else {
             match *self {
                 PerfectQuality::TripleDiminished => write!(f, "ddd"),
@@ -72,14 +74,16 @@ impl fmt::Display for PerfectQuality {w
 impl fmt::Display for MajorQuality {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if f.alternate() {
-            MajorQuality::TripleDiminished => write!(f, "Triple Diminished"),
-            MajorQuality::DoubleDiminished => write!(f, "Double Diminished"),
-            MajorQuality::Diminished => write!(f, "Diminished"),
-            MajorQuality::Major => write!(f, "Major"),
-            MajorQuality::Minor => write!(f, "Minor"),
-            MajorQuality::Augmented => write!(f, "Augmented"),
-            MajorQuality::DoubleAugmented => write!(f, "Double Augmented"),
-            MajorQuality::TripleAugmented => write!(f, "Triple Augmented"),
+            match *self {
+                MajorQuality::TripleDiminished => write!(f, "Triple Diminished"),
+                MajorQuality::DoubleDiminished => write!(f, "Double Diminished"),
+                MajorQuality::Diminished => write!(f, "Diminished"),
+                MajorQuality::Major => write!(f, "Major"),
+                MajorQuality::Minor => write!(f, "Minor"),
+                MajorQuality::Augmented => write!(f, "Augmented"),
+                MajorQuality::DoubleAugmented => write!(f, "Double Augmented"),
+                MajorQuality::TripleAugmented => write!(f, "Triple Augmented"),
+            }
         } else {
             match *self {
                 MajorQuality::TripleDiminished => write!(f, "ddd"),
@@ -1076,20 +1080,22 @@ impl Interval {
 impl fmt::Display for Interval {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if f.alternate() {
-                Interval::First(q) => write!(f, "{} First", q),
-                Interval::Second(q) => write!(f, "{} Second", q),
-                Interval::Third(q) => write!(f, "{} Third", q),
-                Interval::Fourth(q) => write!(f, "{} Fourth", q),
-                Interval::Fifth(q) => write!(f, "{} Fifth", q),
-                Interval::Sixth(q) => write!(f, "{} Sixth", q),
-                Interval::Seventh(q) => write!(f, "{} Seventh", q),
-                Interval::Octave(q) => write!(f, "{} Eighth", q),
-                Interval::Ninth(q) => write!(f, "{} Ninth", q),
-                Interval::Tenth(q) => write!(f, "{} Tenth", q),
-                Interval::Eleventh(q) => write!(f, "{} Eleventh", q),
-                Interval::Twelfth(q) => write!(f, "{} Twelfth", q),
-                Interval::Thirteenth(q) => write!(f, "{} Thirteenth", q),
-                Interval::Fourteenth(q) => write!(f, "{} Fourteenth", q),
+            match *self {
+                Interval::First(q) => write!(f, "{:#} First", q),
+                Interval::Second(q) => write!(f, "{:#} Second", q),
+                Interval::Third(q) => write!(f, "{:#} Third", q),
+                Interval::Fourth(q) => write!(f, "{:#} Fourth", q),
+                Interval::Fifth(q) => write!(f, "{:#} Fifth", q),
+                Interval::Sixth(q) => write!(f, "{:#} Sixth", q),
+                Interval::Seventh(q) => write!(f, "{:#} Seventh", q),
+                Interval::Octave(q) => write!(f, "{:#} Eighth", q),
+                Interval::Ninth(q) => write!(f, "{:#} Ninth", q),
+                Interval::Tenth(q) => write!(f, "{:#} Tenth", q),
+                Interval::Eleventh(q) => write!(f, "{:#} Eleventh", q),
+                Interval::Twelfth(q) => write!(f, "{:#} Twelfth", q),
+                Interval::Thirteenth(q) => write!(f, "{:#} Thirteenth", q),
+                Interval::Fourteenth(q) => write!(f, "{:#} Fourteenth", q),
+            }
         } else {
             match *self {
                 Interval::First(q) => write!(f, "{}1", q),

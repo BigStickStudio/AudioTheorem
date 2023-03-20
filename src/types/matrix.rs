@@ -166,107 +166,108 @@ impl Matrix {
             (_, _) => None,
         }
     }
+    // 2023 - Richard Christopher Modified Degrees to include Quality
     /// Get the Degree from Key Root for the provided position in the Degree table.
     pub fn degree(pc: &PitchClass, pg: &PitchGroup) -> Option<Degree> {
         use crate::types::Degree::*;
         use crate::types::{MajorQuality::*, PerfectQuality::*};
         match (pc, pg) {
             // Column 0
-            (PitchClass::Cn, PitchGroup::Cn) => Some(Tonic()),        // Row 0
-            (PitchClass::Cn, PitchGroup::Gn) => Some(Subdominant),  // Row 1
-            (PitchClass::Cn, PitchGroup::Cs) => Some(Subtonic), // Row 7
-            (PitchClass::Cn, PitchGroup::Gs) => Some(Mediant), // Row 8
-            (PitchClass::Cn, PitchGroup::Ds) => Some(Submediant), // Row 9
-            (PitchClass::Cn, PitchGroup::As) => Some(Subtonic), // Row 10
-            (PitchClass::Cn, PitchGroup::Fn) => Some(Dominant), // Row 11
+            (PitchClass::Cn, PitchGroup::Cn) => Some(Tonic(Perfect)),        // Row 0
+            (PitchClass::Cn, PitchGroup::Gn) => Some(Subdominant(Perfect)),  // Row 1
+            (PitchClass::Cn, PitchGroup::Cs) => Some(Subtonic(Major)), // Row 7
+            (PitchClass::Cn, PitchGroup::Gs) => Some(Mediant(Major)), // Row 8
+            (PitchClass::Cn, PitchGroup::Ds) => Some(Submediant(Major)), // Row 9
+            (PitchClass::Cn, PitchGroup::As) => Some(Subtonic(Major)), // Row 10
+            (PitchClass::Cn, PitchGroup::Fn) => Some(Dominant(Perfect)), // Row 11
             // Column 1
-            (PitchClass::Cs, PitchGroup::Dn) => Some(Subtonic), // Row 2
-            (PitchClass::Cs, PitchGroup::An) => Some(Mediant),  // Row 3
-            (PitchClass::Cs, PitchGroup::En) => Some(Submediant), // Row 4
-            (PitchClass::Cs, PitchGroup::Bn) => Some(Supertonic), // Row 5
-            (PitchClass::Cs, PitchGroup::Fs) => Some(Dominant), // Row 6
-            (PitchClass::Cs, PitchGroup::Cs) => Some(Tonic),    // Row 7
-            (PitchClass::Cs, PitchGroup::Gs) => Some(Subdominant), // Row 8
+            (PitchClass::Cs, PitchGroup::Dn) => Some(Subtonic(Major)), // Row 2
+            (PitchClass::Cs, PitchGroup::An) => Some(Mediant(Major)),  // Row 3
+            (PitchClass::Cs, PitchGroup::En) => Some(Submediant(Major)), // Row 4
+            (PitchClass::Cs, PitchGroup::Bn) => Some(Supertonic(Major)), // Row 5
+            (PitchClass::Cs, PitchGroup::Fs) => Some(Dominant(Perfect)), // Row 6
+            (PitchClass::Cs, PitchGroup::Cs) => Some(Tonic(Perfect)),    // Row 7
+            (PitchClass::Cs, PitchGroup::Gs) => Some(Subdominant(Perfect)), // Row 8
             // Column 2
-            (PitchClass::Dn, PitchGroup::Cn) => Some(Supertonic), // Row 0
-            (PitchClass::Dn, PitchGroup::Gn) => Some(Dominant),   // Row 1
-            (PitchClass::Dn, PitchGroup::Dn) => Some(Tonic),      // Row 2
-            (PitchClass::Dn, PitchGroup::An) => Some(Subdominant), // Row 3
-            (PitchClass::Dn, PitchGroup::Ds) => Some(Subtonic),   // Row 9
-            (PitchClass::Dn, PitchGroup::As) => Some(Mediant),    // Row 10
-            (PitchClass::Dn, PitchGroup::Fn) => Some(Submediant), // Row 11
+            (PitchClass::Dn, PitchGroup::Cn) => Some(Supertonic(Major)), // Row 0
+            (PitchClass::Dn, PitchGroup::Gn) => Some(Dominant(Perfect)),   // Row 1
+            (PitchClass::Dn, PitchGroup::Dn) => Some(Tonic(Perfect)),      // Row 2
+            (PitchClass::Dn, PitchGroup::An) => Some(Subdominant(Perfect)), // Row 3
+            (PitchClass::Dn, PitchGroup::Ds) => Some(Subtonic(Major)),   // Row 9
+            (PitchClass::Dn, PitchGroup::As) => Some(Mediant(Major)),    // Row 10
+            (PitchClass::Dn, PitchGroup::Fn) => Some(Submediant(Major)), // Row 11
             // Column 3
-            (PitchClass::Ds, PitchGroup::En) => Some(Subtonic), // Row 4
-            (PitchClass::Ds, PitchGroup::Bn) => Some(Mediant),  // Row 5
-            (PitchClass::Ds, PitchGroup::Fs) => Some(Submediant), // Row 6
-            (PitchClass::Ds, PitchGroup::Cs) => Some(Supertonic), // Row 7
-            (PitchClass::Ds, PitchGroup::Gs) => Some(Dominant), // Row 8
-            (PitchClass::Ds, PitchGroup::Ds) => Some(Tonic),    // Row 9
-            (PitchClass::Ds, PitchGroup::As) => Some(Subdominant), // Row 10
+            (PitchClass::Ds, PitchGroup::En) => Some(Subtonic(Major)), // Row 4
+            (PitchClass::Ds, PitchGroup::Bn) => Some(Mediant(Major)),  // Row 5
+            (PitchClass::Ds, PitchGroup::Fs) => Some(Submediant(Major)), // Row 6
+            (PitchClass::Ds, PitchGroup::Cs) => Some(Supertonic(Major)), // Row 7
+            (PitchClass::Ds, PitchGroup::Gs) => Some(Dominant(Perfect)), // Row 8
+            (PitchClass::Ds, PitchGroup::Ds) => Some(Tonic(Perfect)),    // Row 9
+            (PitchClass::Ds, PitchGroup::As) => Some(Subdominant(Perfect)), // Row 10
             // Column 4
-            (PitchClass::En, PitchGroup::Cn) => Some(Mediant), // Row 0
-            (PitchClass::En, PitchGroup::Gn) => Some(Submediant), // Row 1
-            (PitchClass::En, PitchGroup::Dn) => Some(Supertonic), // Row 2
-            (PitchClass::En, PitchGroup::An) => Some(Dominant), // Row 3
-            (PitchClass::En, PitchGroup::En) => Some(Tonic),   // Row 4
-            (PitchClass::En, PitchGroup::Bn) => Some(Subdominant), // Row 5
-            (PitchClass::En, PitchGroup::Fn) => Some(Subtonic), // Row 11
+            (PitchClass::En, PitchGroup::Cn) => Some(Mediant(Major)), // Row 0
+            (PitchClass::En, PitchGroup::Gn) => Some(Submediant(Major)), // Row 1
+            (PitchClass::En, PitchGroup::Dn) => Some(Supertonic(Major)), // Row 2
+            (PitchClass::En, PitchGroup::An) => Some(Dominant(Perfect)), // Row 3
+            (PitchClass::En, PitchGroup::En) => Some(Tonic(Perfect)),   // Row 4
+            (PitchClass::En, PitchGroup::Bn) => Some(Subdominant(Perfect)), // Row 5
+            (PitchClass::En, PitchGroup::Fn) => Some(Subtonic(Major)), // Row 11
             // Column 5
-            (PitchClass::Fn, PitchGroup::Cn) => Some(Subdominant), // Row 0
-            (PitchClass::Fn, PitchGroup::Fs) => Some(Subtonic),    // Row 6
-            (PitchClass::Fn, PitchGroup::Cs) => Some(Mediant),     // Row 7
-            (PitchClass::Fn, PitchGroup::Gs) => Some(Submediant),  // Row 8
-            (PitchClass::Fn, PitchGroup::Ds) => Some(Supertonic),  // Row 9
-            (PitchClass::Fn, PitchGroup::As) => Some(Dominant),    // Row 10
-            (PitchClass::Fn, PitchGroup::Fn) => Some(Tonic),       // Row 11
+            (PitchClass::Fn, PitchGroup::Cn) => Some(Subdominant(Perfect)), // Row 0
+            (PitchClass::Fn, PitchGroup::Fs) => Some(Subtonic(Major)),    // Row 6
+            (PitchClass::Fn, PitchGroup::Cs) => Some(Mediant(Major)),     // Row 7
+            (PitchClass::Fn, PitchGroup::Gs) => Some(Submediant(Major)),  // Row 8
+            (PitchClass::Fn, PitchGroup::Ds) => Some(Supertonic(Major)),  // Row 9
+            (PitchClass::Fn, PitchGroup::As) => Some(Dominant(Perfect)),    // Row 10
+            (PitchClass::Fn, PitchGroup::Fn) => Some(Tonic(Perfect)),       // Row 11
             // Column 6
-            (PitchClass::Fs, PitchGroup::Gn) => Some(Subtonic), // Row 1
-            (PitchClass::Fs, PitchGroup::Dn) => Some(Mediant),  // Row 2
-            (PitchClass::Fs, PitchGroup::An) => Some(Submediant), // Row 3
-            (PitchClass::Fs, PitchGroup::En) => Some(Supertonic), // Row 4
-            (PitchClass::Fs, PitchGroup::Bn) => Some(Dominant), // Row 5
-            (PitchClass::Fs, PitchGroup::Fs) => Some(Tonic),    // Row 6
-            (PitchClass::Fs, PitchGroup::Cs) => Some(Subdominant), // Row 7
+            (PitchClass::Fs, PitchGroup::Gn) => Some(Subtonic(Major)), // Row 1
+            (PitchClass::Fs, PitchGroup::Dn) => Some(Mediant(Major)),  // Row 2
+            (PitchClass::Fs, PitchGroup::An) => Some(Submediant(Major)), // Row 3
+            (PitchClass::Fs, PitchGroup::En) => Some(Supertonic(Major)), // Row 4
+            (PitchClass::Fs, PitchGroup::Bn) => Some(Dominant(Perfect)), // Row 5
+            (PitchClass::Fs, PitchGroup::Fs) => Some(Tonic(Perfect)),    // Row 6
+            (PitchClass::Fs, PitchGroup::Cs) => Some(Subdominant(Perfect)), // Row 7
             // Column 7
-            (PitchClass::Gn, PitchGroup::Cn) => Some(Dominant), // Row 0
-            (PitchClass::Gn, PitchGroup::Gn) => Some(Tonic),    // Row 1
-            (PitchClass::Gn, PitchGroup::Dn) => Some(Subdominant), // Row 2
-            (PitchClass::Gn, PitchGroup::Gs) => Some(Subtonic), // Row 8
-            (PitchClass::Gn, PitchGroup::Ds) => Some(Mediant),  // Row 9
-            (PitchClass::Gn, PitchGroup::As) => Some(Submediant), // Row 10
-            (PitchClass::Gn, PitchGroup::Fn) => Some(Supertonic), // Row 11
+            (PitchClass::Gn, PitchGroup::Cn) => Some(Dominant(Perfect)), // Row 0
+            (PitchClass::Gn, PitchGroup::Gn) => Some(Tonic(Perfect)),    // Row 1
+            (PitchClass::Gn, PitchGroup::Dn) => Some(Subdominant(Perfect)), // Row 2
+            (PitchClass::Gn, PitchGroup::Gs) => Some(Subtonic(Major)), // Row 8
+            (PitchClass::Gn, PitchGroup::Ds) => Some(Mediant(Major)),  // Row 9
+            (PitchClass::Gn, PitchGroup::As) => Some(Submediant(Major)), // Row 10
+            (PitchClass::Gn, PitchGroup::Fn) => Some(Supertonic(Major)), // Row 11
             // Column 8
-            (PitchClass::Gs, PitchGroup::An) => Some(Subtonic), // Row 3
-            (PitchClass::Gs, PitchGroup::En) => Some(Mediant),  // Row 4
-            (PitchClass::Gs, PitchGroup::Bn) => Some(Submediant), // Row 5
-            (PitchClass::Gs, PitchGroup::Fs) => Some(Supertonic), // Row 6
-            (PitchClass::Gs, PitchGroup::Cs) => Some(Dominant), // Row 7
-            (PitchClass::Gs, PitchGroup::Gs) => Some(Tonic),    // Row 8
-            (PitchClass::Gs, PitchGroup::Ds) => Some(Subdominant), // Row 9
+            (PitchClass::Gs, PitchGroup::An) => Some(Subtonic(Major)), // Row 3
+            (PitchClass::Gs, PitchGroup::En) => Some(Mediant(Major)),  // Row 4
+            (PitchClass::Gs, PitchGroup::Bn) => Some(Submediant(Major)), // Row 5
+            (PitchClass::Gs, PitchGroup::Fs) => Some(Supertonic(Major)), // Row 6
+            (PitchClass::Gs, PitchGroup::Cs) => Some(Dominant(Perfect)), // Row 7
+            (PitchClass::Gs, PitchGroup::Gs) => Some(Tonic(Perfect)),    // Row 8
+            (PitchClass::Gs, PitchGroup::Ds) => Some(Subdominant(Perfect)), // Row 9
             // Column 9
-            (PitchClass::An, PitchGroup::Cn) => Some(Submediant), // Row 0
-            (PitchClass::An, PitchGroup::Gn) => Some(Supertonic), // Row 1
-            (PitchClass::An, PitchGroup::Dn) => Some(Dominant),   // Row 2
-            (PitchClass::An, PitchGroup::An) => Some(Tonic),      // Row 3
-            (PitchClass::An, PitchGroup::En) => Some(Subdominant), // Row 4
-            (PitchClass::An, PitchGroup::As) => Some(Subtonic),   // Row 10
-            (PitchClass::An, PitchGroup::Fn) => Some(Mediant),    // Row 11
+            (PitchClass::An, PitchGroup::Cn) => Some(Submediant(Major)), // Row 0
+            (PitchClass::An, PitchGroup::Gn) => Some(Supertonic(Major)), // Row 1
+            (PitchClass::An, PitchGroup::Dn) => Some(Dominant(Perfect)),   // Row 2
+            (PitchClass::An, PitchGroup::An) => Some(Tonic(Perfect)),      // Row 3
+            (PitchClass::An, PitchGroup::En) => Some(Subdominant(Perfect)), // Row 4
+            (PitchClass::An, PitchGroup::As) => Some(Subtonic(Major)),   // Row 10
+            (PitchClass::An, PitchGroup::Fn) => Some(Mediant(Major)),    // Row 11
             // Column 10
-            (PitchClass::As, PitchGroup::Bn) => Some(Subtonic), // Row 5
-            (PitchClass::As, PitchGroup::Fs) => Some(Mediant),  // Row 6
-            (PitchClass::As, PitchGroup::Cs) => Some(Submediant), // Row 7
-            (PitchClass::As, PitchGroup::Gs) => Some(Supertonic), // Row 8
-            (PitchClass::As, PitchGroup::Ds) => Some(Dominant), // Row 9
-            (PitchClass::As, PitchGroup::As) => Some(Tonic),    // Row 10
-            (PitchClass::As, PitchGroup::Fn) => Some(Subdominant), // Row 11
+            (PitchClass::As, PitchGroup::Bn) => Some(Subtonic(Major)), // Row 5
+            (PitchClass::As, PitchGroup::Fs) => Some(Mediant(Major)),  // Row 6
+            (PitchClass::As, PitchGroup::Cs) => Some(Submediant(Major)), // Row 7
+            (PitchClass::As, PitchGroup::Gs) => Some(Supertonic(Major)), // Row 8
+            (PitchClass::As, PitchGroup::Ds) => Some(Dominant(Perfect)), // Row 9
+            (PitchClass::As, PitchGroup::As) => Some(Tonic(Perfect)),    // Row 10
+            (PitchClass::As, PitchGroup::Fn) => Some(Subdominant(Perfect)), // Row 11
             // Column 11
-            (PitchClass::Bn, PitchGroup::Cn) => Some(Subtonic), // Row 0
-            (PitchClass::Bn, PitchGroup::Gn) => Some(Mediant),  // Row 1
-            (PitchClass::Bn, PitchGroup::Dn) => Some(Submediant), // Row 2
-            (PitchClass::Bn, PitchGroup::An) => Some(Supertonic), // Row 3
-            (PitchClass::Bn, PitchGroup::En) => Some(Dominant), // Row 4
-            (PitchClass::Bn, PitchGroup::Bn) => Some(Tonic),    // Row 5
-            (PitchClass::Bn, PitchGroup::Fs) => Some(Subdominant), // Row 6
+            (PitchClass::Bn, PitchGroup::Cn) => Some(Subtonic(Major)), // Row 0
+            (PitchClass::Bn, PitchGroup::Gn) => Some(Mediant(Major)),  // Row 1
+            (PitchClass::Bn, PitchGroup::Dn) => Some(Submediant(Major)), // Row 2
+            (PitchClass::Bn, PitchGroup::An) => Some(Supertonic(Major)), // Row 3
+            (PitchClass::Bn, PitchGroup::En) => Some(Dominant(Perfect)), // Row 4
+            (PitchClass::Bn, PitchGroup::Bn) => Some(Tonic(Perfect)),    // Row 5
+            (PitchClass::Bn, PitchGroup::Fs) => Some(Subdominant(Perfect)), // Row 6
             // Empty
             (_, _) => None,
         }
