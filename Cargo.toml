@@ -26,6 +26,7 @@ pollster = "0.3.0"
 wgpu = "0.15"
 bytemuck = { version = "1.13.1", features = [ "derive" ] }
 image = "0.24.5"
+cgmath = "0.18.0"
 
 [[example]]
 name = "test"
