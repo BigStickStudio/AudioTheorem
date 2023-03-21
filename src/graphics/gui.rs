@@ -3,7 +3,7 @@
 //
 
 use crate::types::Dynamic;
-use crate::graphics::{Graphics, Square};
+use crate::graphics::graphics::*;
 
 const SCREEN_WIDTH: f32 = 1200.0;
 const SCREEN_HEIGHT: f32 = 800.0;
@@ -90,6 +90,6 @@ pub struct Gui;
 
 impl Gui{
     pub fn start() {
-        pollster::block_on(Graphics::run(&Square::new()));
+        pollster::block_on(Graphics::run(&TexturedSquare::new()));
     }
 }
