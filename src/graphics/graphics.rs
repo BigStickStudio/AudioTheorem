@@ -5,11 +5,14 @@
 use super::texture::Texture;
 use super::camera::{Camera, CameraUniform, CameraController};
 use super::mesh::*;
+use super::scene::{Instance, RawInstance};
 use wgpu::util::DeviceExt;
 use winit::event::*;
 use winit::dpi::PhysicalSize;
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::{Window, WindowBuilder};
+use cgmath::prelude::*;
+
 
 
 #[derive(Debug)]
@@ -28,6 +31,8 @@ pub struct Graphics {
     camera_bind_group: wgpu::BindGroup,
     diffuse_bind_group: wgpu::BindGroup,
     diffuse_texture: Texture,
+    instances: Vec<Instance>,
+    instance_buffer: wgpu::Buffer,
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
     num_vertices: u32,
@@ -35,7 +40,7 @@ pub struct Graphics {
 }
 
 impl Graphics {
-    async fn new(window: Window, square: &TexturedSquare<'_>) -> Self {
+    async fn new(window: Window, grid_size: u32, square: &TexturedSquare<'_>) -> Self {
         env_logger::init();
 
         let size = window.inner_size();
@@ -79,6 +84,30 @@ impl Graphics {
                     };
         
         surface.configure(&device, &config);
+
+        let instance_displacement: cgmath::Vector3<f32> = cgmath::Vector3::new(
+            grid_size as f32 * 0.25,
+            0.0,
+            grid_size as f32 * 0.25,
+        );
+
+        let instances = (0..grid_size).flat_map(|z| {
+            (0..grid_size).map(move |x| {
+                let position = cgmath::Vector3 { x: x as f32, y: 0.0, z: z as f32 } - instance_displacement;
+                let rotation = cgmath::Quaternion::from_axis_angle(cgmath::Vector3::unit_z(), cgmath::Deg(45.0));
+                Instance { position, rotation }
+            })
+        }).collect::<Vec<_>>();
+
+        let instance_data = instances.iter().map(Instance::raw).collect::<Vec<_>>();
+
+        let instance_buffer = device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Instance Buffer"),
+                contents: bytemuck::cast_slice(&instance_data),
+                usage: wgpu::BufferUsages::VERTEX,
+            }
+        );
 
         let vertex_buffer = device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
@@ -219,7 +248,10 @@ impl Graphics {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: "vs_main",
-                buffers: &[TexturedVertex::desc()]
+                buffers: &[
+                    TexturedVertex::desc(),
+                    RawInstance::desc()
+                    ],
             },
             fragment: Some(wgpu::FragmentState {
                 module: &shader,
@@ -270,6 +302,8 @@ impl Graphics {
             camera_bind_group,
             diffuse_bind_group,
             diffuse_texture,
+            instances,
+            instance_buffer,
             vertex_buffer,
             index_buffer,
             num_vertices,
@@ -327,8 +361,9 @@ impl Graphics {
             render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
             render_pass.set_bind_group(1, &self.camera_bind_group, &[]);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+            render_pass.set_vertex_buffer(1, self.instance_buffer.slice(..));
             render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-            render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
+            render_pass.draw_indexed(0..self.num_indices, 0, 0..self.instances.len() as _);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
@@ -337,10 +372,10 @@ impl Graphics {
         Ok(())
     }
 
-    pub async fn run(square: &TexturedSquare<'_>) {
+    pub async fn run(grid_size: u32, square: &TexturedSquare<'_>) {
         let event_loop = EventLoop::new();
         let window = WindowBuilder::new().build(&event_loop).unwrap();
-        let mut gfx = Graphics::new(window, square).await;
+        let mut gfx = Graphics::new(window, grid_size, square).await;
 
         println!("hit run");
 
