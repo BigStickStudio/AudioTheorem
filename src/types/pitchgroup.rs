@@ -171,6 +171,7 @@ impl PitchGroup {
     }
     /// Get the Minor key for this [PitchGroup](audiotheorem::types::PitchGroup) (Co5).
     pub fn diminished_key(&self) -> Note {
+        use super::{Accidental::*, Note::*};
         match *self {
             PitchGroup::Cn => B(Natural),
             PitchGroup::Gn => F(Sharp),
