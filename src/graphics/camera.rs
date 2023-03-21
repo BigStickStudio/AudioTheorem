@@ -28,3 +28,16 @@ impl Camera {
         return OPENGL_2_WGPU_MATRIX * proj * view
     }
 }
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct CameraUniform {
+    view_proj:[[f32; 4]; 4]
+}
+
+impl CameraUniform {
+    fn new() -> Self {
+        use cgmath::SquareMatrix;
+        Self { view_proj: }
+    }
+}

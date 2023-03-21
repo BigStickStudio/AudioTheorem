@@ -9,6 +9,12 @@ use bytemuck::{Pod, Zeroable};
 #[derive(Copy, Clone, Debug, Pod, Zeroable)]
 pub struct Index(u16);
 
+const INDICES: &[Index] = &[
+    Index(0), Index(1), Index(3),
+    Index(3), Index(2), Index(0),
+];
+
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, Pod, Zeroable)]
 pub struct ColoredVertex {
@@ -16,12 +22,12 @@ pub struct ColoredVertex {
     pub col: [f32; 4],
 }
 
-#[repr(C)]
-#[derive(Copy, Clone, Debug, Pod, Zeroable)]
-pub struct TexturedVertex {
-    pub pos: [f32; 4],
-    pub tex_coords: [f32; 2],
-}
+const COLORED_VERTICES: &[ColoredVertex] = &[
+    ColoredVertex { pos: [-0.5, 0.5, 0.0, 1.0], col: [0.8, 0.0, 0.0, 1.0] },
+    ColoredVertex { pos: [0.5, 0.5, 0.0, 1.0], col: [0.1, 0.0, 1.0, 1.0] },
+    ColoredVertex { pos: [-0.5, -0.5, 0.0, 1.0], col: [0.1, 1.0, 0.0, 1.0] },
+    ColoredVertex { pos: [0.5, -0.5, 0.0, 1.0], col: [0.0, 0.4, 0.4, 1.0] },
+];
 
 impl ColoredVertex {
     pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
@@ -44,6 +50,35 @@ impl ColoredVertex {
     }
 }
 
+pub struct ColoredSquare<'a> {
+    pub vertices: &'a [ColoredVertex],
+    pub indices: &'a [Index]
+}
+
+impl <'a> ColoredSquare<'a> {
+    pub fn new() -> Self {
+        Self {
+            vertices: COLORED_VERTICES,
+            indices: INDICES
+        }
+    }
+}
+
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug, Pod, Zeroable)]
+pub struct TexturedVertex {
+    pub pos: [f32; 4],
+    pub tex_coords: [f32; 2],
+}
+
+const TEXTURED_VERTICES: &[TexturedVertex] = &[
+    TexturedVertex { pos: [-0.5, 0.5, 0.0, 1.0], tex_coords: [0.0, 0.0] },
+    TexturedVertex { pos: [0.5, 0.5, 0.0, 1.0], tex_coords: [1.0, 0.0] },
+    TexturedVertex { pos: [-0.5, -0.5, 0.0, 1.0], tex_coords: [0.0, 1.0] },
+    TexturedVertex { pos: [0.5, -0.5, 0.0, 1.0], tex_coords: [1.0, 1.0] },
+];
+
 impl TexturedVertex {
     pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
         wgpu::VertexBufferLayout {
@@ -64,40 +99,6 @@ impl TexturedVertex {
         }
     }
 }
-
-
-const INDICES: &[Index] = &[
-    Index(0), Index(1), Index(3),
-    Index(3), Index(2), Index(0),
-];
-
-const COLORED_VERTICES: &[ColoredVertex] = &[
-    ColoredVertex { pos: [-0.5, 0.5, 0.0, 1.0], col: [0.8, 0.0, 0.0, 1.0] },
-    ColoredVertex { pos: [0.5, 0.5, 0.0, 1.0], col: [0.1, 0.0, 1.0, 1.0] },
-    ColoredVertex { pos: [-0.5, -0.5, 0.0, 1.0], col: [0.1, 1.0, 0.0, 1.0] },
-    ColoredVertex { pos: [0.5, -0.5, 0.0, 1.0], col: [0.0, 0.4, 0.4, 1.0] },
-];
-
-pub struct ColoredSquare<'a> {
-    pub vertices: &'a [ColoredVertex],
-    pub indices: &'a [Index]
-}
-
-impl <'a> ColoredSquare<'a> {
-    pub fn new() -> Self {
-        Self {
-            vertices: COLORED_VERTICES,
-            indices: INDICES
-        }
-    }
-}
-
-const TEXTURED_VERTICES: &[TexturedVertex] = &[
-    TexturedVertex { pos: [-0.5, 0.5, 0.0, 1.0], tex_coords: [0.0, 0.0] },
-    TexturedVertex { pos: [0.5, 0.5, 0.0, 1.0], tex_coords: [1.0, 0.0] },
-    TexturedVertex { pos: [-0.5, -0.5, 0.0, 1.0], tex_coords: [0.0, 1.0] },
-    TexturedVertex { pos: [0.5, -0.5, 0.0, 1.0], tex_coords: [1.0, 1.0] },
-];
 
 pub struct TexturedSquare<'a> {
     pub vertices: &'a [TexturedVertex],
