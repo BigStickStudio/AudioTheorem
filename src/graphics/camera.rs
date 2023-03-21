@@ -148,12 +148,12 @@ impl CameraController {
         let forward_magnitude = forward.magnitude();
 
         if self.look_right {
-            camera.eye = camera.target - (forward + right * self.speed).normalize() * forward_magnitude;
+            camera.target = camera.eye + (forward + right * self.speed).normalize() * forward_magnitude;
         }
 
         
         if self.look_left {
-            camera.eye = camera.target - (forward - right * self.speed).normalize() * forward_magnitude;
+            camera.target = camera.eye + (forward - right * self.speed).normalize() * forward_magnitude;
         }
     }
 }
