@@ -61,6 +61,24 @@ impl CircleOfFifths {
             Fn => D(Natural),
         }
     }
+    /// Get Major Key
+    pub fn diminished(&self) -> Note {
+        use super::{Accidental::*, Note::*, PitchGroup::*};
+        match self.0 {
+            Cn => B(Natural),
+            Gn => F(Sharp),
+            Dn => C(Sharp),
+            An => G(Sharp),
+            En => D(Sharp),
+            Bn => A(Sharp),
+            Fs => E(Sharp),
+            Cs => B(Sharp),
+            Gs => G(Natural),
+            Ds => D(Natural),
+            As => A(Natural),
+            Fn => E(Natural),
+        }
+    }
     /// Move Right around the Circle
     pub fn next(&mut self) {
         self.0 = match self.0 {

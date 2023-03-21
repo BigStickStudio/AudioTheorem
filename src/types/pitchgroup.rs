@@ -169,6 +169,23 @@ impl PitchGroup {
             PitchGroup::Fn => D(Natural),
         }
     }
+    /// Get the Minor key for this [PitchGroup](audiotheorem::types::PitchGroup) (Co5).
+    pub fn diminished_key(&self) -> Note {
+        match *self {
+            PitchGroup::Cn => B(Natural),
+            PitchGroup::Gn => F(Sharp),
+            PitchGroup::Dn => C(Sharp),
+            PitchGroup::An => G(Sharp),
+            PitchGroup::En => D(Sharp),
+            PitchGroup::Bn => A(Sharp),
+            PitchGroup::Fs => E(Sharp),
+            PitchGroup::Cs => B(Sharp),
+            PitchGroup::Gs => G(Natural),
+            PitchGroup::Ds => D(Natural),
+            PitchGroup::As => A(Natural),
+            PitchGroup::Fn => E(Natural),
+        }
+    }
     /// TODO - Deprecate?
     pub fn sharp_key(&self) -> Note {
         use super::{Accidental::*, Note::*};
