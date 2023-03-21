@@ -3,7 +3,7 @@
 //
 
 use super::texture::Texture;
-use super::camera::{Camera, CameraUniform};
+use super::camera::{Camera, CameraUniform, CameraController};
 use super::mesh::*;
 use wgpu::util::DeviceExt;
 use winit::event::*;
@@ -22,6 +22,7 @@ pub struct Graphics {
     queue: wgpu::Queue,
     size: PhysicalSize<u32>,
     camera: Camera,
+    camera_controller: CameraController,
     camera_uniform: CameraUniform,
     camera_buffer: wgpu::Buffer,
     camera_bind_group: wgpu::BindGroup,
@@ -154,6 +155,8 @@ impl Graphics {
             z_far: 100.0,
         };
 
+        let camera_controller = CameraController::new(0.01);
+
         let mut camera_uniform = CameraUniform::new();
         camera_uniform.update_view_projection(&camera);
 
@@ -261,6 +264,7 @@ impl Graphics {
             queue,
             size,
             camera, 
+            camera_controller,
             camera_uniform,
             camera_buffer,
             camera_bind_group,
@@ -283,10 +287,13 @@ impl Graphics {
     }
 
     fn input(&mut self, event: &WindowEvent) -> bool {
-        false
+        self.camera_controller.process_events(event)
     }
 
     fn update(&mut self) {
+        self.camera_controller.update_camera(&mut self.camera);
+        self.camera_uniform.update_view_projection(&self.camera);
+        self.queue.write_buffer(&self.camera_buffer, 0, bytemuck::cast_slice(&[self.camera_uniform]));
     }
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
