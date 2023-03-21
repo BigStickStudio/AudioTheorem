@@ -3,7 +3,8 @@
 //
 
 use crate::types::Dynamic;
-use crate::graphics::graphics::*;
+use super::graphics::Graphics;
+use super::mesh::TexturedSquare;
 
 const SCREEN_WIDTH: f32 = 1200.0;
 const SCREEN_HEIGHT: f32 = 800.0;

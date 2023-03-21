@@ -3,125 +3,18 @@
 //
 
 use super::texture::Texture;
+use super::camera::Camera;
+use super::mesh::*;
 use wgpu::util::DeviceExt;
 use winit::event::*;
 use winit::dpi::PhysicalSize;
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::{Window, WindowBuilder};
-use bytemuck::{Pod, Zeroable};
-
-
-#[repr(C)]
-#[derive(Copy, Clone, Debug, Pod, Zeroable)]
-pub struct Index(u16);
-
-#[repr(C)]
-#[derive(Copy, Clone, Debug, Pod, Zeroable)]
-pub struct ColoredVertex {
-    pub pos: [f32; 4],
-    pub col: [f32; 4],
-}
-
-#[repr(C)]
-#[derive(Copy, Clone, Debug, Pod, Zeroable)]
-pub struct TexturedVertex {
-    pub pos: [f32; 4],
-    pub tex_coords: [f32; 2],
-}
-
-impl ColoredVertex {
-    fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
-        wgpu::VertexBufferLayout {
-            array_stride: std::mem::size_of::<ColoredVertex>() as wgpu::BufferAddress,
-            step_mode: wgpu::VertexStepMode::Vertex,
-            attributes: &[
-                wgpu::VertexAttribute {
-                    offset: 0,
-                    shader_location: 0,
-                    format: wgpu::VertexFormat::Float32x4
-                },
-                wgpu::VertexAttribute {
-                    offset: std::mem::size_of::<[f32; 4]>() as wgpu::BufferAddress,
-                    shader_location: 1,
-                    format: wgpu::VertexFormat::Float32x4
-                },
-            ]
-        }
-    }
-}
-
-impl TexturedVertex {
-    fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
-        wgpu::VertexBufferLayout {
-            array_stride: std::mem::size_of::<TexturedVertex>() as wgpu::BufferAddress,
-            step_mode: wgpu::VertexStepMode::Vertex,
-            attributes: &[
-                wgpu::VertexAttribute {
-                    offset: 0,
-                    shader_location: 0,
-                    format: wgpu::VertexFormat::Float32x4
-                },
-                wgpu::VertexAttribute {
-                    offset: std::mem::size_of::<[f32; 4]>() as wgpu::BufferAddress,
-                    shader_location: 1,
-                    format: wgpu::VertexFormat::Float32x2
-                },
-            ]
-        }
-    }
-}
-
-
-const INDICES: &[Index] = &[
-    Index(0), Index(1), Index(3),
-    Index(3), Index(2), Index(0),
-];
-
-const COLORED_VERTICES: &[ColoredVertex] = &[
-    ColoredVertex { pos: [-0.5, 0.5, 0.0, 1.0], col: [0.8, 0.0, 0.0, 1.0] },
-    ColoredVertex { pos: [0.5, 0.5, 0.0, 1.0], col: [0.1, 0.0, 1.0, 1.0] },
-    ColoredVertex { pos: [-0.5, -0.5, 0.0, 1.0], col: [0.1, 1.0, 0.0, 1.0] },
-    ColoredVertex { pos: [0.5, -0.5, 0.0, 1.0], col: [0.0, 0.4, 0.4, 1.0] },
-];
-
-pub struct ColoredSquare<'a> {
-    vertices: &'a [ColoredVertex],
-    indices: &'a [Index]
-}
-
-impl <'a> ColoredSquare<'a> {
-    pub fn new() -> Self {
-        Self {
-            vertices: COLORED_VERTICES,
-            indices: INDICES
-        }
-    }
-}
-
-const TEXTURED_VERTICES: &[TexturedVertex] = &[
-    TexturedVertex { pos: [-0.5, 0.5, 0.0, 1.0], tex_coords: [0.0, 0.0] },
-    TexturedVertex { pos: [0.5, 0.5, 0.0, 1.0], tex_coords: [1.0, 0.0] },
-    TexturedVertex { pos: [-0.5, -0.5, 0.0, 1.0], tex_coords: [0.0, 1.0] },
-    TexturedVertex { pos: [0.5, -0.5, 0.0, 1.0], tex_coords: [1.0, 1.0] },
-];
-
-pub struct TexturedSquare<'a> {
-    vertices: &'a [TexturedVertex],
-    indices: &'a [Index],
-}
-
-impl <'a> TexturedSquare<'a> {
-    pub fn new() -> Self {
-        Self {
-            vertices: TEXTURED_VERTICES,
-            indices: INDICES
-        }
-    }
-}
 
 
 #[derive(Debug)]
 pub struct Graphics {
+    camera: Camera,
     surface: wgpu::Surface,
     device: wgpu::Device,
     queue: wgpu::Queue,
@@ -130,7 +23,7 @@ pub struct Graphics {
     window: Window,
     pipeline: wgpu::RenderPipeline,
     diffuse_bind_group: wgpu::BindGroup,
-    diffuse_texture: super::texture::Texture,
+    diffuse_texture: Texture,
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
     num_vertices: u32,
@@ -202,8 +95,8 @@ impl Graphics {
         let num_vertices = square.vertices.len() as u32;
         let num_indices = square.indices.len() as u32;
 
-        let diffuse_bytes = include_bytes!("sample_stock_texture.png");
-        let diffuse_texture = super::texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "sample_stock_texture.png");
+        let diffuse_bytes = include_bytes!("sample_sphere_texture.png");
+        let diffuse_texture = super::texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "sample_sphere_texture.png");
 
         let texture_bind_group = device.create_bind_group_layout(
             &wgpu::BindGroupLayoutDescriptor {
@@ -248,6 +141,16 @@ impl Graphics {
             }
         );
 
+        let camera = Camera {
+            eye: (0.0, 1.0, 2.0).into(),
+            target: (0.0, 0.0, 0.0).into(),
+            up: cgmath::Vector3::unit_y(),
+            aspect: config.width as f32 / config.height as f32,
+            fov_y: 45.0,
+            z_near: 0.1,
+            z_far: 100.0,
+        };
+
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
             source: wgpu::ShaderSource::Wgsl(include_str!("texturedshader.wgsl").into()),
@@ -272,7 +175,14 @@ impl Graphics {
                 entry_point: "fs_main",
                 targets: &[Some(wgpu::ColorTargetState {
                     format: config.format,
-                    blend: Some(wgpu::BlendState::REPLACE),
+                    blend: Some(wgpu::BlendState{
+                        color: wgpu::BlendComponent{
+                            src_factor: wgpu::BlendFactor::SrcAlpha,
+                            dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
+                            operation: wgpu::BlendOperation::Add,
+                        },
+                        alpha: wgpu::BlendComponent::OVER
+                    }),
                     write_mask: wgpu::ColorWrites::ALL,
                 })],
             }),
@@ -295,7 +205,8 @@ impl Graphics {
         });
 
 
-        Self { 
+        Self {
+            camera, 
             surface,
             device,
             queue,
