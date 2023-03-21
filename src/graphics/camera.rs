@@ -21,7 +21,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    fn view_projection_matrix(&self) -> cgmath::Matrix4<f32> {
+    pub fn view_projection_matrix(&self) -> cgmath::Matrix4<f32> {
         let view = cgmath::Matrix4::look_at_rh(self.eye, self.target, self.up);
         let proj = cgmath::perspective(cgmath::Deg(self.fov_y), self.aspect, self.z_near, self.z_far);
 
@@ -36,8 +36,12 @@ pub struct CameraUniform {
 }
 
 impl CameraUniform {
-    fn new() -> Self {
+    pub fn new() -> Self {
         use cgmath::SquareMatrix;
-        Self { view_proj: }
+        Self { view_proj: cgmath::Matrix4::identity().into(), }
+    }
+
+    pub fn update_view_projection(&mut self, camera: &Camera) {
+        self.view_proj = camera.view_projection_matrix().into();
     }
 }
