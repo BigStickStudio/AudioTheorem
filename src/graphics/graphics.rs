@@ -128,8 +128,8 @@ impl Graphics {
         let num_vertices = square.vertices.len() as u32;
         let num_indices = square.indices.len() as u32;
 
-        let diffuse_bytes = include_bytes!("black_sphere.png");
-        let diffuse_texture = super::texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "black_sphere.png");
+        let diffuse_bytes = include_bytes!("white_sphere.png");
+        let diffuse_texture = super::texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "white_sphere.png");
 
         let texture_bind_group_layout = device.create_bind_group_layout(
             &wgpu::BindGroupLayoutDescriptor {
