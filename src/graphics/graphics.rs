@@ -40,7 +40,7 @@ pub struct Graphics {
 }
 
 impl Graphics {
-    async fn new(window: Window, grid_size: u32, square: &TexturedSquare<'_>) -> Self {
+    async fn new(window: Window, grid_size: u32, square: &ColoredSquare<'_>) -> Self {
         env_logger::init();
 
         let size = window.inner_size();
@@ -175,8 +175,8 @@ impl Graphics {
         );
 
         let camera = Camera {
-            eye: (0.0, 1.0, 2.0).into(),
-            target: (0.0, 0.0, 0.0).into(),
+            eye: (0.0, 6.5, 16.5).into(),
+            target: (3.75, -2.75, 0.0).into(),
             up: cgmath::Vector3::unit_y(),
             aspect: config.width as f32 / config.height as f32,
             fov_y: 45.0,
@@ -184,7 +184,7 @@ impl Graphics {
             z_far: 100.0,
         };
 
-        let camera_controller = CameraController::new(0.01);
+        let camera_controller = CameraController::new(0.1);
 
         let mut camera_uniform = CameraUniform::new();
         camera_uniform.update_view_projection(&camera);
@@ -230,7 +230,7 @@ impl Graphics {
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
-            source: wgpu::ShaderSource::Wgsl(include_str!("texturedshader.wgsl").into()),
+            source: wgpu::ShaderSource::Wgsl(include_str!("coloredshader.wgsl").into()),
         });
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -249,7 +249,7 @@ impl Graphics {
                 module: &shader,
                 entry_point: "vs_main",
                 buffers: &[
-                    TexturedVertex::desc(),
+                    ColoredVertex::desc(),
                     RawInstance::desc()
                     ],
             },
@@ -258,14 +258,15 @@ impl Graphics {
                 entry_point: "fs_main",
                 targets: &[Some(wgpu::ColorTargetState {
                     format: config.format,
-                    blend: Some(wgpu::BlendState{
+                    blend: Some(wgpu::BlendState::REPLACE),
+                    /*blend: Some(wgpu::BlendState{
                         color: wgpu::BlendComponent{
                             src_factor: wgpu::BlendFactor::SrcAlpha,
                             dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
                             operation: wgpu::BlendOperation::Add,
                         },
                         alpha: wgpu::BlendComponent::OVER
-                    }),
+                    }),*/
                     write_mask: wgpu::ColorWrites::ALL,
                 })],
             }),
@@ -372,7 +373,7 @@ impl Graphics {
         Ok(())
     }
 
-    pub async fn run(grid_size: u32, square: &TexturedSquare<'_>) {
+    pub async fn run(grid_size: u32, square: &ColoredSquare<'_>) {
         let event_loop = EventLoop::new();
         let window = WindowBuilder::new().build(&event_loop).unwrap();
         let mut gfx = Graphics::new(window, grid_size, square).await;

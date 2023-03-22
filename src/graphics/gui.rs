@@ -4,7 +4,7 @@
 
 use crate::types::Dynamic;
 use super::graphics::Graphics;
-use super::mesh::TexturedSquare;
+use super::mesh::{TexturedSquare, ColoredSquare};
 
 const SCREEN_WIDTH: f32 = 1200.0;
 const SCREEN_HEIGHT: f32 = 800.0;
@@ -94,7 +94,7 @@ impl Gui{
         pollster::block_on(
             Graphics::run(
                 GRID_SIZE as u32,
-                &TexturedSquare::new()
+                &ColoredSquare::new()
             )
         );
     }
