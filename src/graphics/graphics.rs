@@ -40,7 +40,7 @@ pub struct Graphics {
 }
 
 impl Graphics {
-    async fn new(window: Window, grid_size: u32, square: &ColoredSquare<'_>) -> Self {
+    async fn new(window: Window, grid_size: u32, square: &TexturedSquare<'_>) -> Self {
         env_logger::init();
 
         let size = window.inner_size();
@@ -91,10 +91,10 @@ impl Graphics {
             grid_size as f32 * 0.25,
         );
 
-        let instances = (0..grid_size).flat_map(|z| {
+        let instances = (0..grid_size).flat_map(|y| {
             (0..grid_size).map(move |x| {
-                let position = cgmath::Vector3 { x: x as f32, y: 0.0, z: z as f32 } - instance_displacement;
-                let rotation = cgmath::Quaternion::from_axis_angle(cgmath::Vector3::unit_z(), cgmath::Deg(45.0));
+                let position = cgmath::Vector3 { x: x as f32, y: y as f32, z: 0.0 } - instance_displacement;
+                let rotation = cgmath::Quaternion::from_axis_angle(cgmath::Vector3::unit_y(), cgmath::Deg(0.0));
                 Instance { position, rotation }
             })
         }).collect::<Vec<_>>();
@@ -128,8 +128,8 @@ impl Graphics {
         let num_vertices = square.vertices.len() as u32;
         let num_indices = square.indices.len() as u32;
 
-        let diffuse_bytes = include_bytes!("sample_sphere_texture.png");
-        let diffuse_texture = super::texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "sample_sphere_texture.png");
+        let diffuse_bytes = include_bytes!("black_sphere.png");
+        let diffuse_texture = super::texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "black_sphere.png");
 
         let texture_bind_group_layout = device.create_bind_group_layout(
             &wgpu::BindGroupLayoutDescriptor {
@@ -175,8 +175,8 @@ impl Graphics {
         );
 
         let camera = Camera {
-            eye: (0.0, 6.5, 16.5).into(),
-            target: (3.75, -2.75, 0.0).into(),
+            eye: (2.5, 7.0, 12.0).into(),
+            target: (2.5, 6.0, 0.0).into(),
             up: cgmath::Vector3::unit_y(),
             aspect: config.width as f32 / config.height as f32,
             fov_y: 45.0,
@@ -230,7 +230,7 @@ impl Graphics {
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
-            source: wgpu::ShaderSource::Wgsl(include_str!("coloredshader.wgsl").into()),
+            source: wgpu::ShaderSource::Wgsl(include_str!("texturedshader.wgsl").into()),
         });
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -249,7 +249,7 @@ impl Graphics {
                 module: &shader,
                 entry_point: "vs_main",
                 buffers: &[
-                    ColoredVertex::desc(),
+                    TexturedVertex::desc(),
                     RawInstance::desc()
                     ],
             },
@@ -258,15 +258,15 @@ impl Graphics {
                 entry_point: "fs_main",
                 targets: &[Some(wgpu::ColorTargetState {
                     format: config.format,
-                    blend: Some(wgpu::BlendState::REPLACE),
-                    /*blend: Some(wgpu::BlendState{
+                    //blend: Some(wgpu::BlendState::REPLACE),
+                    blend: Some(wgpu::BlendState{
                         color: wgpu::BlendComponent{
                             src_factor: wgpu::BlendFactor::SrcAlpha,
                             dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
                             operation: wgpu::BlendOperation::Add,
                         },
                         alpha: wgpu::BlendComponent::OVER
-                    }),*/
+                    }),
                     write_mask: wgpu::ColorWrites::ALL,
                 })],
             }),
@@ -373,7 +373,7 @@ impl Graphics {
         Ok(())
     }
 
-    pub async fn run(grid_size: u32, square: &ColoredSquare<'_>) {
+    pub async fn run(grid_size: u32, square: &TexturedSquare<'_>) {
         let event_loop = EventLoop::new();
         let window = WindowBuilder::new().build(&event_loop).unwrap();
         let mut gfx = Graphics::new(window, grid_size, square).await;

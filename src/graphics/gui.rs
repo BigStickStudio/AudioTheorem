@@ -94,7 +94,7 @@ impl Gui{
         pollster::block_on(
             Graphics::run(
                 GRID_SIZE as u32,
-                &ColoredSquare::new()
+                &TexturedSquare::new()
             )
         );
     }
