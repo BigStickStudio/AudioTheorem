@@ -6,6 +6,7 @@ use super::texture::Texture;
 use super::camera::{Camera, CameraUniform, CameraController};
 use super::mesh::*;
 use super::scene::{Instance, RawInstance};
+use super::spheres::Sphere;
 use wgpu::util::DeviceExt;
 use winit::event::*;
 use winit::dpi::PhysicalSize;
@@ -30,7 +31,7 @@ pub struct Graphics {
     camera_buffer: wgpu::Buffer,
     camera_bind_group: wgpu::BindGroup,
     diffuse_bind_group: wgpu::BindGroup,
-    diffuse_texture: Texture,
+    diffuse_textures: Vec<Texture>,
     instances: Vec<Instance>,
     instance_buffer: wgpu::Buffer,
     vertex_buffer: wgpu::Buffer,
@@ -128,8 +129,22 @@ impl Graphics {
         let num_vertices = square.vertices.len() as u32;
         let num_indices = square.indices.len() as u32;
 
-        let diffuse_bytes = include_bytes!("white_sphere.png");
-        let diffuse_texture = super::texture::Texture::from_bytes(&device, &queue, diffuse_bytes, "white_sphere.png");
+        let mut diffuse_textures: Vec<Texture> = Vec::new(); 
+
+        let white_sphere = Sphere::White;
+        let black_sphere = Sphere::Black;
+
+        diffuse_textures.push(
+            super::texture::Texture::from_bytes(
+                &device, &queue, white_sphere.diffuse_bytes(), white_sphere.to_string()
+            )
+        );
+
+        diffuse_textures.push(
+            super::texture::Texture::from_bytes(
+                &device, &queue, black_sphere.diffuse_bytes(), black_sphere.to_string()
+            )
+        );
 
         let texture_bind_group_layout = device.create_bind_group_layout(
             &wgpu::BindGroupLayoutDescriptor {
@@ -152,6 +167,24 @@ impl Graphics {
                         ty: wgpu::BindingType::Sampler (wgpu::SamplerBindingType::Filtering),
                         count: None,
                     },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 2,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Texture {
+                            multisampled: false,
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            sample_type: wgpu::TextureSampleType::Float {
+                                filterable: true,
+                            },
+                        },
+                        count: None,
+                    },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 3,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Sampler (wgpu::SamplerBindingType::Filtering),
+                        count: None,
+                    },
                 ],
                 label: Some("texture_bind_group_layout"),
             }
@@ -163,11 +196,19 @@ impl Graphics {
                 entries: &[
                     wgpu::BindGroupEntry {
                         binding: 0,
-                        resource: wgpu::BindingResource::TextureView(&diffuse_texture.view),
+                        resource: wgpu::BindingResource::TextureView(&diffuse_textures[0].view),
                     },
                     wgpu::BindGroupEntry {
                         binding: 1,
-                        resource: wgpu::BindingResource::Sampler(&diffuse_texture.sampler),
+                        resource: wgpu::BindingResource::Sampler(&diffuse_textures[0].sampler),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 2,
+                        resource: wgpu::BindingResource::TextureView(&diffuse_textures[1].view),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 3,
+                        resource: wgpu::BindingResource::Sampler(&diffuse_textures[1].sampler),
                     }
                 ],
                 label: Some("diffuse_bind_group")
@@ -302,7 +343,7 @@ impl Graphics {
             camera_buffer,
             camera_bind_group,
             diffuse_bind_group,
-            diffuse_texture,
+            diffuse_textures,
             instances,
             instance_buffer,
             vertex_buffer,

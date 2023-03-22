@@ -21,6 +21,7 @@ struct VertexInput {
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
     @location(0) tex_coords: vec2<f32>,
+    @location(1) white_key: f32
 };
 
 @vertex
@@ -33,6 +34,8 @@ fn vs_main(model: VertexInput, instance: InstanceInput) -> VertexOutput {
         instance.model_matrix_3,
     );
 
+
+
     out.tex_coords = model.tex_coords;
     out.clip_position = camera.view_proj * model_matrix * model.position;
 
@@ -42,11 +45,18 @@ fn vs_main(model: VertexInput, instance: InstanceInput) -> VertexOutput {
 // Fragment shader
 
 @group(0) @binding(0)
-var t_diffuse: texture_2d<f32>;
+var white_diffuse: texture_2d<f32>;
 @group(0) @binding(1)
-var s_diffuse: sampler;
+var white_sampler: sampler;
+@group(0) @binding(2)
+var black_diffuse: texture_2d<f32>;
+@group(0) @binding(3)
+var black_sampler: sampler;
 
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
-    return textureSample(t_diffuse, s_diffuse, in.tex_coords);
+    var white_sample = textureSample(white_diffuse, white_sampler, in.tex_coords);
+    var black_sample = textureSample(black_diffuse, black_sampler, in.tex_coords);
+
+    return mix(black_sample, white_sample, in.white_key);
 }
