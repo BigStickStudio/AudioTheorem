@@ -19,24 +19,6 @@ pub enum Sphere {
 }
 
 impl Sphere {
-    pub fn from_index(index: u8) -> Sphere {
-        match index {
-            0 => Sphere::White,
-            1 => Sphere::Black,
-            2 => Sphere::White,
-            3 => Sphere::Black,
-            4 => Sphere::White,
-            5 => Sphere::White,
-            6 => Sphere::Black,
-            7 => Sphere::White,
-            8 => Sphere::Black,
-            9 => Sphere::White,
-            10 => Sphere::Black,
-            11 => Sphere::White,
-            _ => Sphere::White
-        }
-    }
-
     pub fn to_string(&self) -> &str {
         match self {
             Sphere::Black => "black_sphere",
@@ -57,19 +39,19 @@ impl Sphere {
 
     pub fn diffuse_bytes(&self) -> &[u8] {
         match self {
-            Sphere::Black => include_bytes!("black_sphere.png"),
-            Sphere::White => include_bytes!("white_sphere.png"),
-            Sphere::Red => include_bytes!("red_sphere.png"),
-            Sphere::Orange => include_bytes!("orange_sphere.png"),
-            Sphere::Green => include_bytes!("black_sphere.png"),
-            Sphere::Blue1 => include_bytes!("blue1_sphere.png"),
-            Sphere::Blue2 => include_bytes!("blue2_sphere.png"),
-            Sphere::Blue3 => include_bytes!("blue3_sphere.png"),
-            Sphere::Blue4 => include_bytes!("blue4_sphere.png"),
-            Sphere::Blue5 => include_bytes!("blue5_sphere.png"),
-            Sphere::Blue6 => include_bytes!("blue6_sphere.png"),
-            Sphere::Blue7 => include_bytes!("blue7_sphere.png"),
-            Sphere::Blue8 => include_bytes!("blue8_sphere.png"),
+            Sphere::Black => include_bytes!("textures/black_sphere.png"),
+            Sphere::White => include_bytes!("textures/white_sphere.png"),
+            Sphere::Red => include_bytes!("textures/red_sphere.png"),
+            Sphere::Orange => include_bytes!("textures/orange_sphere.png"),
+            Sphere::Green => include_bytes!("textures/black_sphere.png"),
+            Sphere::Blue1 => include_bytes!("textures/blue1_sphere.png"),
+            Sphere::Blue2 => include_bytes!("textures/blue2_sphere.png"),
+            Sphere::Blue3 => include_bytes!("textures/blue3_sphere.png"),
+            Sphere::Blue4 => include_bytes!("textures/blue4_sphere.png"),
+            Sphere::Blue5 => include_bytes!("textures/blue5_sphere.png"),
+            Sphere::Blue6 => include_bytes!("textures/blue6_sphere.png"),
+            Sphere::Blue7 => include_bytes!("textures/blue7_sphere.png"),
+            Sphere::Blue8 => include_bytes!("textures/blue8_sphere.png"),
         }
     }
 }

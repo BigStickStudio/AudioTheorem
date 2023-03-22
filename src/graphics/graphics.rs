@@ -94,9 +94,10 @@ impl Graphics {
 
         let instances = (0..grid_size).flat_map(|y| {
             (0..grid_size).map(move |x| {
+                let index = x;
                 let position = cgmath::Vector3 { x: x as f32, y: y as f32, z: 0.0 } - instance_displacement;
                 let rotation = cgmath::Quaternion::from_axis_angle(cgmath::Vector3::unit_y(), cgmath::Deg(0.0));
-                Instance { position, rotation }
+                Instance { position, rotation, index }
             })
         }).collect::<Vec<_>>();
 

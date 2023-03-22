@@ -11,6 +11,7 @@ struct InstanceInput {
     @location(6) model_matrix_1: vec4<f32>,
     @location(7) model_matrix_2: vec4<f32>,
     @location(8) model_matrix_3: vec4<f32>,
+    @location(9) white_key: f32,
 }
 
 struct VertexInput {
@@ -34,8 +35,7 @@ fn vs_main(model: VertexInput, instance: InstanceInput) -> VertexOutput {
         instance.model_matrix_3,
     );
 
-
-
+    out.white_key = instance.white_key;
     out.tex_coords = model.tex_coords;
     out.clip_position = camera.view_proj * model_matrix * model.position;
 
