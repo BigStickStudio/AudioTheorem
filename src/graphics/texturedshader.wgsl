@@ -58,5 +58,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     var white_sample = textureSample(white_diffuse, white_sampler, in.tex_coords);
     var black_sample = textureSample(black_diffuse, black_sampler, in.tex_coords);
 
-    return mix(black_sample, white_sample, in.white_key);
+    var color_filter = vec4<f32>(0.0, 0.745, 0.98, 1.0);
+
+    return color_filter * (mix(black_sample, white_sample, in.white_key) * 0.5) * 2.0;
 }
