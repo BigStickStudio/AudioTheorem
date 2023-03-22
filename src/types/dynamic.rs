@@ -18,6 +18,20 @@ pub enum Dynamic {
 }
 
 impl Dynamic {
+    pub fn to_index(&self) -> u8 {
+        match *self {
+            Dynamic::Off => 0,
+            Dynamic::Pianissimissimo => 1,
+            Dynamic::Pianissimo => 2,
+            Dynamic::Piano => 3,
+            Dynamic::MezzoPiano => 4,
+            Dynamic::MezzoForte => 5,
+            Dynamic::Forte => 6,
+            Dynamic::Fortissimo => 7,
+            Dynamic::Fortissimissimo => 8
+        }
+    }
+
     pub fn to_velocity(&self) -> u8 {
         match *self {
             Dynamic::Off => 0,
