@@ -76,7 +76,7 @@ impl Pitch {
     }
     /// Get Natural Tone for this Pitch
     pub fn tone(&self) -> Tone {
-        Tone::from_parts(self.octave(), self.note())
+        Tone::from_parts(self.octave(), self.note(), 65)
     }
     /// Get [Notes](audiotheorem::types::Pitch) for this [Pitch](audiotheorem::types::Pitch).
     pub fn names(&self) -> &'static [Note] {

@@ -17,6 +17,7 @@ pub struct Sequence {
     intervals: Vec<Chord>
 }
 
+// Stores a Vector of Tones, and their associated Chords
 impl Sequence {
     pub fn new() -> Sequence {
         Sequence { size: 0, tones: Vec::new(), intervals: Vec::new() }
@@ -35,9 +36,9 @@ impl Sequence {
         }
     }
 
-    fn add_tone(&mut self, index: u8) {
+    fn add_tone(&mut self, index: u8, velocity: u8) {
         self.size += 1;
-        self.tones.push(Tone::from_index(index));
+        self.tones.push(Tone::from_index(index, velocity));
         self.tones.sort_by_key(|t| t.to_index());
         self.intervals.clear();
         self.construct_chords()
@@ -52,7 +53,7 @@ impl Sequence {
 
     pub fn process_input(&mut self, index: u8, velocity: u8) {
         if velocity > 0 {
-            self.add_tone(index);
+            self.add_tone(index, velocity);
         } else {
             self.delete_tone(index);
         }

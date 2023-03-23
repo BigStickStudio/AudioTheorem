@@ -50,7 +50,7 @@ impl Instance {
     pub fn raw(&self) -> RawInstance {
         RawInstance {
             model: (cgmath::Matrix4::from_translation(self.position) * cgmath::Matrix4::from(self.rotation)).into(),
-            color_factor: self.dynamic_color(Dynamic::Fortissimo),
+            color_factor: self.dynamic_color(Dynamic::Off),
             white_key : self.index_to_white_key(),
         }
     }
