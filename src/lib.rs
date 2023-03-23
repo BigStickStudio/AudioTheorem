@@ -21,8 +21,8 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
-pub mod analysis;
 mod scratchpad;
+pub mod analysis;
 pub mod types;
 pub mod midi;
 pub mod graphics;

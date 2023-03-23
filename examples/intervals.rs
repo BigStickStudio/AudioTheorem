@@ -2,9 +2,10 @@
 // Copyright 2023 Richard I. Christopher, NeoTec Digital. All Rights Reserved.
 //
 
-use audiotheorem::types::*;
 
 pub fn main() {
+    use audiotheorem::types::*;
+
     let l = Note::A(Accidental::Natural);
     let c = Note::C(Accidental::Natural);
     let r = (l + Interval::Fifth(PerfectQuality::Perfect)).unwrap();

@@ -5,7 +5,7 @@
 use super::texture::Texture;
 use super::camera::{Camera, CameraUniform, CameraController};
 use super::mesh::*;
-use super::scene::{Instance, RawInstance};
+use super::instances::{Instance, RawInstance};
 use super::spheres::Sphere;
 use wgpu::util::DeviceExt;
 use winit::event::*;
@@ -368,6 +368,7 @@ impl Graphics {
     }
 
     fn update(&mut self) {
+//        self.instance_controller.update_instances(&mut self.instances);
         self.camera_controller.update_camera(&mut self.camera);
         self.camera_uniform.update_view_projection(&self.camera);
         self.queue.write_buffer(&self.camera_buffer, 0, bytemuck::cast_slice(&[self.camera_uniform]));

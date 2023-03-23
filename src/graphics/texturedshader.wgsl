@@ -11,7 +11,8 @@ struct InstanceInput {
     @location(6) model_matrix_1: vec4<f32>,
     @location(7) model_matrix_2: vec4<f32>,
     @location(8) model_matrix_3: vec4<f32>,
-    @location(9) white_key: f32,
+    @location(9) color_filter: vec4<f32>,
+    @location(10) white_key: f32,
 }
 
 struct VertexInput {
@@ -22,7 +23,9 @@ struct VertexInput {
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
     @location(0) tex_coords: vec2<f32>,
-    @location(1) white_key: f32
+    @location(1) color_filter: vec4<f32>,
+    @location(2) white_key: f32,
+
 };
 
 @vertex
@@ -35,6 +38,7 @@ fn vs_main(model: VertexInput, instance: InstanceInput) -> VertexOutput {
         instance.model_matrix_3,
     );
 
+    out.color_filter = instance.color_filter;
     out.white_key = instance.white_key;
     out.tex_coords = model.tex_coords;
     out.clip_position = camera.view_proj * model_matrix * model.position;
@@ -58,7 +62,5 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     var white_sample = textureSample(white_diffuse, white_sampler, in.tex_coords);
     var black_sample = textureSample(black_diffuse, black_sampler, in.tex_coords);
 
-    var color_filter = vec4<f32>(0.0, 0.745, 0.98, 1.0);
-
-    return color_filter * (mix(black_sample, white_sample, in.white_key) * 0.5) * 2.0;
+    return in.color_filter * (mix(black_sample, white_sample, in.white_key) * 0.5) * 2.0;
 }
