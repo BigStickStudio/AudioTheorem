@@ -47,7 +47,6 @@ fn vs_main(model: VertexInput, instance: InstanceInput) -> VertexOutput {
 }
 
 // Fragment shader
-
 @group(0) @binding(0)
 var white_diffuse: texture_2d<f32>;
 @group(0) @binding(1)
