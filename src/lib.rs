@@ -33,3 +33,10 @@ mod tests {
     #[test]
     fn it_works() {}
 }
+
+pub fn main() {
+    println!("!!! Audio Theorem !!!");
+    println!("=====================");
+    
+    self::graphics::Gui::start();
+}

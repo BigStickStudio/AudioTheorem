@@ -20,7 +20,6 @@ pub struct RawInstance {
     pub white_key: f32,
 }
 
-
 impl Instance {
     pub fn dynamic_color(&self, dynamic: Dynamic) -> [f32; 4] {
         match dynamic {

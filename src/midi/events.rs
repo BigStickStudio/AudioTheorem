@@ -10,7 +10,6 @@ use std::error::Error;
 use midir::{MidiInput, MidiOutput, MidiOutputPort, Ignore};
 
 
-
 #[derive(Copy, Clone, Debug)]
 pub struct Events;
 
@@ -70,7 +69,7 @@ impl Events {
         println!("=====================\n");
         println!("Connected to Input: {}.\nSending to Output: {}.\n", midi_in.port_name(in_port)?, midi_out.port_name(out_port)?);
         println!("Press [enter] to Exit.\n");
-        
+
         let mut conn_out = midi_out.connect(out_port, "midir-test")?;
         let a_ = midi_in.connect(in_port, "readin", move |stamp, message, _| { 
             let velocity = message[2];
