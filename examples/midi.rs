@@ -7,7 +7,7 @@ pub fn main() {
     println!("!!! Audio Theorem !!!");
     println!("=====================");
     
-    let mut sequence = audiotheorem::types::Sequence::new();
+    let mut sequence = audiotheorem::runtime::Sequence::new();
 
-    audiotheorem::midi::Events::read_midi(move |index, velocity| sequence.process_input(index, velocity));
+    audiotheorem::runtime::midi::Events::read_midi(move |index, velocity| sequence.process_input(index, velocity));
 }

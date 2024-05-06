@@ -24,19 +24,11 @@
 mod scratchpad;
 pub mod analysis;
 pub mod types;
-pub mod midi;
-pub mod graphics;
+pub mod runtime;                    // Later Added by Richard I. Christopher as part of a seperate application 2024
 
 #[cfg(test)]
 mod tests {
-
     #[test]
-    fn it_works() {}
+    fn it_works() { }
 }
 
-pub fn main() {
-    println!("!!! Audio Theorem !!!");
-    println!("=====================");
-    
-    self::graphics::Gui::start();
-}

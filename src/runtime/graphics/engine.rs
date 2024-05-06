@@ -2,12 +2,12 @@
 // Copyright 2023 Richard I. Christopher, NeoTec Digital. All Rights Reserved.
 //
 
+use super::super::Sequence;
 use super::texture::Texture;
 use super::camera::{Camera, CameraUniform, CameraController};
 use super::mesh::*;
 use super::instances::{Instance, RawInstance};
 use super::spheres::Sphere;
-use crate::types::Sequence;
 use std::sync::{Arc, Mutex};
 use wgpu::util::DeviceExt;
 use winit::event::*;
@@ -19,7 +19,7 @@ use cgmath::prelude::*;
 
 
 #[derive(Debug)]
-pub struct Graphics {
+pub struct Engine {
     device: wgpu::Device,
     config: wgpu::SurfaceConfiguration,
     surface: wgpu::Surface,
@@ -42,7 +42,7 @@ pub struct Graphics {
     num_indices: u32,
 }
 
-impl Graphics {
+impl Engine {
     async fn new(window: Window, grid_size: u32, square: &TexturedSquare<'_>) -> Self {
         env_logger::init();
 
@@ -456,7 +456,7 @@ impl Graphics {
     pub async fn run(grid_size: u32, sequence: Arc<Mutex<Sequence>>) { // We need to add the Midi Input here
         let event_loop = EventLoop::new();
         let window = WindowBuilder::new().build(&event_loop).unwrap();
-        let mut gfx = Graphics::new(window, grid_size, &TexturedSquare::new()).await;
+        let mut gfx = Engine::new(window, grid_size, &TexturedSquare::new()).await;
         let mut last_sequence_size = sequence.lock().unwrap().get_size();
 
         println!("hit run");
@@ -484,7 +484,7 @@ impl Graphics {
                         gfx.resize(**new_inner_size);
                     },
                     _ => {
-                        // Need to take the Midi Input here from the Sequence data and pass it to the Graphics
+                        // Need to take the Midi Input here from the Sequence data and pass it to the Engine
                         // gfx.process_input(index, velocity); -> need to use this to find which items are lit up which colors
                         
                         // we have to set the instance dynamic_color() to the velocity of the index

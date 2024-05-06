@@ -51,7 +51,6 @@ mod pitchmode;
 mod scale;
 mod steps;
 mod tone;
-mod sequence;
 mod dynamic;
 
 pub use self::cents::Cents;
@@ -74,5 +73,4 @@ pub use self::scale::sequences;
 pub use self::scale::Scale;
 pub use self::steps::Steps;
 pub use self::tone::Tone;
-pub use self::sequence::Sequence;
 pub use self::dynamic::Dynamic;

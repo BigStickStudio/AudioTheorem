@@ -3,7 +3,6 @@
 //
 
 use crate::types::Dynamic;
-use super::graphics::Graphics;
 use super::mesh::{TexturedSquare, ColoredSquare};
 
 const SCREEN_WIDTH: f32 = 1200.0;
@@ -92,7 +91,7 @@ pub struct Gui;
 impl Gui{
     pub fn start() {
         // pollster::block_on(
-        //     Graphics::run(
+        //     Engine::run(
         //         GRID_SIZE as u32,
         //         &TexturedSquare::new()
         //     )
