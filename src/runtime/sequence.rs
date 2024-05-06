@@ -2,10 +2,10 @@
 // Copyright 2023 Richard I. Christopher, NeoTec Digital. All Rights Reserved.
 //
 
-use crate::types::{Scale, Tone, Note, Interval};
+use crate::types::{Interval, Note, Pitch, PitchGroup, Scale, Tone};
 
 #[derive(Clone, Debug)]
-struct Chord {
+struct Chord { // This isn't much of a chord, but it's an interface for a "scale" to act as a cursor for all possible scales and N number of potential chords based on inversions.
     root: Note,
     intervals: Vec<(Note, Interval)>
 }
@@ -14,14 +14,15 @@ struct Chord {
 pub struct Sequence {
     size: u8,
     tones: Vec<Tone>,
-    intervals: Vec<Chord>,
-    pitchgroups: Vec<Scale>
+    chords: Vec<Chord>,
+    scales: Vec<Scale>,
+    pitchgroups: Vec<PitchGroup>
 }
 
 // Stores a Vector of Tones, and their associated Chords
 impl Sequence {
     pub fn new() -> Sequence {
-        Sequence { size: 0, tones: Vec::new(), intervals: Vec::new(), pitchgroups: Vec::new() }
+        Sequence { size: 0, tones: Vec::new(), chords: Vec::new(), scales: Vec::new(), pitchgroups: Vec::new() }
     }
 
     pub fn get_size(&self) -> u8 {
@@ -37,35 +38,38 @@ impl Sequence {
                     chord_shape.push((tone.note(), Interval::distance(root.note(), tone.note()).unwrap()));
                 }
             }
-            self.intervals.push(Chord{ root: root_note, intervals: chord_shape })
+            self.chords.push(Chord{ root: root_note, intervals: chord_shape })
         }
     }
 
+    fn find_scales(&mut self) {
+        let  scales = Vec::new();
+        
+        // we need to find all the scales that contain the given intervals
+        
+        self.scales = scales;
+    }
+
     fn find_pitch_groups(&mut self) {
-        let mut pitchgroups = Vec::new();
-        for chord in self.intervals.iter() {
-            let mut scale = Vec::new();
-            for interval in chord.intervals.iter() {
-                scale.push(interval.0);
-            }
-            pitchgroups.push(Scale::new(chord.root, scale));
-        }
-        self.pitchgroups = pitchgroups;
+        // create an array of tones
+        self.pitchgroups = PitchGroup::from_pitch_classes(self.tones.iter().map(|t| t.note().pitch_class()).collect());
     }
 
     fn add_tone(&mut self, index: u8, velocity: u8) {
         self.size += 1;
         self.tones.push(Tone::from_index(index, velocity));
         self.tones.sort_by_key(|t| t.to_index());
-        self.intervals.clear();
-        self.construct_chords()
+        self.chords.clear();
+        self.construct_chords();
+        self.find_pitch_groups();
     }
 
     fn delete_tone(&mut self, index: u8) {
         self.tones.retain(|&t| t.to_index() != index);
         self.size = self.tones.len() as u8;
-        self.intervals.clear();
+        self.chords.clear();
         self.construct_chords();
+        self.find_pitch_groups();
     }
 
     pub fn process_input(&mut self, index: u8, velocity: u8) {

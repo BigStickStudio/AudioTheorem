@@ -407,7 +407,8 @@ impl PitchGroup {
     // We could also implement a search function that uses the pitch classes of the notes
     // to find the pitch groups, and determines which pitch groups are valid based on the
     // least number of sharps or flats
-    pub fn find(notes: &[Note]) -> Result<Vec<PitchGroup>, &'static str> { 
+   
+    pub fn find(notes: &[Note]) -> Result<Vec<PitchGroup>, &'static str> { // TODO: Add Another Find Function that uses PitchClasses instead of Notes
         debug!("Notes: {:?}", &notes);
 
         let is_sharp = notes.iter().any(|n| n.sharp());
@@ -508,6 +509,23 @@ impl PitchGroup {
         debug!("Verified PitchGroups: {:?}", &groups);
         Ok(groups)
     }
+
+
+    pub fn from_pitch_classes(pitch_classes: Vec<PitchClass>) -> Vec<PitchGroup> {
+        let pitch_groups = {
+            let mut remaining: HashSet<PitchGroup> =
+                PitchGroup::all().iter().copied().collect();
+            for pitch_class in pitch_classes {
+                let groups: HashSet<PitchGroup> =
+                    pitch_class.groups().iter().copied().collect();
+                remaining = remaining.intersection(&groups).copied().collect();
+            }
+            remaining
+        };
+        debug!("Potential PitchGroups: {:?}", &pitch_groups);
+        pitch_groups.iter().copied().collect()
+    }
+
 }
 
 impl fmt::Display for PitchGroup {
