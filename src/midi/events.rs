@@ -45,7 +45,7 @@ impl Events {
             }
         };
 
-        print!("\x1B[2J\x1B[1;1H");
+        //print!("\x1B[2J\x1B[1;1H");
         println!("!!! Audio Theorem !!!");
         println!("=====================");
 
@@ -64,7 +64,7 @@ impl Events {
             }
         };
         
-        print!("\x1B[2J\x1B[1;1H");
+        //print!("\x1B[2J\x1B[1;1H");
         println!("!!! Audio Theorem !!!");
         println!("=====================\n");
         println!("Connected to Input: {}.\nSending to Output: {}.\n", midi_in.port_name(in_port)?, midi_out.port_name(out_port)?);

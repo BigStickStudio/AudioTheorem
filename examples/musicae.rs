@@ -18,15 +18,14 @@ fn main() {
     thread::spawn({
         let sequence = Arc::clone(&sequence);
         move || {
-            audiotheorem::midi::Events::read_midi(move |index, velocity| {
-                let mut sequence = sequence.lock().unwrap();
-                sequence.process_input(index, velocity);
-            });
+            audiotheorem::midi::Events::read_midi(
+                move |index, velocity| 
+                    { sequence.lock().unwrap().process_input(index, velocity); }
+            );
         }
     });
 
-    pollster::block_on(audiotheorem::graphics::Graphics::run(GRID_SIZE.into()));
-
+    pollster::block_on(audiotheorem::graphics::Graphics::run(GRID_SIZE.into(), sequence.clone()));
 
     loop {
         thread::sleep(std::time::Duration::from_secs(1));

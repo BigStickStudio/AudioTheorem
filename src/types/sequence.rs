@@ -24,6 +24,10 @@ impl Sequence {
         Sequence { size: 0, tones: Vec::new(), intervals: Vec::new(), pitchgroups: Vec::new() }
     }
 
+    pub fn get_size(&self) -> u8 {
+        self.size
+    }
+
     fn construct_chords(&mut self) { 
         for root in self.tones.iter() {
             let root_note = root.note();
@@ -58,7 +62,7 @@ impl Sequence {
         } else {
             self.delete_tone(index);
         }
-        self.print_state();
+        //self.print_state();
     }
 
     pub fn print_state(&self) {

@@ -7,6 +7,8 @@ use super::camera::{Camera, CameraUniform, CameraController};
 use super::mesh::*;
 use super::instances::{Instance, RawInstance};
 use super::spheres::Sphere;
+use crate::types::Sequence;
+use std::sync::{Arc, Mutex};
 use wgpu::util::DeviceExt;
 use winit::event::*;
 use winit::dpi::PhysicalSize;
@@ -60,12 +62,12 @@ impl Graphics {
                               .next().unwrap();
         
         let (device, queue) = adapter.request_device(
-                                          &wgpu::DeviceDescriptor {
-                                              features: wgpu::Features::empty(),
-                                              limits: wgpu::Limits::default(),
-                                              label: None
-                                          }, None)
-                                      .await.unwrap();
+                                                &wgpu::DeviceDescriptor {
+                                                    features: wgpu::Features::empty(),
+                                                    limits: wgpu::Limits::default(),
+                                                    label: None
+                                                }, None)
+                                            .await.unwrap();
 
         let capabilities = surface.get_capabilities(&adapter);
 
@@ -76,7 +78,7 @@ impl Graphics {
 
         let config = wgpu::SurfaceConfiguration{
                         usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-                        format: format,
+                        format,
                         width: size.width,
                         height: size.height,
                         present_mode: capabilities.present_modes[0],
@@ -134,6 +136,7 @@ impl Graphics {
 
         let white_sphere = Sphere::White;
         let black_sphere = Sphere::Black;
+        let blue_sphere: Sphere = Sphere::Blue1;
 
         diffuse_textures.push(
             super::texture::Texture::from_bytes(
@@ -147,6 +150,13 @@ impl Graphics {
             )
         );
 
+        diffuse_textures.push(
+            super::texture::Texture::from_bytes(
+                &device, &queue, blue_sphere.diffuse_bytes(), blue_sphere.to_string()
+            )
+        );
+
+        // We are creating a layout for the textures that we are going to use in the shader
         let texture_bind_group_layout = device.create_bind_group_layout(
             &wgpu::BindGroupLayoutDescriptor {
                 entries: &[
@@ -186,11 +196,30 @@ impl Graphics {
                         ty: wgpu::BindingType::Sampler (wgpu::SamplerBindingType::Filtering),
                         count: None,
                     },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 4,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Texture {
+                            multisampled: false,
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            sample_type: wgpu::TextureSampleType::Float {
+                                filterable: true,
+                            },
+                        },
+                        count: None,
+                    },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 5,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Sampler (wgpu::SamplerBindingType::Filtering),
+                        count: None,
+                    }, 
                 ],
                 label: Some("texture_bind_group_layout"),
             }
         );
 
+        // and here we are binding the textures to the layout
         let diffuse_bind_group = device.create_bind_group(
             &wgpu::BindGroupDescriptor {
                 layout: &texture_bind_group_layout,
@@ -210,6 +239,14 @@ impl Graphics {
                     wgpu::BindGroupEntry {
                         binding: 3,
                         resource: wgpu::BindingResource::Sampler(&diffuse_textures[1].sampler),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 4,
+                        resource: wgpu::BindingResource::TextureView(&diffuse_textures[2].view),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 5,
+                        resource: wgpu::BindingResource::Sampler(&diffuse_textures[2].sampler),
                     }
                 ],
                 label: Some("diffuse_bind_group")
@@ -416,10 +453,11 @@ impl Graphics {
         Ok(())
     }
 
-    pub async fn run(grid_size: u32) {
+    pub async fn run(grid_size: u32, sequence: Arc<Mutex<Sequence>>) { // We need to add the Midi Input here
         let event_loop = EventLoop::new();
         let window = WindowBuilder::new().build(&event_loop).unwrap();
         let mut gfx = Graphics::new(window, grid_size, &TexturedSquare::new()).await;
+        let mut last_sequence_size = sequence.lock().unwrap().get_size();
 
         println!("hit run");
 
@@ -448,7 +486,15 @@ impl Graphics {
                     _ => {
                         // Need to take the Midi Input here from the Sequence data and pass it to the Graphics
                         // gfx.process_input(index, velocity); -> need to use this to find which items are lit up which colors
-
+                        
+                        // we have to set the instance dynamic_color() to the velocity of the index
+                        
+                        // print the index and velocity to the console
+                        let seq_size = sequence.lock().unwrap().get_size();
+                        if seq_size != last_sequence_size {
+                            last_sequence_size = seq_size;
+                            sequence.lock().unwrap().print_state();
+                        }
                     }
                 }
             },

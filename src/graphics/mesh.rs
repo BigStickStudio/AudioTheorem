@@ -14,7 +14,7 @@ const INDICES: &[Index] = &[
     Index(3), Index(2), Index(0),
 ];
 
-
+// We are not using the following struct in the current version of the code. See TexturedSquare struct below.
 #[repr(C)]
 #[derive(Copy, Clone, Debug, Pod, Zeroable)]
 pub struct ColoredVertex {

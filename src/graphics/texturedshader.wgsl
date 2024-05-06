@@ -11,7 +11,7 @@ struct InstanceInput {
     @location(6) model_matrix_1: vec4<f32>,
     @location(7) model_matrix_2: vec4<f32>,
     @location(8) model_matrix_3: vec4<f32>,
-    @location(9) color_filter: vec4<f32>,
+    @location(9) color_factor: vec4<f32>,
     @location(10) white_key: f32,
 }
 
@@ -23,7 +23,7 @@ struct VertexInput {
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
     @location(0) tex_coords: vec2<f32>,
-    @location(1) color_filter: vec4<f32>,
+    @location(1) color_factor: vec4<f32>,
     @location(2) white_key: f32,
 };
 
@@ -37,7 +37,7 @@ fn vs_main(model: VertexInput, instance: InstanceInput) -> VertexOutput {
         instance.model_matrix_3,
     );
 
-    out.color_filter = instance.color_filter;
+    out.color_factor = instance.color_factor;
     out.white_key = instance.white_key;
     out.tex_coords = model.tex_coords;
     out.clip_position = camera.view_proj * model_matrix * model.position;
@@ -54,11 +54,16 @@ var white_sampler: sampler;
 var black_diffuse: texture_2d<f32>;
 @group(0) @binding(3)
 var black_sampler: sampler;
+@group(0) @binding(4)
+var blue_diffuse: texture_2d<f32>;
+@group(0) @binding(5)
+var blue_sampler: sampler;
 
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     var white_sample = textureSample(white_diffuse, white_sampler, in.tex_coords);
     var black_sample = textureSample(black_diffuse, black_sampler, in.tex_coords);
+    var blue_sample = textureSample(blue_diffuse, blue_sampler, in.tex_coords);
 
-    return in.color_filter * (mix(black_sample, white_sample, in.white_key) * 0.5) * 2.0;
+    return mix((mix(black_sample, white_sample, in.white_key) * 0.5) * 2.0, blue_sample, in.color_factor.a);
 }
