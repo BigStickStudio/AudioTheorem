@@ -170,7 +170,7 @@ impl PitchGroup {
         }
     }
     /// Get the Minor key for this [PitchGroup](audiotheorem::types::PitchGroup) (Co5).
-    pub fn diminished_key(&self) -> Note {
+    pub fn diminished_key(&self) -> Note {  // Do we want to extend these out to be sharps and flats?
         use super::{Accidental::*, Note::*};
         match *self {
             PitchGroup::Cn => B(Natural),
@@ -403,7 +403,11 @@ impl PitchGroup {
     /// Find which [PitchGroups](audiotheorem::types::PitchGroup) a given set of provided
     /// [Note](audiotheorem::types::Note) belong to.  
     #[instrument]
-    pub fn find(notes: &[Note]) -> Result<Vec<PitchGroup>, &'static str> {
+    // This search function uses the names of the notes to find the pitch groups
+    // We could also implement a search function that uses the pitch classes of the notes
+    // to find the pitch groups, and determines which pitch groups are valid based on the
+    // least number of sharps or flats
+    pub fn find(notes: &[Note]) -> Result<Vec<PitchGroup>, &'static str> { 
         debug!("Notes: {:?}", &notes);
 
         let is_sharp = notes.iter().any(|n| n.sharp());

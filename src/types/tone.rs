@@ -34,7 +34,7 @@ impl Tone {
     // creates a new [Tone](audiotheorem::types::Tone) from an index
     pub fn from_index(index: u8, velocity: u8) -> Tone {
         let octave = Octave::from_index(index / 12 - 1).unwrap();
-        let note = Pitch::from_index(index % 12).note();
+        let note = Pitch::from_index(index % 12).note(); // Finds the pitch and then gives the natural note
         return Tone { octave, note, velocity };
     }
 
@@ -214,25 +214,25 @@ mod tests {
         }
         test(
             // C4 - First(Perfect) = C4
-            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65.as_u8()),
+            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65),
             Interval::First(PerfectQuality::Perfect),
-            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65.as_u8())),
+            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65)),
         );
         test(
             // C4 - First(Diminished) = C#4
-            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65.as_u8()),
+            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65),
             Interval::First(PerfectQuality::Diminished),
-            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Sharp), 65.as_u8())),
+            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Sharp), 65)),
         );
         test(
             // C4 - First(Augmented) = Cb3
-            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65.as_u8()),
+            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65),
             Interval::First(PerfectQuality::Augmented),
-            Some(Tone::from_parts(Octave::Small, Note::C(Accidental::Flat), 65.as_u8())),
+            Some(Tone::from_parts(Octave::Small, Note::C(Accidental::Flat), 65)),
         );
         test(
             // D-1 - Third(Major) = None
-            Tone::from_parts(Octave::DoubleContra, Note::D(Accidental::Natural), 65.as_u8()),
+            Tone::from_parts(Octave::DoubleContra, Note::D(Accidental::Natural), 65),
             Interval::Third(MajorQuality::Major),
             None,
         );

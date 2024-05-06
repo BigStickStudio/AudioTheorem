@@ -41,6 +41,18 @@ impl Sequence {
         }
     }
 
+    fn find_pitch_groups(&mut self) {
+        let mut pitchgroups = Vec::new();
+        for chord in self.intervals.iter() {
+            let mut scale = Vec::new();
+            for interval in chord.intervals.iter() {
+                scale.push(interval.0);
+            }
+            pitchgroups.push(Scale::new(chord.root, scale));
+        }
+        self.pitchgroups = pitchgroups;
+    }
+
     fn add_tone(&mut self, index: u8, velocity: u8) {
         self.size += 1;
         self.tones.push(Tone::from_index(index, velocity));
@@ -68,6 +80,7 @@ impl Sequence {
 
     pub fn print_state(&self) {
         print!("\x1B[2J\x1B[1;1H");
+        println!("=========================");
         println!("!!! Audio Theorem GUI !!!");
         println!("=========================\n");
         println!("{:#?}", *self);

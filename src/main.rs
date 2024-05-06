@@ -28,20 +28,80 @@ fn main() {
     let rt = tokio::runtime::Runtime::new().unwrap();
 
     let write_sequence: Arc<Mutex<Sequence>> = Arc::new(Mutex::new(Sequence::new()));
-    let read_sequence: Arc<Mutex<Sequence>> = Arc::new(Mutex::new(Sequence::new()));
+    let read_sequence: Arc<Mutex<Sequence>> = Arc::clone(&write_sequence);
 
+    // Midi Loop
     rt.spawn(async move {
         Events::read_midi(
             move |index, velocity| 
-                { temp_sequence.lock().unwrap().process_input(index, velocity); }
+                { write_sequence.lock().unwrap().process_input(index, velocity); }
         )
     });
 
+    // Graphics Loop
     rt.block_on(async move {
-        Engine::run(GRID_SIZE.into(), temp_sequence).await;
+        use winit::event::{Event, WindowEvent, ElementState, KeyboardInput, VirtualKeyCode};
+        use winit::event_loop::{ControlFlow, EventLoop};
+        use winit::window::WindowBuilder;
+        use audiotheorem::runtime::TexturedSquare;
+    
+        let event_loop = EventLoop::new();
+        let window = WindowBuilder::new().build(&event_loop).unwrap();
+        let mut gfx = Engine::new(window, GRID_SIZE.into(), &TexturedSquare::new()).await;
+        let mut last_sequence_size = read_sequence.lock().unwrap().get_size();
+
+        event_loop.run(move |event, _, control_flow| match event {
+
+            Event::WindowEvent {
+                ref event,
+                window_id,
+            } if window_id == gfx.window.id() => if !gfx.input(event) {
+                match event {
+                    WindowEvent::CloseRequested
+                    | WindowEvent::KeyboardInput {
+                        input: 
+                            KeyboardInput {
+                                state: ElementState::Pressed,
+                                virtual_keycode: Some(VirtualKeyCode::Escape),
+                                ..
+                            },
+                        ..
+                    } => *control_flow = ControlFlow::Exit,
+                    WindowEvent::Resized(physical_size) => {
+                        gfx.resize(*physical_size);
+                    },
+                    WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
+                        gfx.resize(**new_inner_size);
+                    },
+                    _ => {
+
+
+                    }
+                }
+            },
+            Event::RedrawRequested(window_id) if window_id == gfx.window.id() => {
+                gfx.update();
+                match gfx.render() {
+                    Ok(_) => {},
+                    Err(wgpu::SurfaceError::Lost) => gfx.resize(gfx.size),
+                    Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
+                    Err(e) => eprintln!("{:?}", e),
+                }
+            },
+            Event::MainEventsCleared => {
+                gfx.window.request_redraw();
+            },
+            _ => {
+                if read_sequence.lock().unwrap().get_size() != last_sequence_size {
+                    last_sequence_size = read_sequence.lock().unwrap().get_size();
+                    println!("Sequence Size: {}", last_sequence_size);
+                    read_sequence.lock().unwrap().print_state();
+                }
+            }
+        });
     });
     
-    loop{ 
-        let _ = time::sleep(time::Duration::from_millis(100));
-    }
+
+
+    loop{ let _ = time::sleep(time::Duration::from_millis(100));}
 }
