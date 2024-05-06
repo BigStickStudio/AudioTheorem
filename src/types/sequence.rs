@@ -62,13 +62,14 @@ impl Sequence {
         } else {
             self.delete_tone(index);
         }
-        //self.print_state();
+        // println!("Tone Added/Deleted");
+        // println!("Index: {}", index);
     }
 
     pub fn print_state(&self) {
         print!("\x1B[2J\x1B[1;1H");
-        println!("!!! Audio Theorem !!!");
-        println!("=====================\n");
+        println!("!!! Audio Theorem GUI !!!");
+        println!("=========================\n");
         println!("{:#?}", *self);
     }
 }

@@ -7,7 +7,7 @@
 //  Status: In Development
 //  
 use std::sync::{Arc, Mutex};
-use std::thread;
+use tokio::time;
 
 const GRID_SIZE: u8 = 12;
 
@@ -15,19 +15,20 @@ fn main() {
     // Create a Mutex for the Grid
     let sequence = Arc::new(Mutex::new(audiotheorem::types::Sequence::new()));
 
-    thread::spawn({
-        let sequence = Arc::clone(&sequence);
-        move || {
-            audiotheorem::midi::Events::read_midi(
-                move |index, velocity| 
-                    { sequence.lock().unwrap().process_input(index, velocity); }
-            );
-        }
+    let mut rt = tokio::runtime::Runtime::new().unwrap();
+
+    let audio_sequence = Arc::clone(&sequence);
+    rt.spawn(async move {
+        audiotheorem::midi::Events::read_midi(
+            move |index, velocity| 
+                { audio_sequence.lock().unwrap().process_input(index, velocity); }
+        );
     });
 
-    pollster::block_on(audiotheorem::graphics::Graphics::run(GRID_SIZE.into(), sequence.clone()));
-
-    loop {
-        thread::sleep(std::time::Duration::from_secs(1));
-    }
+    let mut gfx_sequence = Arc::clone(&sequence);
+    rt.block_on(async move {
+        audiotheorem::graphics::Graphics::run(GRID_SIZE.into(), gfx_sequence).await;
+    });
+    
+    loop{ time::sleep(time::Duration::from_millis(100)); }
 }
