@@ -46,7 +46,8 @@ impl Sequence {
         let  scales = Vec::new();
         
         // we need to find all the scales that contain the given intervals
-        
+        // we are going to iterate over all the scales and check if the intervals are present
+
         self.scales = scales;
     }
 

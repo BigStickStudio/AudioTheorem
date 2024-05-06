@@ -511,7 +511,12 @@ impl PitchGroup {
     }
 
 
+    // Added by NeoTec Circa 2024, Richard I Christopher.
     pub fn from_pitch_classes(pitch_classes: Vec<PitchClass>) -> Vec<PitchGroup> {
+        if pitch_classes.is_empty() {
+            return Vec::new();
+        }
+
         let pitch_groups = {
             let mut remaining: HashSet<PitchGroup> =
                 PitchGroup::all().iter().copied().collect();

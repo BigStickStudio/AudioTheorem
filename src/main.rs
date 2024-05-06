@@ -94,8 +94,8 @@ fn main() {
             _ => {
                 if read_sequence.lock().unwrap().get_size() != last_sequence_size {
                     last_sequence_size = read_sequence.lock().unwrap().get_size();
-                    println!("Sequence Size: {}", last_sequence_size);
                     read_sequence.lock().unwrap().print_state();
+                    println!("Sequence Size: {}", last_sequence_size);
                 }
             }
         });

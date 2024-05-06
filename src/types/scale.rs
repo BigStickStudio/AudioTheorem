@@ -76,6 +76,11 @@ pub enum Scale {
 }
 
 impl Scale {
+    // Added by NeoTec Circa 2024, for the NEXUS Project
+    pub fn all() -> Vec<Scale> {
+       Vec::new()
+    }
+
     pub fn monotonic(root: Note) -> Option<Scale> {
         use self::{Interval::*, PerfectQuality::*};
         Some(Scale::Monotonic([Position {
@@ -84,6 +89,7 @@ impl Scale {
             interval: First(Perfect),
         }]))
     }
+
     pub fn ditonic(
         root: Note,
         sequence: sequences::DitonicSequence,
