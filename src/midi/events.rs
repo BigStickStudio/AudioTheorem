@@ -75,8 +75,9 @@ impl Events {
             let velocity = message[2];
             let index = message[1];
 
-            // process audio as Sequence<Tone>
-            f(index, velocity); 
+            // Main Audio Processing Loop
+                // process audio as Sequence<Tone>
+                f(index, velocity); 
 
             // play audio
             if velocity > 0 {

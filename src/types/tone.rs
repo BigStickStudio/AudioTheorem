@@ -167,13 +167,13 @@ mod tests {
             // F6 + Fourth(DoubleAugmented) = B#7
             Tone::from_parts(Octave::ThreeLine, Note::F(Accidental::Natural), 65),
             Interval::Fourth(PerfectQuality::DoubleAugmented),
-            Some(Tone::from_parts(Octave::FourLine, Note::B(Accidental::Sharp)), 65),
+            Some(Tone::from_parts(Octave::FourLine, Note::B(Accidental::Sharp), 65)),
         );
         test(
             // G4 + Fourth(Perfect) = C5
             Tone::from_parts(Octave::OneLine, Note::G(Accidental::Natural), 65),
             Interval::Fourth(PerfectQuality::Perfect),
-            Some(Tone::from_parts(Octave::TwoLine, Note::C(Accidental::Natural)), 65),
+            Some(Tone::from_parts(Octave::TwoLine, Note::C(Accidental::Natural), 65)),
         );
         test(
             // B11 + Third(Major) = None
@@ -185,13 +185,13 @@ mod tests {
             // C4 + First(Perfect) = C4
             Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65),
             Interval::First(PerfectQuality::Perfect),
-            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural)), 65),
+            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65)),
         );
         test(
             // C4 + First(Diminished) = Cb3
             Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65),
             Interval::First(PerfectQuality::Diminished),
-            Some(Tone::from_parts(Octave::Small, Note::C(Accidental::Flat)), 65),
+            Some(Tone::from_parts(Octave::Small, Note::C(Accidental::Flat), 65)),
         );
     }
 
@@ -214,25 +214,25 @@ mod tests {
         }
         test(
             // C4 - First(Perfect) = C4
-            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65),
+            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65.as_u8()),
             Interval::First(PerfectQuality::Perfect),
-            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural)), 65),
+            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65.as_u8())),
         );
         test(
             // C4 - First(Diminished) = C#4
-            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65),
+            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65.as_u8()),
             Interval::First(PerfectQuality::Diminished),
-            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Sharp)), 65),
+            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Sharp), 65.as_u8())),
         );
         test(
             // C4 - First(Augmented) = Cb3
-            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65),
+            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65.as_u8()),
             Interval::First(PerfectQuality::Augmented),
-            Some(Tone::from_parts(Octave::Small, Note::C(Accidental::Flat)), 65),
+            Some(Tone::from_parts(Octave::Small, Note::C(Accidental::Flat), 65.as_u8())),
         );
         test(
             // D-1 - Third(Major) = None
-            Tone::from_parts(Octave::DoubleContra, Note::D(Accidental::Natural), 65),
+            Tone::from_parts(Octave::DoubleContra, Note::D(Accidental::Natural), 65.as_u8()),
             Interval::Third(MajorQuality::Major),
             None,
         );

@@ -6,14 +6,21 @@
 
 ([Original API Docs])
 
+## Objective
+
 > Encoding music theory into a usable audio library
 > Intended to be a learning tool and creative resource
 
+## Todos
+> Incorporate Midi Synth from Source
+> Extended Analysis from Tones
+> Smooth and Intuitive UI for GFX Analysis
+
 ## License
 
-The original "[musictheory]" part of this project (Collaborative effort between Hans and Richard) is licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+The original "[musictheory]" part of this project, a collaborative effort between Hans Uhlig and Richard Christopher, is licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
-The remaining original code of this project is held under private copyright, circa 2023.
+The remaining original code of this project is held as proprietary context exclusively owned by Big Stick Studio, under private copyright, circa 2023 and throughout the pendency of this development project.
 
 ### Contribution
 

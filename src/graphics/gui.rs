@@ -91,11 +91,11 @@ pub struct Gui;
 
 impl Gui{
     pub fn start() {
-        pollster::block_on(
-            Graphics::run(
-                GRID_SIZE as u32,
-                &TexturedSquare::new()
-            )
-        );
+        // pollster::block_on(
+        //     Graphics::run(
+        //         GRID_SIZE as u32,
+        //         &TexturedSquare::new()
+        //     )
+        // );
     }
 }

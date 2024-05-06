@@ -416,10 +416,10 @@ impl Graphics {
         Ok(())
     }
 
-    pub async fn run(grid_size: u32, square: &TexturedSquare<'_>) {
+    pub async fn run(grid_size: u32) {
         let event_loop = EventLoop::new();
         let window = WindowBuilder::new().build(&event_loop).unwrap();
-        let mut gfx = Graphics::new(window, grid_size, square).await;
+        let mut gfx = Graphics::new(window, grid_size, &TexturedSquare::new()).await;
 
         println!("hit run");
 
@@ -431,7 +431,7 @@ impl Graphics {
                 match event {
                     WindowEvent::CloseRequested
                     | WindowEvent::KeyboardInput {
-                        input:
+                        input: // Need to take the Midi Input here from the Sequence data and pass it to the Graphics
                             KeyboardInput {
                                 state: ElementState::Pressed,
                                 virtual_keycode: Some(VirtualKeyCode::Escape),

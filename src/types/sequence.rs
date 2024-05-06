@@ -14,16 +14,17 @@ struct Chord {
 pub struct Sequence {
     size: u8,
     tones: Vec<Tone>,
-    intervals: Vec<Chord>
+    intervals: Vec<Chord>,
+    pitchgroups: Vec<Scale>
 }
 
 // Stores a Vector of Tones, and their associated Chords
 impl Sequence {
     pub fn new() -> Sequence {
-        Sequence { size: 0, tones: Vec::new(), intervals: Vec::new() }
+        Sequence { size: 0, tones: Vec::new(), intervals: Vec::new(), pitchgroups: Vec::new() }
     }
 
-    fn construct_chords(&mut self) {
+    fn construct_chords(&mut self) { 
         for root in self.tones.iter() {
             let root_note = root.note();
             let mut chord_shape = Vec::new();

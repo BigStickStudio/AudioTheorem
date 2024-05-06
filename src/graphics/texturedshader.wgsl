@@ -25,7 +25,6 @@ struct VertexOutput {
     @location(0) tex_coords: vec2<f32>,
     @location(1) color_filter: vec4<f32>,
     @location(2) white_key: f32,
-
 };
 
 @vertex
