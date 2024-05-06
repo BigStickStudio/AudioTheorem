@@ -453,15 +453,14 @@ impl Engine {
         Ok(())
     }
 
-    pub async fn run(grid_size: u32, sequence: Arc<Mutex<Sequence>>) { // We need to add the Midi Input here
+    pub async fn run(grid_size: u32, sequence: &Arc<Mutex<Sequence>>) { // We need to add the Midi Input here
         let event_loop = EventLoop::new();
         let window = WindowBuilder::new().build(&event_loop).unwrap();
         let mut gfx = Engine::new(window, grid_size, &TexturedSquare::new()).await;
         let mut last_sequence_size = sequence.lock().unwrap().get_size();
 
-        println!("hit run");
-
         event_loop.run(move |event, _, control_flow| match event {
+
             Event::WindowEvent {
                 ref event,
                 window_id,
@@ -484,17 +483,8 @@ impl Engine {
                         gfx.resize(**new_inner_size);
                     },
                     _ => {
-                        // Need to take the Midi Input here from the Sequence data and pass it to the Engine
-                        // gfx.process_input(index, velocity); -> need to use this to find which items are lit up which colors
-                        
-                        // we have to set the instance dynamic_color() to the velocity of the index
-                        
-                        // print the index and velocity to the console
-                        let seq_size = sequence.lock().unwrap().get_size();
-                        if seq_size != last_sequence_size {
-                            last_sequence_size = seq_size;
-                            sequence.lock().unwrap().print_state();
-                        }
+
+
                     }
                 }
             },
@@ -510,7 +500,9 @@ impl Engine {
             Event::MainEventsCleared => {
                 gfx.window.request_redraw();
             },
-            _ => {}
+            _ => {
+
+            }
         });
     } 
 }

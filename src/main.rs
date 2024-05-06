@@ -14,42 +14,34 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
-use std::sync::{Arc, Mutex};
-use tokio::time;
-
-
-const GRID_SIZE: u8 = 12;
 
 fn main() {
+    use std::sync::{Arc, Mutex};
+    use tokio::time;
+    
     use audiotheorem::runtime::Sequence;
     use audiotheorem::runtime::Engine;
     use audiotheorem::runtime::Events;
 
-    println!("!!! Audio Theorem !!!");
-    println!("=====================");
-    println!("Starting Audio Theorem...");
+    const GRID_SIZE: u8 = 12;
 
-    // Create a Mutex for the Grid
+    let rt = tokio::runtime::Runtime::new().unwrap();
+
+    let write_sequence: Arc<Mutex<Sequence>> = Arc::new(Mutex::new(Sequence::new()));
     let read_sequence: Arc<Mutex<Sequence>> = Arc::new(Mutex::new(Sequence::new()));
-    let mut write_sequence: Arc<Mutex<Sequence>> = Arc::clone(&read_sequence);
 
-    let mut rt = tokio::runtime::Runtime::new().unwrap();
-
-    rt.spawn(async {
+    rt.spawn(async move {
         Events::read_midi(
             move |index, velocity| 
-                { read_sequence.lock().unwrap().process_input(index, velocity); }
+                { temp_sequence.lock().unwrap().process_input(index, velocity); }
         )
     });
 
     rt.block_on(async move {
-        Engine::run(GRID_SIZE.into(), write_sequence).await;
+        Engine::run(GRID_SIZE.into(), temp_sequence).await;
     });
     
     loop{ 
-        // print state of read_sequence
-        ??
-
         let _ = time::sleep(time::Duration::from_millis(100));
     }
 }
