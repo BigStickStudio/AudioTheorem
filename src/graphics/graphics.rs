@@ -431,7 +431,7 @@ impl Graphics {
                 match event {
                     WindowEvent::CloseRequested
                     | WindowEvent::KeyboardInput {
-                        input: // Need to take the Midi Input here from the Sequence data and pass it to the Graphics
+                        input: 
                             KeyboardInput {
                                 state: ElementState::Pressed,
                                 virtual_keycode: Some(VirtualKeyCode::Escape),
@@ -445,7 +445,11 @@ impl Graphics {
                     WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                         gfx.resize(**new_inner_size);
                     },
-                    _ => {}
+                    _ => {
+                        // Need to take the Midi Input here from the Sequence data and pass it to the Graphics
+                        // gfx.process_input(index, velocity); -> need to use this to find which items are lit up which colors
+
+                    }
                 }
             },
             Event::RedrawRequested(window_id) if window_id == gfx.window.id() => {
