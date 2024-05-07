@@ -3,13 +3,12 @@
 //
 
 
-use std::{ops::DerefMut, sync::{Arc, Mutex}};
-use std::time::Duration;
+use std::{sync::{Arc, Mutex, mpsc}, thread, time::Duration};
 use rodio::{OutputStream, Source};
 use audiotheorem::runtime::{Sequence, WaveTableOsc};
 use audiotheorem::types::Tuning;
 
-async fn midi_loop(sequence: Arc<Mutex<Sequence>>, oscillator: Arc<Mutex<WaveTableOsc>>) {
+async fn midi_loop(seq_snd: mpsc::Sender<Sequence>, seq_rcv: mpsc::Receiver<Sequence>, osc_snd: mpsc::Sender<WaveTableOsc>, osc_rcv: mpsc::Receiver<WaveTableOsc>) {
         
     // midir wrapper that is used to convert out midi into a sequence of tones
     // that can then be used to generate a sequence of chords, scales, pitchclasses, 
@@ -22,20 +21,26 @@ async fn midi_loop(sequence: Arc<Mutex<Sequence>>, oscillator: Arc<Mutex<WaveTab
     audiotheorem::runtime::Events::read_midi(move |index, velocity| {
         // This acts as our buffer handle for the midi input - which we can then user for gfx/ui
         // this maintains state for a given set of tones and their dynamics => midi state
-        sequence.lock().unwrap().process_input(index, velocity);
+        let mut seq_r = seq_rcv.try_recv().unwrap();
+        seq_r.process_input(index, velocity);
+        seq_snd.send(seq_r).unwrap();
+
 
         // this is where we go from a sequence of midi events to a sequence of tones -> pitches
         let tone = Sequence::get_tone(index, velocity).unwrap();
-        oscillator.lock().unwrap().set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
+        let mut osc_r = osc_rcv.try_recv().unwrap();
+        osc_r.set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
+        osc_snd.send(osc_r).unwrap();
     });
 }
 
-async fn graphics_loop(sequence: Arc<Mutex<Sequence>>) {
+async fn graphics_loop(seq_rcv: mpsc::Receiver<Sequence>) {
     loop {
-        let size = sequence.lock().unwrap().get_size();
-
+        let sequence = seq_rcv.try_recv().unwrap();
+        let size = sequence.get_size();
+        
         if size > 0 {
-            sequence.lock().unwrap().print_state();
+            sequence.print_state();
             println!("Sequence Size: {}", size);
         } else {
             print!("\x1B[2J\x1B[1;1H");
@@ -46,16 +51,16 @@ async fn graphics_loop(sequence: Arc<Mutex<Sequence>>) {
             println!("Sequence Size: {}", size);
         }
 
-        tokio::time::sleep(Duration::from_millis(100)).await;
+        thread::sleep(Duration::from_millis(100));
     }
 }
 
-async fn playback_loop(oscillator: Arc<Mutex<WaveTableOsc>>) {
-    let (_stream, _handle) = OutputStream::try_default().unwrap();
+async fn playback_loop(osc_rcv: mpsc::Receiver<WaveTableOsc>) {
+    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 
-    loop {
-        let _res = _handle.play_raw(oscillator.lock().unwrap().clone().convert_samples());
-        //println!("Playing Oscillator");
+    loop { 
+        thread::sleep(Duration::from_millis(1)); 
+        stream_handle.play_raw(osc_rcv.recv().unwrap().convert_samples());
     }
 }
 
@@ -63,8 +68,7 @@ async fn playback_loop(oscillator: Arc<Mutex<WaveTableOsc>>) {
 //  - then map out all the pitch groups mapped to the scales based on number of pitchgroups
 //  - then map out those statically as a lookup for a given cursor position i.e. 'root' note
 //  - then map out the root note and mode in a 'turing complete' way
-#[tokio::main]
-async fn main() {
+fn main() {
     let wave_table_size = 1024;
     let sample_rate = 44100;
     let _buffer_size = 1024;
@@ -75,19 +79,30 @@ async fn main() {
         wave_table.push((i as f32 / wave_table_size as f32 * 2.0 * std::f32::consts::PI).sin());
     }
 
-    let sequence = Arc::new(Mutex::new(Sequence::new()));
-    let oscillator = Arc::new(Mutex::new(WaveTableOsc::new(sample_rate, wave_table)));
+    let (seq_snd, seq_rcv) = mpsc::channel::<Sequence>();
+    let (osc_snd, osc_rcv) = mpsc::channel::<WaveTableOsc>();
 
-    // parallelize with threads
-    let _midi = tokio::spawn(midi_loop(Arc::clone(&sequence), Arc::clone(&oscillator)));
-    let _gfx = tokio::spawn(graphics_loop(Arc::clone(&sequence)));
-    let midi_read_clone = Arc::clone(&oscillator);
-    let _playback = tokio::spawn(playback_loop(Arc::clone(&midi_read_clone)));
+    // spawn the midi loop
+    let midi_thread = {
+        let sequence = sequence.clone();
+        let oscillator = oscillator.clone();
+        thread::spawn(move || {tokio::runtime::Runtime::new().unwrap().block_on(midi_loop(seq_snd, seq_rcv, osc_snd, osc_rcv))})
+    };
 
-    // join
-    _midi.await.unwrap();
-    _gfx.await.unwrap();
-    _playback.await.unwrap();
+    // spawn the graphics loop
+    let graphics_thread = {
+        let sequence = sequence.clone();
+        thread::spawn(move || {tokio::runtime::Runtime::new().unwrap().block_on(graphics_loop(seq_rcv))})
+    };
 
-    println!("Audio Theorem Complete!");
+    // spawn the playback loop
+    let playback_thread = {
+        let oscillator = oscillator.clone();
+        thread::spawn(move || {tokio::runtime::Runtime::new().unwrap().block_on(playback_loop(osc_rcv))})
+    };
+
+    // wait for the threads to finish
+    midi_thread.join().unwrap();
+    graphics_thread.join().unwrap();
+    playback_thread.join().unwrap();
 }
