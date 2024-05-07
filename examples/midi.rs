@@ -41,6 +41,9 @@ async fn midi_loop(sequence: Arc<Mutex<Sequence>>) {
         let tone = Sequence::get_tone(index, velocity).unwrap();
         osc.set_frequency(tone.to_index() as f32);
 
+        let (_stream, _handle) = rodio::OutputStream::try_default().unwrap();
+        let _res = _stream.play_raw(osc.convert_to_raw(buffer_size)).unwrap();
+
         *sequence.lock().unwrap() = seq_snd;
     });
 }

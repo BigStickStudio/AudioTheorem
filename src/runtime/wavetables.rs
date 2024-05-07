@@ -2,6 +2,8 @@
 // Copyright 2024 Richard I. Christopher, NeoTec Digital. All Rights Reserved.
 //
 
+use std::path::Iter;
+
 
 pub struct WaveTableOsc {
     pub sample_rate: u32,
@@ -35,4 +37,22 @@ impl WaveTableOsc {
         let sample = self.wave_table[index] * truncated_index_value + self.wave_table[next_index] * fractional_index_value;
         sample
     }
+}
+
+impl Iterator for WaveTableOsc {
+    type Item = f32;
+
+    fn next(&mut self) -> Option<f32> {
+        //let sample = self.interpolate();
+        //self.index = (self.index + self.increment) % self.wave_table.len() as f32;
+        //Some(sample)
+        Some(self.next_sample())
+    }
+}
+
+impl Source for WaveTableOsc {
+    fn current_frame_len(&self) -> Option<usize> { Some(1) }
+    fn channels(&self) -> u16 { 1 }
+    fn sample_rate(&self) -> u32 { self.sample_rate }
+    fn total_duration(&self) -> Option<Duration> { None }
 }
