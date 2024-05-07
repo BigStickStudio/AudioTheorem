@@ -3,12 +3,11 @@
 //
 
 
-use std::{ops::{Deref, DerefMut}, sync::{Arc, Mutex}};
+use std::{ops::DerefMut, sync::{Arc, Mutex}};
+use std::time::Duration;
 use rodio::{OutputStream, Source};
-use tokio::time::{self, Duration};
 use audiotheorem::runtime::{Sequence, WaveTableOsc};
 use audiotheorem::types::Tuning;
-
 
 async fn midi_loop(sequence: Arc<Mutex<Sequence>>, oscillator: Arc<Mutex<WaveTableOsc>>) {
         
@@ -22,24 +21,12 @@ async fn midi_loop(sequence: Arc<Mutex<Sequence>>, oscillator: Arc<Mutex<WaveTab
                         // .. and up (oscillators, filters, envelopes, effects, etc.)
     audiotheorem::runtime::Events::read_midi(move |index, velocity| {
         // This acts as our buffer handle for the midi input - which we can then user for gfx/ui
-        let mut seq_snd = sequence.lock().unwrap().deref_mut().clone();
-        let mut binding = oscillator.lock().unwrap();
-        let osc_write = binding.deref_mut();
-        
         // this maintains state for a given set of tones and their dynamics => midi state
-        seq_snd.process_input(index, velocity);
-//        seq_snd.print_state();
-
-        let (_stream, _handle) = OutputStream::try_default().unwrap();
-        let osc_read = oscillator.lock().unwrap().deref().clone();
-        let _res = _handle.play_raw(osc_read.clone().convert_samples());
-    
+        sequence.lock().unwrap().process_input(index, velocity);
 
         // this is where we go from a sequence of midi events to a sequence of tones -> pitches
         let tone = Sequence::get_tone(index, velocity).unwrap();
-        osc_write.set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
-
-        *sequence.lock().unwrap() = seq_snd;
+        oscillator.lock().unwrap().set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
     });
 }
 
@@ -59,14 +46,17 @@ async fn graphics_loop(sequence: Arc<Mutex<Sequence>>) {
             println!("Sequence Size: {}", size);
         }
 
-        time::sleep(Duration::from_millis(10)).await;
+        tokio::time::sleep(Duration::from_millis(500)).await;
     }
 }
 
 async fn playback_loop(oscillator: Arc<Mutex<WaveTableOsc>>) {
-    
+    let (_stream, _handle) = OutputStream::try_default().unwrap();
+
     loop {
-        println!("Playing Oscillator");
+        let _res = _handle.play_raw(oscillator.lock().unwrap().clone().convert_samples());
+        //println!("Playing Oscillator");
+        tokio::time::sleep(Duration::from_millis(1)).await;
     }
 }
 
@@ -89,11 +79,16 @@ async fn main() {
     let sequence = Arc::new(Mutex::new(Sequence::new()));
     let oscillator = Arc::new(Mutex::new(WaveTableOsc::new(sample_rate, wave_table)));
 
-    let midi_task = midi_loop(sequence.clone(), oscillator.clone());
-    let graphics_task = graphics_loop(sequence.clone());
-    let playback_task = playback_loop(oscillator.clone());
+    // parallelize with threads
+    let _midi = tokio::spawn(midi_loop(Arc::clone(&sequence), Arc::clone(&oscillator)));
+    let _gfx = tokio::spawn(graphics_loop(Arc::clone(&sequence)));
+    let midi_read_clone = Arc::clone(&oscillator);
+    let _playback = tokio::spawn(playback_loop(Arc::clone(&midi_read_clone)));
 
-    tokio::join!(midi_task, playback_task, graphics_task);
+    // join
+    _midi.await.unwrap();
+    _gfx.await.unwrap();
+    _playback.await.unwrap();
 
     println!("Audio Theorem Complete!");
 }
