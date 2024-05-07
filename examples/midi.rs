@@ -12,86 +12,87 @@
 
 
 
-use std::{sync::mpsc, thread, time::Duration};
+use std::{ops::DerefMut, thread::sleep, sync::Mutex, time::Duration};
 use rodio::{OutputStream, Source};
-use audiotheorem::runtime::{Sequence, WaveTableOsc};
+use audiotheorem::runtime::{Sequence, WaveTableOsc, Events};
 use audiotheorem::types::Tuning;
-
+use crossbeam_channel::unbounded;
+use crossbeam_utils::thread;
 
 // TODO: map out all the scales and chords
 //  - then map out all the pitch groups mapped to the scales based on number of pitchgroups
 //  - then map out those statically as a lookup for a given cursor position i.e. 'root' note
 //  - then map out the root note and mode in a 'turing complete' way
 fn main() {
-    let wave_table_size = 1024;
+    let wave_table_size = 1440;     // 120 samples per octave - 10 samples per pitchclass
     let sample_rate = 44100;
     let _buffer_size = 1024;
 
     let mut wave_table: Vec<f32> = Vec::with_capacity(wave_table_size);
+    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 
     for i in 0..wave_table_size {
         wave_table.push((i as f32 / wave_table_size as f32 * 2.0 * std::f32::consts::PI).sin());
     }
 
-    let (seq_snd, seq_rcv) = mpsc::channel::<Mutex<Sequence>>();
-    let (osc_snd, osc_rcv) = mpsc::channel::<WaveTableOsc>();
+    let (seq_snd, seq_rcv) = unbounded::<Mutex<Sequence>>();
+    let (osc_snd, osc_rcv) = unbounded::<Mutex<WaveTableOsc>>();
 
+    // initialize the sequence
+    let sequence = Sequence::new();
+    seq_snd.send(sequence.into());
 
+    // initialize the oscilator
+    let osc = WaveTableOsc::new(sample_rate, wave_table);
+    osc_snd.send(osc.into());
 
-    let graphics_thread = thread::spawn({
-        loop {
-            let sequence = seq_rcv.try_recv().unwrap();
-            let size = sequence.get_size();
-            
-            if size > 0 {
-                sequence.print_state();
-                println!("Sequence Size: {}", size);
-            } else {
-                print!("\x1B[2J\x1B[1;1H");
-                println!("=====================");
-                println!("!!! Audio Theorem !!!");
-                println!("=====================\n");
-    
-                println!("Sequence Size: {}", size);
+    // Graphics Loop
+    thread::scope(|s| {
+        s.spawn(|_| {
+            loop {
+                let sequence = seq_rcv.try_recv().unwrap();
+                let size = sequence.lock().unwrap().get_size();
+                
+                if size > 0 {
+                    sequence.lock().unwrap().print_state();
+                    println!("Sequence Size: {}", size);
+                } else {
+                    println!("Sequence Size: {}", size);
+                }
+        
+                sleep(Duration::from_millis(100));
             }
-    
-            thread::sleep(Duration::from_millis(100));
-        }
-    });
+        });
+    }).unwrap();
 
-    let playback_thread = thread::spawn({
-        let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+    // this is where we read our midi input and convert it to a sequence of tones, and play the frequency
+    thread::scope(|s| {
+        s.spawn(|_| {
+            Events::read_midi(
+                move |index, velocity| 
+                    { 
+                        // Used as a buffer to store the midi events for the graphics loop
+                        // get the current sequence
+                        let mut sequence = seq_rcv.try_recv().unwrap().lock().unwrap().deref_mut().clone();
+                        sequence.process_input(index, velocity);
 
-        loop { 
-            thread::sleep(Duration::from_millis(1)); 
-            stream_handle.play_raw(osc_rcv.recv().unwrap().convert_samples());
-        }
-    });
+                        // update the oscilator with the tone
+                        let tone = Sequence::get_tone(index, velocity).expect(format!("Sequence Expected Tone, but found {}:{}", index, velocity).as_str());
 
-    let midi_thread = thread::spawn({
-        let mut seq_r = seq_rcv.try_recv().unwrap();
+                        let mut osc = osc_rcv.try_recv().unwrap().lock().unwrap().deref_mut().clone();
+                        osc.set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
 
-        loop {
-            audiotheorem::runtime::Events::read_midi(move |index, velocity| {
-                // This acts as our buffer handle for the midi input - which we can then user for gfx/ui
-                // this maintains state for a given set of tones and their dynamics => midi state
-                seq_r = seq_rcv.try_recv().unwrap();
-                seq_r.process_input(index, velocity);
-                seq_snd.send(seq_r).unwrap();
-        
-        
-                // this is where we go from a sequence of midi events to a sequence of tones -> pitches
-                let tone = Sequence::get_tone(index, velocity).unwrap();
-                let mut osc_r = osc_rcv.try_recv().unwrap();
-                osc_r.set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
-                osc_snd.send(osc_r).unwrap();
-            })
-        }
-    });
+                        // send the oscilator to the play function
+                        let sh = stream_handle.clone();
+                        s.spawn(|_| { sh.play_raw(osc.convert_samples()); });
+                        // send the sequence back to the sequence buffer
+                        seq_snd.send(sequence.into());
 
-    // wait for the threads to finish
-    graphics_thread.join().unwrap();
-    playback_thread.join().unwrap();
-    midi_thread.join().unwrap();
-    
+                        // send the oscilator back to the oscilator buffer
+                        osc_snd.send(osc.into());
+                    }
+            )
+        });
+    }).unwrap();
+
 }
