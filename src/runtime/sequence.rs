@@ -13,6 +13,8 @@ struct Chord { // This isn't much of a chord, but it's an interface for a "scale
 #[derive(Clone, Debug)]
 pub struct Sequence {
     size: u8,
+    indices: Vec<u8>,
+    velocities: Vec<u8>,
     tones: Vec<Tone>,
     chords: Vec<Chord>,
     scales: Vec<Scale>,
@@ -22,7 +24,9 @@ pub struct Sequence {
 // Stores a Vector of Tones, and their associated Chords
 impl Sequence {
     pub fn new() -> Sequence {
-        Sequence { size: 0, tones: Vec::new(), chords: Vec::new(), scales: Vec::new(), pitchgroups: Vec::new() }
+        Sequence { size: 0, indices: Vec::new(), velocities: Vec::new(),
+                   tones: Vec::new(), chords: Vec::new(), scales: Vec::new(), 
+                   pitchgroups: Vec::new() }
     }
 
     pub fn get_size(&self) -> u8 {
@@ -58,6 +62,8 @@ impl Sequence {
 
     fn add_tone(&mut self, index: u8, velocity: u8) {
         self.size += 1;
+        self.indices.push(index);
+        self.velocities.push(velocity);
         self.tones.push(Tone::from_index(index, velocity));
         self.tones.sort_by_key(|t| t.to_index());
         self.chords.clear();
@@ -67,6 +73,8 @@ impl Sequence {
 
     fn delete_tone(&mut self, index: u8) {
         self.tones.retain(|&t| t.to_index() != index);
+        self.indices.retain(|&i| i != index);
+        self.velocities.retain(|&v| v != index);
         self.size = self.tones.len() as u8;
         self.chords.clear();
         self.construct_chords();
@@ -89,5 +97,9 @@ impl Sequence {
         println!("!!! Audio Theorem GUI !!!");
         println!("=========================\n");
         println!("{:#?}", *self);
+    }
+
+    pub fn get_instance(&self) -> (Vec<u8>, Vec<u8>) {
+        (self.indices.clone(), self.velocities.clone())
     }
 }

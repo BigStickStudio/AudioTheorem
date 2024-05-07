@@ -6,7 +6,6 @@ mod instances;
 mod spheres;
 mod engine;
 
-pub use self::gui::Gui;
 pub use self::texture::*;
 pub use self::camera::*;
 pub use self::mesh::*;

@@ -72,8 +72,8 @@ impl Events {
 
         let mut conn_out = midi_out.connect(out_port, "midir-test")?;
         let a_ = midi_in.connect(in_port, "readin", move |stamp, message, _| { 
-            let velocity = message[2];
-            let index = message[1];
+            let velocity: u8 = message[2];
+            let index: u8 = message[1];
 
             // Main Audio Processing Loop
                 // process audio as Sequence<Tone>

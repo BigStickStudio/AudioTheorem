@@ -84,17 +84,3 @@ impl Grid {
     }
 
 }
-
-
-pub struct Gui;
-
-impl Gui{
-    pub fn start() {
-        // pollster::block_on(
-        //     Engine::run(
-        //         GRID_SIZE as u32,
-        //         &TexturedSquare::new()
-        //     )
-        // );
-    }
-}

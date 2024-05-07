@@ -9,15 +9,8 @@ use cgmath::prelude::*;
 pub struct Instance {
     pub position: cgmath::Vector3<f32>,
     pub rotation: cgmath::Quaternion<f32>,
-    pub index: u32
-}
-
-#[repr(C)]
-#[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct RawInstance {
-    pub model: [[f32; 4]; 4],
-    pub color_factor: [f32; 4],
-    pub white_key: f32,
+    pub index: u32,
+    pub dynamic: Dynamic,
 }
 
 impl Instance {
@@ -49,10 +42,22 @@ impl Instance {
     pub fn raw(&self) -> RawInstance {
         RawInstance {
             model: (cgmath::Matrix4::from_translation(self.position) * cgmath::Matrix4::from(self.rotation)).into(),
-            color_factor: self.dynamic_color(Dynamic::Off),
+            color_factor: self.dynamic_color(self.dynamic),
             white_key : self.index_to_white_key(),
         }
     }
+
+    pub fn set_velocity(&mut self, velocity: &u8) {
+        self.dynamic = Dynamic::from_velocity(*velocity);
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
+pub struct RawInstance {
+    pub model: [[f32; 4]; 4],
+    pub color_factor: [f32; 4],
+    pub white_key: f32,
 }
 
 impl RawInstance {

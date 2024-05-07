@@ -8,6 +8,7 @@ use super::camera::{Camera, CameraUniform, CameraController};
 use super::mesh::*;
 use super::instances::{Instance, RawInstance};
 use super::spheres::Sphere;
+use crate::types::Dynamic;
 use std::sync::{Arc, Mutex};
 use wgpu::util::DeviceExt;
 use winit::event::WindowEvent;
@@ -92,12 +93,13 @@ impl Engine {
             grid_size as f32 * 0.25,
         );
 
+        // We are creating a grid of instances
         let instances = (0..grid_size).flat_map(|y| {
             (0..grid_size).map(move |x| {
                 let index = x;
                 let position = cgmath::Vector3 { x: x as f32, y: y as f32, z: 0.0 } - instance_displacement;
                 let rotation = cgmath::Quaternion::from_axis_angle(cgmath::Vector3::unit_y(), cgmath::Deg(0.0));
-                Instance { position, rotation, index }
+                Instance { position, rotation, index, dynamic: Dynamic::Off }
             })
         }).collect::<Vec<_>>();
 
@@ -400,6 +402,10 @@ impl Engine {
 
     pub fn input(&mut self, event: &WindowEvent) -> bool {
         self.camera_controller.process_events(event)
+    }
+
+    pub fn set_instance(&mut self, idx: usize, velocity: &u8) {
+        self.instances[idx].set_velocity(velocity);
     }
 
     pub fn update(&mut self) {
