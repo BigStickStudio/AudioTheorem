@@ -46,7 +46,7 @@ async fn graphics_loop(sequence: Arc<Mutex<Sequence>>) {
             println!("Sequence Size: {}", size);
         }
 
-        tokio::time::sleep(Duration::from_millis(500)).await;
+        tokio::time::sleep(Duration::from_millis(100)).await;
     }
 }
 
@@ -56,7 +56,6 @@ async fn playback_loop(oscillator: Arc<Mutex<WaveTableOsc>>) {
     loop {
         let _res = _handle.play_raw(oscillator.lock().unwrap().clone().convert_samples());
         //println!("Playing Oscillator");
-        tokio::time::sleep(Duration::from_millis(1)).await;
     }
 }
 
