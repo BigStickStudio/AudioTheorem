@@ -71,9 +71,16 @@ impl Sequence {
         self.find_pitch_groups();
     }
 
+    pub fn get_tone(index: u8, velocity: u8) -> Option<Tone> {
+        Some(Tone::from_index(index, velocity))
+    }
+
     fn delete_tone(&mut self, index: u8) {
+        if self.size == 0 {
+            return;
+        }
+
         self.tones.retain(|&t| t.to_index() != index);
-        
         let index = self.indices.iter().position(|&i| i == index).unwrap();
         self.indices.remove(index);
         self.velocities.remove(index);

@@ -14,20 +14,24 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
+use rustysynth::SynthesizerSettings;
+
 
 fn main() {
+    use std::fs::File;
     use std::sync::{Arc, Mutex};
     use tokio::time;
-    
+ 
     use audiotheorem::runtime::Sequence;
     use audiotheorem::runtime::Engine;
     use audiotheorem::runtime::Events;
 
-
     const GRID_SIZE: u8 = 12;
 
+    // Multi-threaded Runtime
     let rt = tokio::runtime::Runtime::new().unwrap();
 
+    // Midi Sequence Buffer
     let write_sequence: Arc<Mutex<Sequence>> = Arc::new(Mutex::new(Sequence::new()));
     let read_sequence: Arc<Mutex<Sequence>> = Arc::clone(&write_sequence);
 
@@ -35,7 +39,10 @@ fn main() {
     rt.spawn(async move {
         Events::read_midi(
             move |index, velocity| 
-                { write_sequence.lock().unwrap().process_input(index, velocity); }
+                { 
+                    // Used as a buffer to store the midi events for the graphics loop
+                    write_sequence.lock().unwrap().process_input(index, velocity); 
+                }
         )
     });
 
@@ -103,11 +110,14 @@ fn main() {
 
                     println!("Sequence Size: {}", last_sequence_size);
                 }
+
             }
         });
     });
     
 
 
-    loop{ let _ = time::sleep(time::Duration::from_millis(100));}
+    loop{ 
+        let _ = time::sleep(time::Duration::from_millis(1));
+    }
 }
