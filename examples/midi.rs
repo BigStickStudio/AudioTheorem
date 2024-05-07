@@ -28,7 +28,12 @@ async fn midi_loop(sequence: Arc<Mutex<Sequence>>, oscillator: Arc<Mutex<WaveTab
         
         // this maintains state for a given set of tones and their dynamics => midi state
         seq_snd.process_input(index, velocity);
-        seq_snd.print_state();
+//        seq_snd.print_state();
+
+        let (_stream, _handle) = OutputStream::try_default().unwrap();
+        let osc_read = oscillator.lock().unwrap().deref().clone();
+        let _res = _handle.play_raw(osc_read.clone().convert_samples());
+    
 
         // this is where we go from a sequence of midi events to a sequence of tones -> pitches
         let tone = Sequence::get_tone(index, velocity).unwrap();
@@ -59,17 +64,9 @@ async fn graphics_loop(sequence: Arc<Mutex<Sequence>>) {
 }
 
 async fn playback_loop(oscillator: Arc<Mutex<WaveTableOsc>>) {
-    let (_stream, _handle) = OutputStream::try_default().unwrap();
-    let binding = oscillator.lock().unwrap();
-    let osc_read = binding.deref().clone();
-
+    
     loop {
-        if (osc_read.index as usize) >= osc_read.wave_table.len() {
-            print!("Wave Table Index: {}", osc_read.index);
-            break;
-        }
-
-        let _res = _handle.play_raw(osc_read.clone().convert_samples());
+        println!("Playing Oscillator");
     }
 }
 
@@ -96,7 +93,7 @@ async fn main() {
     let graphics_task = graphics_loop(sequence.clone());
     let playback_task = playback_loop(oscillator.clone());
 
-    tokio::join!(midi_task, graphics_task, playback_task);
+    tokio::join!(midi_task, playback_task, graphics_task);
 
     println!("Audio Theorem Complete!");
 }
