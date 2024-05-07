@@ -3,24 +3,15 @@
 //
 
 
-use std::{ops::DerefMut, sync::{Arc, Mutex}};
-use libloading::os;
+use std::{ops::{Deref, DerefMut}, sync::{Arc, Mutex}};
+use rodio::{OutputStream, Source};
 use tokio::time::{self, Duration};
 use audiotheorem::runtime::{Sequence, WaveTableOsc};
+use audiotheorem::types::Tuning;
 
 
-async fn midi_loop(sequence: Arc<Mutex<Sequence>>) {
-    let wave_table_size = 1024;
-    let sample_rate = 44100;
-    let buffer_size = 1024;
-    let mut wave_table: Vec<f32> = Vec::with_capacity(wave_table_size);
-
-    for i in 0..wave_table_size {
-        wave_table.push((i as f32 / wave_table_size as f32 * 2.0 * std::f32::consts::PI).sin());
-    }
-
-    let mut osc = WaveTableOsc::new(sample_rate, wave_table);
-    
+async fn midi_loop(sequence: Arc<Mutex<Sequence>>, oscillator: Arc<Mutex<WaveTableOsc>>) {
+        
     // midir wrapper that is used to convert out midi into a sequence of tones
     // that can then be used to generate a sequence of chords, scales, pitchclasses, 
     // and pitchgroups, which is turn become the foundation for finding a root note of 
@@ -32,6 +23,8 @@ async fn midi_loop(sequence: Arc<Mutex<Sequence>>) {
     audiotheorem::runtime::Events::read_midi(move |index, velocity| {
         // This acts as our buffer handle for the midi input - which we can then user for gfx/ui
         let mut seq_snd = sequence.lock().unwrap().deref_mut().clone();
+        let mut binding = oscillator.lock().unwrap();
+        let osc_write = binding.deref_mut();
         
         // this maintains state for a given set of tones and their dynamics => midi state
         seq_snd.process_input(index, velocity);
@@ -39,10 +32,7 @@ async fn midi_loop(sequence: Arc<Mutex<Sequence>>) {
 
         // this is where we go from a sequence of midi events to a sequence of tones -> pitches
         let tone = Sequence::get_tone(index, velocity).unwrap();
-        osc.set_frequency(tone.to_index() as f32);
-
-        let (_stream, _handle) = rodio::OutputStream::try_default().unwrap();
-        let _res = _stream.play_raw(osc.convert_to_raw(buffer_size)).unwrap();
+        osc_write.set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
 
         *sequence.lock().unwrap() = seq_snd;
     });
@@ -68,18 +58,45 @@ async fn graphics_loop(sequence: Arc<Mutex<Sequence>>) {
     }
 }
 
+async fn playback_loop(oscillator: Arc<Mutex<WaveTableOsc>>) {
+    let (_stream, _handle) = OutputStream::try_default().unwrap();
+    let binding = oscillator.lock().unwrap();
+    let osc_read = binding.deref().clone();
+
+    loop {
+        if (osc_read.index as usize) >= osc_read.wave_table.len() {
+            print!("Wave Table Index: {}", osc_read.index);
+            break;
+        }
+
+        let _res = _handle.play_raw(osc_read.clone().convert_samples());
+    }
+}
+
 // TODO: map out all the scales and chords
 //  - then map out all the pitch groups mapped to the scales based on number of pitchgroups
 //  - then map out those statically as a lookup for a given cursor position i.e. 'root' note
 //  - then map out the root note and mode in a 'turing complete' way
 #[tokio::main]
 async fn main() {
+    let wave_table_size = 1024;
+    let sample_rate = 44100;
+    let _buffer_size = 1024;
+
+    let mut wave_table: Vec<f32> = Vec::with_capacity(wave_table_size);
+
+    for i in 0..wave_table_size {
+        wave_table.push((i as f32 / wave_table_size as f32 * 2.0 * std::f32::consts::PI).sin());
+    }
+
     let sequence = Arc::new(Mutex::new(Sequence::new()));
+    let oscillator = Arc::new(Mutex::new(WaveTableOsc::new(sample_rate, wave_table)));
 
-    let midi_task = midi_loop(sequence.clone());
+    let midi_task = midi_loop(sequence.clone(), oscillator.clone());
     let graphics_task = graphics_loop(sequence.clone());
+    let playback_task = playback_loop(oscillator.clone());
 
-    tokio::join!(midi_task, graphics_task);
+    tokio::join!(midi_task, graphics_task, playback_task);
 
     println!("Audio Theorem Complete!");
 }

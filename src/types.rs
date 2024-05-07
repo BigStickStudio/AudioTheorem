@@ -65,7 +65,7 @@ pub use self::mode::Mode;
 pub use self::note::Accidental;
 pub use self::note::Note;
 pub use self::octave::Octave;
-pub use self::pitch::Pitch;
+pub use self::pitch::{Pitch,Tuning};
 pub use self::pitchclass::PitchClass;
 pub use self::pitchgroup::PitchGroup;
 pub use self::pitchmode::PitchMode;
