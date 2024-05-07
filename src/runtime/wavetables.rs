@@ -6,7 +6,6 @@ use std::path::Iter;
 use std::time::Duration;
 use rodio::Source;
 
-
 #[derive(Clone)]
 pub struct WaveTableOsc {
     pub sample_rate: u32,
@@ -63,3 +62,5 @@ impl Source for WaveTableOsc {
         Some(Duration::from_millis(1))
     }
 }
+
+unsafe impl Sync for WaveTableOsc {}
