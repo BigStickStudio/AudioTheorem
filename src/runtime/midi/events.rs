@@ -32,6 +32,10 @@ impl Events {
         let out_ports = midi_out.ports();
         let in_port = match in_ports.len() {
             _ => {
+                println!("\x1B[2J\x1B[1;1H");
+                println!("=====================");
+                println!("!!! Audio Theorem !!!");
+                println!("=====================\n");
                 println!("\nAvailable Input Devices:");
                 for (i, p) in in_ports.iter().enumerate() {
                     println!("\t{}: {}", i, midi_in.port_name(p).unwrap());
@@ -46,8 +50,9 @@ impl Events {
         };
 
         print!("\x1B[2J\x1B[1;1H");
-        println!("!!! Audio Theorem !!!");
         println!("=====================");
+        println!("!!! Audio Theorem !!!");
+        println!("=====================\n");
 
         let out_port: &MidiOutputPort = match out_ports.len() {
             _ => {

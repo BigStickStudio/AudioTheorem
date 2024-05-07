@@ -136,7 +136,7 @@ impl Engine {
 
         let white_sphere = Sphere::White;
         let black_sphere = Sphere::Black;
-        let blue_sphere: Sphere = Sphere::Blue1;
+        let blue_sphere: Sphere = Sphere::Blue8;
 
         diffuse_textures.push(
             super::texture::Texture::from_bytes(
@@ -404,12 +404,30 @@ impl Engine {
         self.camera_controller.process_events(event)
     }
 
-    pub fn set_instance(&mut self, idx: usize, velocity: &u8) {
-        self.instances[idx].set_velocity(velocity);
+    pub fn enable_tones(&mut self, idx_vel: (Vec<u8>, Vec<u8>)) {
+        // reset all the instances dynamic to off
+        for instance in self.instances.iter_mut() {
+            instance.dynamic = Dynamic::Off;            
+        }
+
+        // iterate over the indexes and set the velocity
+        for (idx, velocity) in idx_vel.0.iter().zip(idx_vel.1.iter()) {
+            self.instances[*idx as usize].set_velocity(velocity);
+        }
+        
+        let instance_data = self.instances.iter().map(Instance::raw).collect::<Vec<_>>();
+
+        self.instance_buffer = self.device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Instance Buffer"),
+                contents: bytemuck::cast_slice(&instance_data),
+                usage: wgpu::BufferUsages::VERTEX,
+            }
+        );
+
     }
 
     pub fn update(&mut self) {
-//        self.instance_controller.update_instances(&mut self.instances);
         self.camera_controller.update_camera(&mut self.camera);
         self.camera_uniform.update_view_projection(&self.camera);
         self.queue.write_buffer(&self.camera_buffer, 0, bytemuck::cast_slice(&[self.camera_uniform]));

@@ -95,14 +95,12 @@ fn main() {
             _ => {
                 if read_sequence.lock().unwrap().get_size() != last_sequence_size {
                     last_sequence_size = read_sequence.lock().unwrap().get_size();
-                    let idx_vel = read_sequence.lock().unwrap().get_instance();
-
-                    
-                    for (idx, vel) in idx_vel.0.iter().zip(idx_vel.1.iter()) {
-                        gfx.set_instance((*idx).into(), vel);
-                    }
+                    let idx_vel: (Vec<u8>, Vec<u8>) = read_sequence.lock().unwrap().get_instance();
 
                     read_sequence.lock().unwrap().print_state();
+
+                    gfx.enable_tones(idx_vel);
+
                     println!("Sequence Size: {}", last_sequence_size);
                 }
             }

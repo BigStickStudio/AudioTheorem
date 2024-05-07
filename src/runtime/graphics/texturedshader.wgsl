@@ -65,5 +65,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     var black_sample = textureSample(black_diffuse, black_sampler, in.tex_coords);
     var blue_sample = textureSample(blue_diffuse, blue_sampler, in.tex_coords);
 
-    return mix(blue_sample, (mix(black_sample, white_sample, in.white_key) * 0.5) * 2.0, in.color_factor.a);
+    var black_and_white = mix(black_sample, white_sample, in.white_key);
+
+    if (in.color_factor[0] < 1.0) {
+        return mix(blue_sample, black_and_white, in.color_factor[0]);
+    } else {
+        return black_and_white;
+    }
 }

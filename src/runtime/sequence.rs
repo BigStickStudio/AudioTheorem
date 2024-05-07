@@ -73,8 +73,10 @@ impl Sequence {
 
     fn delete_tone(&mut self, index: u8) {
         self.tones.retain(|&t| t.to_index() != index);
-        self.indices.retain(|&i| i != index);
-        self.velocities.retain(|&v| v != index);
+        
+        let index = self.indices.iter().position(|&i| i == index).unwrap();
+        self.indices.remove(index);
+        self.velocities.remove(index);
         self.size = self.tones.len() as u8;
         self.chords.clear();
         self.construct_chords();

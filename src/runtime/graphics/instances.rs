@@ -49,6 +49,7 @@ impl Instance {
 
     pub fn set_velocity(&mut self, velocity: &u8) {
         self.dynamic = Dynamic::from_velocity(*velocity);
+        //println!("Velocity: {:?} Dynamic: {:?}", velocity, self.dynamic);
     }
 }
 
