@@ -44,7 +44,7 @@ impl Events {
         let out_ports = midi_out.ports();
         let in_port = match in_ports.len() {
             _ => {
-                println!("\x1B[2J\x1B[1;1H");
+                //println!("\x1B[2J\x1B[1;1H");
                 println!("=====================");
                 println!("!!! Audio Theorem !!!");
                 println!("=====================\n");

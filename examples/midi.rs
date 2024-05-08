@@ -42,9 +42,7 @@ fn main() {
     let gui_thread = thread::spawn(move || {
 
         loop {
-            if (latch) {
-                continue;
-            }
+            if latch { continue; }
 
             let sequence = seq_rec_ref.lock().unwrap();
             let size = sequence.get_size();
