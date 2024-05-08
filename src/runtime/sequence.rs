@@ -71,6 +71,10 @@ impl Sequence {
         self.find_pitch_groups();
     }
 
+    pub fn tones(&self) -> Vec<Tone> {
+        self.tones.clone()
+    }
+
     pub fn get_tone(index: u8, velocity: u8) -> Option<Tone> {
         Some(Tone::from_index(index, velocity))
     }

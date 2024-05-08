@@ -57,10 +57,7 @@ impl Source for WaveTableOsc {
     fn current_frame_len(&self) -> Option<usize> { Some(1) }
     fn channels(&self) -> u16 { 1 }
     fn sample_rate(&self) -> u32 { self.sample_rate }
-    fn total_duration(&self) -> Option<Duration> { 
-        // set to 1ms for now
-        Some(Duration::from_millis(1))
-    }
+    fn total_duration(&self) -> Option<Duration> { Some(Duration::from_millis(10)) }
 }
 
 unsafe impl Sync for WaveTableOsc {}

@@ -14,17 +14,16 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
-use rustysynth::SynthesizerSettings;
+use std::{ops::Deref, thread::sleep};
 
+use rodio::Sink;
 
 fn main() {
     use std::fs::File;
     use std::sync::{Arc, Mutex};
-    use tokio::time;
- 
-    use audiotheorem::runtime::Sequence;
-    use audiotheorem::runtime::Engine;
-    use audiotheorem::runtime::Events;
+    use tokio::time::{self, sleep, Duration};
+    use rodio::{OutputStream, Source};
+    use audiotheorem::{runtime::{Events, Engine, Sequence, WaveTableOsc}, types::Tuning};
 
     const GRID_SIZE: u8 = 12;
 
@@ -33,17 +32,39 @@ fn main() {
 
     // Midi Sequence Buffer
     let write_sequence: Arc<Mutex<Sequence>> = Arc::new(Mutex::new(Sequence::new()));
-    let read_sequence: Arc<Mutex<Sequence>> = Arc::clone(&write_sequence);
+    let gfx_read_sequence: Arc<Mutex<Sequence>> = Arc::clone(&write_sequence);
+    let audio_read_sequence: Arc<Mutex<Sequence>> = Arc::clone(&write_sequence);
 
-    // Midi Loop
+    // Audio Settings
+    let wave_table_size = 1440;     // 120 samples per octave - 10 samples per pitchclass
+    let sample_rate = 44100;
+
+    let mut wave_table: Vec<f32> = Vec::with_capacity(wave_table_size);
+    for i in 0..wave_table_size { wave_table.push((i as f32 / wave_table_size as f32 * 2.0 * std::f32::consts::PI).sin()); }
+
+    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+
+    // Midi Loop = // Used as a buffer to store the midi events for the graphics loop
+    rt.spawn(async move { Events::read_midi(move |index, velocity| { write_sequence.lock().unwrap().process_input(index, velocity); })});
+
+    // Audio Loop
     rt.spawn(async move {
-        Events::read_midi(
-            move |index, velocity| 
-                { 
-                    // Used as a buffer to store the midi events for the graphics loop
-                    write_sequence.lock().unwrap().process_input(index, velocity); 
-                }
-        )
+        loop {
+            let read_sequence = audio_read_sequence.lock().unwrap().deref().clone();
+            let size = read_sequence.get_size();
+
+            if size <= 0 { sleep(Duration::from_millis(10)); continue; } 
+
+            for tone in read_sequence.tones() {
+                let (sink, mut src_queue) = Sink::new_idle();
+                let mut oscillator = WaveTableOsc::new(sample_rate, wave_table.clone());
+                oscillator.set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
+                sink.append(oscillator);
+                let _ = sleep(Duration::from_millis(5));
+                stream_handle.play_raw(src_queue);
+            }
+            let _ = sleep(Duration::from_millis(5));
+        }
     });
 
     // Graphics Loop
@@ -56,7 +77,7 @@ fn main() {
         let event_loop = EventLoop::new();
         let window = WindowBuilder::new().build(&event_loop).unwrap();
         let mut gfx = Engine::new(window, GRID_SIZE.into(), &TexturedSquare::new()).await;
-        let mut last_sequence_size = read_sequence.lock().unwrap().get_size();
+        let mut last_sequence_size = gfx_read_sequence.lock().unwrap().get_size();
 
         event_loop.run(move |event, _, control_flow| match event {
 
@@ -100,11 +121,14 @@ fn main() {
                 gfx.window.request_redraw();
             },
             _ => {
-                if read_sequence.lock().unwrap().get_size() != last_sequence_size {
-                    last_sequence_size = read_sequence.lock().unwrap().get_size();
-                    let idx_vel: (Vec<u8>, Vec<u8>) = read_sequence.lock().unwrap().get_instance();
+                let read_sequence = gfx_read_sequence.lock().unwrap();
+                let size = read_sequence.get_size();
 
-                    read_sequence.lock().unwrap().print_state();
+                if size != last_sequence_size {
+                    last_sequence_size = size;
+                    let idx_vel: (Vec<u8>, Vec<u8>) = read_sequence.get_instance();
+
+                    read_sequence.print_state();
 
                     gfx.enable_tones(idx_vel);
 
@@ -114,10 +138,7 @@ fn main() {
             }
         });
     });
-    
 
 
-    loop{ 
-        let _ = time::sleep(time::Duration::from_millis(1));
-    }
+
 }

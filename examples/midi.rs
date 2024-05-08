@@ -12,8 +12,8 @@
 
 
 
-use std::{ops::DerefMut, sync::{Arc, Mutex}, thread::{self, sleep}, time::Duration};
-use rodio::{OutputStream, Source};
+use std::{sync::{Arc, Mutex}, thread::{self, sleep}, time::Duration};
+use rodio::{OutputStream, Source, Sink};
 use audiotheorem::runtime::{Sequence, WaveTableOsc, Events};
 use audiotheorem::types::Tuning;
 
@@ -42,7 +42,9 @@ fn main() {
     let gui_thread = thread::spawn(move || {
 
         loop {
-            if latch { continue; }
+            if latch {
+                continue;
+            }
 
             let sequence = seq_rec_ref.lock().unwrap();
             let size = sequence.get_size();
@@ -52,11 +54,7 @@ fn main() {
                 println!("Sequence Size: {}", size);
             } 
             else {
-                //print!("\x1B[2J\x1B[1;1H");
-                println!("=====================");
-                println!("!!! Audio Theorem !!!");
-                println!("=====================\n");
-                println!("Sequence Empty");
+                println!("Sequence Size: 0");
             }
     
             sleep(Duration::from_millis(100));
@@ -80,8 +78,9 @@ fn main() {
                         let mut oscillator = WaveTableOsc::new(sample_rate, wave_table.clone());
                         oscillator.set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
 
-                        // send the oscilator to the play function
-                        let _ = stream_handle.play_raw(oscillator.convert_samples());
+                        {
+                            stream_handle.play_raw(oscillator);
+                        }
                     }
             );
         });
