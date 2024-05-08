@@ -12,7 +12,7 @@
 
 
 
-use std::{ops::DerefMut, thread::sleep, sync::Mutex, time::Duration};
+use std::{thread::sleep, time::Duration};
 use rodio::{OutputStream, Source};
 use audiotheorem::runtime::{Sequence, WaveTableOsc, Events};
 use audiotheorem::types::Tuning;
@@ -35,29 +35,27 @@ fn main() {
         wave_table.push((i as f32 / wave_table_size as f32 * 2.0 * std::f32::consts::PI).sin());
     }
 
-    let (seq_snd, seq_rcv) = unbounded::<Mutex<Sequence>>();
-    let (osc_snd, osc_rcv) = unbounded::<Mutex<WaveTableOsc>>();
+    // Create a new Sequence Channel - Todo: Implement this as part of a Sequence Channel Type that has a vector of Oscillators
+    let (seq_snd, seq_rcv) = unbounded::<Sequence>();
+    let _ = seq_snd.send(Sequence::new().into());
 
-    // initialize the sequence
-    let sequence = Sequence::new();
-    seq_snd.send(sequence.into());
-
-    // initialize the oscilator
-    let osc = WaveTableOsc::new(sample_rate, wave_table);
-    osc_snd.send(osc.into());
-
-    // Graphics Loop
+    // GUI Loop
     thread::scope(|s| {
         s.spawn(|_| {
             loop {
-                let sequence = seq_rcv.try_recv().unwrap();
-                let size = sequence.lock().unwrap().get_size();
+                let sequence = seq_rcv.try_recv().unwrap().clone();
+                let size = sequence.get_size();
                 
                 if size > 0 {
-                    sequence.lock().unwrap().print_state();
+                    let _ = sequence.print_state();
                     println!("Sequence Size: {}", size);
-                } else {
-                    println!("Sequence Size: {}", size);
+                } 
+                else {
+                    //print!("\x1B[2J\x1B[1;1H");
+                    println!("=====================");
+                    println!("!!! Audio Theorem !!!");
+                    println!("=====================\n");
+                    println!("Sequence Empty");
                 }
         
                 sleep(Duration::from_millis(100));
@@ -65,33 +63,29 @@ fn main() {
         });
     }).unwrap();
 
-    // this is where we read our midi input and convert it to a sequence of tones, and play the frequency
-    thread::scope(|s| {
-        s.spawn(|_| {
+    // MIDI Processing Loop
+    thread::scope(|s: &thread::Scope| {
+        s.spawn(move |_| {
             Events::read_midi(
                 move |index, velocity| 
                     { 
                         // Used as a buffer to store the midi events for the graphics loop
                         // get the current sequence
-                        let mut sequence = seq_rcv.try_recv().unwrap().lock().unwrap().deref_mut().clone();
+                        let mut sequence = seq_rcv.try_recv().unwrap().clone();
                         sequence.process_input(index, velocity);
+                        let _ = seq_snd.send(sequence.into());
 
                         // update the oscilator with the tone
                         let tone = Sequence::get_tone(index, velocity).expect(format!("Sequence Expected Tone, but found {}:{}", index, velocity).as_str());
 
-                        let mut osc = osc_rcv.try_recv().unwrap().lock().unwrap().deref_mut().clone();
-                        osc.set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
+                        let mut oscillator = WaveTableOsc::new(sample_rate, wave_table.clone());
+                        oscillator.set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
 
                         // send the oscilator to the play function
                         let sh = stream_handle.clone();
-                        s.spawn(|_| { sh.play_raw(osc.convert_samples()); });
-                        // send the sequence back to the sequence buffer
-                        seq_snd.send(sequence.into());
-
-                        // send the oscilator back to the oscilator buffer
-                        osc_snd.send(osc.into());
+                        let _ = sh.play_raw(oscillator.convert_samples());
                     }
-            )
+            );
         });
     }).unwrap();
 }
