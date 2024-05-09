@@ -1,8 +1,9 @@
 //
-// Copyright 2023 Richard I. Christopher, NeoTec Digital. All Rights Reserved.
+// Copyright 2023-2024 Richard I. Christopher, NeoTec Digital. All Rights Reserved.
 //
 
 use crate::types::{Interval, Note, Pitch, PitchGroup, Scale, Tone};
+use super::PitchgroupAnalyzer;
 
 #[derive(Clone, Debug)]
 struct Chord { // This isn't much of a chord, but it's an interface for a "scale" to act as a cursor for all possible scales and N number of potential chords based on inversions.
@@ -10,28 +11,37 @@ struct Chord { // This isn't much of a chord, but it's an interface for a "scale
     intervals: Vec<(Note, Interval)>
 }
 
+
 #[derive(Clone, Debug)]
 pub struct Sequence {
     size: u8,
-    indices: Vec<u8>,
-    velocities: Vec<u8>,
+    // These Need To Be Combined -+
+    indices: Vec<u8>,           //|
+    velocities: Vec<u8>,        //|
+    dispositions: Vec<u8>,
+    // ---------------------------+
     tones: Vec<Tone>,
     chords: Vec<Chord>,
     scales: Vec<Scale>,
-    pitchgroups: Vec<PitchGroup>
+    key_map: Vec<PitchclassAnalyzer>
 }
 
 // Stores a Vector of Tones, and their associated Chords
 impl Sequence {
     pub fn new() -> Sequence {
-        Sequence { size: 0, indices: Vec::new(), velocities: Vec::new(),
-                   tones: Vec::new(), chords: Vec::new(), scales: Vec::new(), 
-                   pitchgroups: Vec::new() }
+        Sequence { 
+            size: 0, 
+            indices: Vec::new(),        // Midi Index
+            velocities: Vec::new(),     // Midi Velocity
+            dispositions: Vec::new(),   // Disposition of the Note - if it's played, the uniformity of the pitchgroups, or the non-uniformity of the pitchgroups // TODO: Add played in and out of a pitchgroup - with scale
+            tones: Vec::new(),          // The Tones that are currently being played
+            chords: Vec::new(),         // Really just used to check intervals and inversions
+            scales: Vec::new(),         // Essentially Useless at this point
+            key_map: Vec::new() 
+        }
     }
 
-    pub fn get_size(&self) -> u8 {
-        self.size
-    }
+    pub fn get_size(&self) -> u8 { self.size } // needs to be thrown away
 
     fn construct_chords(&mut self) { 
         for root in self.tones.iter() {
@@ -46,7 +56,7 @@ impl Sequence {
         }
     }
 
-    fn find_scales(&mut self) {
+    fn find_scales(&mut self) { // This is a mess that needs to be agnostic to pitchgroups
         let  scales = Vec::new();
         
         // we need to find all the scales that contain the given intervals
@@ -55,9 +65,67 @@ impl Sequence {
         self.scales = scales;
     }
 
-    fn find_pitch_groups(&mut self) {
+    fn find_pitch_groups(&mut self) {   // This needs to eventually account for secondary and even tertiary pitchgroups to determine favorability towards defining harmony and dissonance
         // create an array of tones
-        self.pitchgroups = PitchGroup::from_pitch_classes(self.tones.iter().map(|t| t.note().pitch_class()).collect());
+        let pitchclasses = self.tones.iter().map(|t| t.note().pitch_class()).collect::<Vec<_>>();
+        let pitchgroups = PitchGroup::from_pitch_classes(pitchclasses); // This gets
+
+        // Add the notes from the pitchgroups that aren't in the tones
+        for pitchgroup in pitchgroups.iter() {
+            let mut found = Vec::new();
+            let mut missing = Vec::new();
+
+            for tone in self.tones.iter() {
+                // We expect that if we've gotten this far then we already have the note being played
+                let pitch_class_name = pitchgroup.pitch_classes().iter().find(|&p| p == &tone.pitch_class()).unwrap().note();
+
+
+                if pitchgroup.pitch_classes().contains(&tone.note().pitch_class()) {
+                    // get the name of the pitch class from the pitch group
+                    found.push(pitch_class_name);
+                } else {
+                    missing.push(pitch_class_name);
+                }
+            }
+
+            let p = found.len() as f64 / pitchgroup.pitch_classes().len() as f64;
+
+            self.key_map.push(PitchgroupAnalyzer {
+                pitchgroup: pitchgroup.clone(),
+                probability: p,
+                members: found,
+                offnotes: missing
+            });
+        }
+
+        // first we want to get the first top pitchgroup(s) 
+        //          note: we could have ties
+        let mut top_pitchgroups = Vec::new();
+        let mut top_probability = 0.0;
+
+        for pitchgroup in self.key_map.iter() {
+            if pitchgroup.probability > top_probability {
+                top_probability = pitchgroup.probability;
+                top_pitchgroups = vec![pitchgroup.pitchgroup.clone()];
+            } else if pitchgroup.probability == top_probability {
+                top_pitchgroups.push(pitchgroup.pitchgroup.clone());
+            }
+        }
+
+        // if we have 1 pitchgroup then we want to add all the notes from the pitchgroup (harmonious - uniform)
+        // if top_pitchgroups.len() == 1 {
+        //     let top_pitchgroup = top_pitchgroups.first().unwrap();
+        //     let uniform = top_pitchgroup.pitch_classes().iter().map(|p| p.note()).collect::<Vec<_>();
+        //     self.dispositions = self.dispositions.iter().map(|d| if uniform.contains(&d) { 2 } else { 4 }).collect::<Vec<_>>();
+        // } else {
+        //     // if we have more than 1 pitchgroup then we want to add all the notes from the pitchgroups (dissonant - non-uniform)
+        //     let dissonant = top_pitchgroups.iter().flat_map(|p| p.pitch_classes().iter().map(|p| p.note())).collect::<Vec<_>();
+        //     self.dispositions = self.dispositions.iter().map(|d| if dissonant.contains(&d) { 4 } else { 2 }).collect::<Vec<_>();
+        // }
+        
+        // if we subtract the tones from the two pitchgroups we get the difference between the two pitchgroups (dissonant - non-uniform)
+
+        // if we subtract the difference from the hashset of the pitchgroup we get the notes that are uniform (harmonious - uniform)
     }
 
     fn add_tone(&mut self, index: u8, velocity: u8) {
@@ -67,8 +135,7 @@ impl Sequence {
         self.tones.push(Tone::from_index(index, velocity));
         self.tones.sort_by_key(|t| t.to_index());
         self.chords.clear();
-        self.construct_chords();
-        self.find_pitch_groups();
+
     }
 
     pub fn tones(&self) -> Vec<Tone> {
@@ -90,8 +157,6 @@ impl Sequence {
         self.velocities.remove(index);
         self.size = self.tones.len() as u8;
         self.chords.clear();
-        self.construct_chords();
-        self.find_pitch_groups();
     }
 
     pub fn process_input(&mut self, index: u8, velocity: u8) {
@@ -100,8 +165,10 @@ impl Sequence {
         } else {
             self.delete_tone(index);
         }
-        // println!("Tone Added/Deleted");
-        // println!("Index: {}", index);
+        
+        self.construct_chords();
+        self.find_pitch_groups();
+        self.add_dissodance();
     }
 
     pub fn print_state(&self) {

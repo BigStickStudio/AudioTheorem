@@ -27,5 +27,14 @@ impl Disposition {
             Disposition::Dissodant => 4
         }
     }
+
+    pub fn as_u8(&self) -> u8 {
+        match *self {
+            Disposition::Natural => 0,
+            Disposition::Played => 1,
+            Disposition::Harmonious => 2,
+            Disposition::Dissodant => 4
+        }
+    }
 }
 

@@ -513,18 +513,18 @@ impl PitchGroup {
 
     // Added by NeoTec Circa 2024, Richard I Christopher.
     pub fn from_pitch_classes(pitch_classes: Vec<PitchClass>) -> Vec<PitchGroup> {
-        if pitch_classes.is_empty() {
-            return Vec::new();
-        }
+        // This is a safeguard to ensure that the pitch_classes vector is not empty
+        if pitch_classes.is_empty() { return Vec::new(); }
 
         let pitch_groups = {
-            let mut remaining: HashSet<PitchGroup> =
-                PitchGroup::all().iter().copied().collect();
+            let mut remaining: HashSet<PitchGroup> = PitchGroup::all().iter().copied().collect();
+
             for pitch_class in pitch_classes {
                 let groups: HashSet<PitchGroup> =
                     pitch_class.groups().iter().copied().collect();
                 remaining = remaining.intersection(&groups).copied().collect();
             }
+            
             remaining
         };
         debug!("Potential PitchGroups: {:?}", &pitch_groups);
@@ -597,6 +597,29 @@ mod tests {
 
         let notes4 = [E(Natural), A(Natural), B(Natural)];
         let result4 = PitchGroup::find(&notes4);
+        println!("Result 4: {:?}\n", &result4);
+    }
+
+    #[test]
+    fn test_find_pitchclass() {
+        let pitchclass0 = [Cn, An, En];
+        let result0 = PitchGroup::from_pitch_classes(pitchclass0.to_vec());
+        println!("Result 0: {:?}\n", &result0);
+
+        let pitchclass1 = [Cn, Dn, En];
+        let result1 = PitchGroup::from_pitch_classes(pitchclass1.to_vec());
+        println!("Result 1: {:?}\n", &result1);
+
+        let pitchclass2 = [Cn, Dn, En, Fn, Gn, An, Bn];
+        let result2 = PitchGroup::from_pitch_classes(pitchclass2.to_vec());
+        println!("Result 2: {:?}\n", &result2);
+
+        let pitchclass3 = [Cn, Dn, En, Fs, Gn, An, Bn];
+        let result3 = PitchGroup::from_pitch_classes(pitchclass3.to_vec());
+        println!("Result 3: {:?}\n", &result3);
+
+        let pitchclass4 = [Cn, Dn, En, Fs, Gs, An, Bn];
+        let result4 = PitchGroup::from_pitch_classes(pitchclass4.to_vec());
         println!("Result 4: {:?}\n", &result4);
     }
 

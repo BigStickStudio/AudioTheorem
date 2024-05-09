@@ -34,7 +34,7 @@ impl Tone {
     // creates a new [Tone](audiotheorem::types::Tone) from an index
     pub fn from_index(index: u8, velocity: u8) -> Tone {
         let octave = Octave::from_index(index / 12 - 1).unwrap();
-        let note = Pitch::from_index(index % 12).note(); // Finds the pitch and then gives the natural note
+        let note = Pitch::from_index(index % 12).note(); // Finds the pitch and then gives the natural note // This needs to be done in a way  that can find the correct note based on the pitchgroup - not just the natural note
         return Tone { octave, note, velocity };
     }
 
