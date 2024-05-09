@@ -23,7 +23,7 @@ struct VertexInput {
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
     @location(0) tex_coords: vec2<f32>,
-    @location(1) color_factor: vec4<f32>,
+    @location(1) color_factor: vec4<u8>,
     @location(2) white_key: f32,
 };
 
@@ -68,8 +68,13 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     var black_and_white = mix(black_sample, white_sample, in.white_key);
 
     if (in.color_factor[0] < 1.0) {
-        return mix(blue_sample, black_and_white, in.color_factor[0]);
-    } else {
-        return black_and_white;
+        return mix(blue_sample, black_and_white, in.color_factor[0] * 1.25);
     }
+    
+    if (in.color_factor[1] < 1.0) 
+    {
+        return mix(
+    }
+
+   return black_and_white;
 }
