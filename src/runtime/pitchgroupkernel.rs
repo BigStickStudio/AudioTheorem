@@ -1,11 +1,12 @@
 // Written and Created by Richard I. Christopher, Big Stick Studio, 2024
 
-use crate::types::{Accidental, Matrix, Note, PitchClass, PitchGroup, Tone};
+use std::collections;
+
+use crate::types::{Accidental, Matrix, Note, Pitch, PitchClass, PitchGroup, Tone};
 
 pub struct PitchgroupSlice {
     pitchgroup: PitchGroup,         // This is the pitchgroup that this slice belongs to
     notes: Vec<Note>,               // This is the notes that are being played in the natural accidentals per the 'circle of fifths' (Proprietary, Ancillary, 2024)
-    pitchclasses: Vec<PitchClass>,  // This is ALL of the PitchClasses that are in the top pitchgroups -- Eventually this becomes a 12x12 per pitchgroup -- Eventually Combining with Scale. (Proprietary, Ancillary, 2024)
     displacements: Vec<bool>,       // This is the same as the members and offnotes fields per index
     accidental: Accidental,         // This is a fast way of telling us if this is a sharp, flat, or natural note (Cn would be the only Natural Slice) (Proprietary, Ancillary, 2024)
 }
@@ -28,20 +29,27 @@ impl PitchgroupSlice {
         PitchgroupSlice { 
             pitchgroup: pitchgroup.clone(), 
             notes, 
-            pitchclasses, 
             displacements,
-            accidental: if is_sharp { Accidental::Sharp } else if is_flat { Accidental::Flat } else { Accidental::Natural },
+            accidental: if is_sharp { Accidental::Sharp } else if is_flat { Accidental::Flat } else { Accidental::Natural }
+        }
     }
 
+    pub fn get_displaced(&self) -> Vec<Note> {
+        // This gives us all of the notes that are NOT being played in the pitchgroup (all of the 0's from the displacements)
+        self.notes.iter().zip(self.displacements.iter()).filter(|(_, d)| !**d).map(|(n, _)| *n).collect::<Vec<Note>>()
+    }
 }
 
 pub struct PitchGroupKernel {
-    pitchgroups: Vec<PitchgroupSlice>,   // Pitchgroups are in the same order as Propabilities
-    probabilities: Vec<f64>,        // Probabilities belong to the pitchgroups
+    pitchgroups: Vec<PitchgroupSlice>,  // Pitchgroups are in the same order as Propabilities
+    probabilities: Vec<f64>,            // Probabilities belong to the pitchgroups
+    uniforms: Vec<Note>,                // Uniforms are the common notes between the top pitchgroups
+    mediants: Vec<Note>,                // Mediants are the notes that are in the top pitchgroups but not in all of them, and are not nonces.
+    non_uniforms: Vec<Note>,            // Non-Uniforms are the uncommon notes between the top pitchgroups
 }
 
 impl PitchGroupKernel {
-    fn new(tones: Vec<Tone>) -> PitchGroupKernel {
+    pub fn new(tones: Vec<Tone>) -> PitchGroupKernel {
         let pitch_groups: Vec<PitchGroup> = Vec::new<PitchGroup>();
         let probabilities: Vec<f64> = Vec::new<f64>();
 
@@ -67,8 +75,65 @@ impl PitchGroupKernel {
             probabilities.push(probability);
         }
 
-        PitchGroupKernel { pitchgroups, probabilities }
+        PitchGroupKernel { 
+            pitchgroups, 
+            probabilities,
+            uniforms: Vec::new<Note>(),
+            mediants: Vec::new<Note>(),
+            non_uniforms: Vec::new<Note>()
+        }
     }
 
-    // compare the top pitchgroups and determine the favorability of the harmony and dissonance for 'Uniform' and 'Non-Uniform' notes
+    // This gives us a collection of the top pitchgroups
+    fn top_pitchgroups(&self) -> Vec<PitchgroupSlice> {
+        let top_probability = self.pitchgroups.iter().map(|pg| pg.probability).max().unwrap();
+        self.pitchgroups.iter().filter(|pg| pg.probability == top_probability).collect::<Vec<PitchgroupSlice>>()
+    }
+
+    // This determines uniformity vs non-uniformity of the top pitchgroups
+    fn normalize(&self) {
+        use collections::HashSet;
+        let top_pitchgroups = self.top_pitchgroups();
+
+        // If we have 1 pitchgroup then we want to add all of the non-played notes from the pitchgroup (harmonious - uniform)
+        if top_pitchgroups.len() == 1 {
+            self.uniforms = top_pitchgroups.first().unwrap().get_displaced();;
+        } else {
+            // we want to collect all of the notes that are in all of of the displacements of the top pitchgroups
+            let displacements: HashSet<Note> = top_pitchgroups.iter().flat_map(|pg| pg.get_displaced()).collect::<HashSet<Note>>();
+
+            let total_found: HashSet<Note> = HashSet::new();
+            let total_missing: HashSet<Note> = HashSet::new();
+            let mediants: HashSet<Note> = HashSet::new();
+
+            // and for each pitchgroup we want to create a set of displacement notes that are NOT found in the other pitchgroups
+            // these are our non-uniform
+            for pitchgroup in top_pitchgroups.iter() {
+                let pitch_group_displaced = pitchgroup.get_displaced();
+                
+                // We need a collection of the notes that are in the pitchgroup but not in the other pitchgroups
+                let found: HashSet<Note> = pitch_group_displaced.iter().filter(|n| top_pitchgroups.iter().all(|pg| pg.get_displaced().contains(n))).collect::<HashSet<Note>>();
+                let missing: HashSet<Note> = pitch_group_displaced.iter().filter(|n| !found.contains(n)).collect::<HashSet<Note>>();
+
+                total_found.extend(found);
+                total_missing.extend(missing);
+            }
+            
+            // We need to find the mediant notes that are in the total_found and in the total_missing or in the displacements but not in the total_found or total_missing
+            let intersection = total_found.intersection(&total_missing);
+            mediants.extend(intersection);
+            // we need to remove it from the total_found and total_missing just in case
+            total_found = total_found.difference(&mediants);
+            total_missing = total_missing.difference(&mediants);
+
+            // This is incase we somehow accidentally skipped over any boolean logic - this will be a 'discovery' phase
+            // because in theory, something could be in 2 out of 3 pitchgroups, and not be in ALL and not be missing
+            let difference = displacements.difference(&total_found).difference(&total_missing);
+            mediants.extend(difference);
+        }
+
+        self.uniforms = total_found.iter().collect::<Vec<Note>>();
+        self.non_uniforms = total_missing.iter().collect::<Vec<Note>>();
+        self.mediants = mediants.iter().collect::<Vec<Note>>();
+    }
 }
