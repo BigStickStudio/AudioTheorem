@@ -144,13 +144,12 @@ fn main() {
                     gfx.refresh_instances();
                     gfx.enable_tones(played_notes);
                     gfx.enable_tones(uniform_notes);
-                    gfx.enable_tones(nonce_notes);
                     gfx.enable_tones(mediant_notes);
+                    gfx.enable_tones(nonce_notes);
 
                     read_sequence.print_state();
 
                     // Need to add logic to highlight duplicate 'overlaps' from top rated pitchgroups
-
                     println!("Sequence Size: {}", last_sequence_size);
                 }
 
