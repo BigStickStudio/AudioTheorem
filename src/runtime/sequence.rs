@@ -101,7 +101,7 @@ impl Sequence {
         // We can take all the notes that we have played and iterate +/- 12 to populate our Sequence Data types
         for tone in self.tones.iter() {
             let index = tone.to_index();
-            let velocity = to.velocity(); // In all reality a tone could have a disposition as well.. and our matrix and tone can merge into a ToneMatrix
+            let velocity = tone.velocity(); // In all reality a tone could have a disposition as well.. and our matrix and tone can merge into a ToneMatrix
             
             self.played_notes.indices.push(index);
             self.played_notes.velocities.push(velocity);
@@ -180,40 +180,23 @@ impl Sequence {
         self.size += 1;
         self.played_notes.indices.push(index);
         self.played_notes.velocities.push(velocity);
-        self.tones.push(Tone::from_index(index, velocity));
-        //self.tones.sort_by_key(|t| t.to_index());
-        self.chords.clear();
-
     }
 
-    pub fn tones(&self) -> Vec<Tone> {
-        self.tones.clone()
-    }
-
-    pub fn get_tone(index: u8, velocity: u8) -> Option<Tone> {
-        Some(Tone::from_index(index, velocity))
-    }
+    pub fn tones(&self) -> Vec<Tone> { self.tones.clone() }
+    pub fn get_tone(index: u8, velocity: u8) -> Option<Tone> { Some(Tone::from_index(index, velocity)) }
 
     fn delete_tone(&mut self, index: u8) {
-        if self.size == 0 {
-            return;
-        }
+        if self.size == 0 { return; }
 
         self.tones.retain(|&t| t.to_index() != index);
-        let index = self.indices.iter().position(|&i| i == index).unwrap();
-        self.indices.remove(index);
-        self.velocities.remove(index);
         self.size = self.tones.len() as u8;
-        self.chords.clear();
     }
 
     pub fn process_input(&mut self, index: u8, velocity: u8) {
-        if velocity > 0 {
-            self.add_tone(index, velocity);
-        } else {
-            self.delete_tone(index);
-        }
+        if velocity > 0 { self.add_tone(index, velocity); } 
+        else { self.delete_tone(index); }
         
+        self.chords.clear();
         self.construct_chords();
         self.find_pitch_groups();
     }
