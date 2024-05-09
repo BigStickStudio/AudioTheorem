@@ -442,11 +442,8 @@ impl Engine {
         });
 
 
-        let disposition = iv.2;    // This will be dec2bin(0-7) to determine the disposition of the key
-
-        // iterate over the indexes and set the velocity
-        for (idx, velocity) in idx_vel.0.iter().zip(idx_vel.1.iter()) 
-            { self.instances[*idx as usize].trigger_key(velocity, disposition); }
+        for i in iv.iv.iter()
+            { self.instances[*i.index as usize].trigger_key(*i.velocity, iv.disposition); }
         
         let instance_data = self.instances.iter().map(Instance::raw).collect::<Vec<_>>();
 

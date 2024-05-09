@@ -12,13 +12,13 @@ struct Chord { // This isn't much of a chord, but it's an interface for a "scale
 }
 
 struct IV {
-    index: u8,
-    velocity: u8
+    pub index: u8,
+    pub velocity: u8
 }
 
 pub struct SequenceData {
-    iv: Vec<IV>,                             // Midi Velocity
-    disposition: u8                     // Disposition of the Note (0 = Not Used, 1)
+    pub iv: Vec<IV>,                             // Midi Velocity
+    pub disposition: u8                     // Disposition of the Note (0 = Not Used, 1)
 }
 
 #[derive(Clone, Debug)]
