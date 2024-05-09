@@ -434,16 +434,16 @@ impl Engine {
         self.camera_controller.process_events(event)
     }
 
-    pub fn enable_tones(&mut self, iv: SequenceData) {
-        // reset all the instances dynamic to off
+    pub fn refresh_instances(&mut self) {
         self.instances.iter_mut().for_each(|instance| {
             instance.dynamic = Dynamic::Off;
             instance.disposition = Disposition::Natural;
         });
+    }
 
-
-        for i in iv.iv.iter()
-            { self.instances[*i.index as usize].trigger_key(*i.velocity, iv.disposition); }
+    pub fn enable_tones(&mut self, sequence: SequenceData) {
+        for i in sequence.iv.iter()
+            { self.instances[i.index as usize].trigger_key(i.velocity, sequence.disposition); }
         
         let instance_data = self.instances.iter().map(Instance::raw).collect::<Vec<_>>();
 

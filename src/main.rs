@@ -136,11 +136,12 @@ fn main() {
 
                 if size != last_sequence_size {
                     last_sequence_size = size;
-                    let played_notes: SequenceData = read_sequence.played_notes;
-                    let uniform_notes: SequenceData = read_sequence.uniform_notes;
-                    let nonce_notes: SequenceData = read_sequence.nonce_notes;
-                    let mediant_notes: SequenceData = read_sequence.mediant_notes;
+                    let played_notes: SequenceData = read_sequence.played_notes.clone();
+                    let uniform_notes: SequenceData = read_sequence.uniform_notes.clone();
+                    let nonce_notes: SequenceData = read_sequence.nonce_notes.clone();
+                    let mediant_notes: SequenceData = read_sequence.mediant_notes.clone();
 
+                    gfx.refresh_instances();
                     gfx.enable_tones(played_notes);
                     gfx.enable_tones(uniform_notes);
                     gfx.enable_tones(nonce_notes);
