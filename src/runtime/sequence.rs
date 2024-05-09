@@ -2,7 +2,7 @@
 // Copyright 2023-2024 Richard I. Christopher, NeoTec Digital. All Rights Reserved.
 //
 
-use crate::types::{Interval, Note, Pitch, PitchGroup, Scale, Tone};
+use crate::types::{Interval, Note, Pitch, PitchClass, PitchGroup, Scale, Tone};
 use super::PitchgroupAnalyzer;
 
 #[derive(Clone, Debug)]
@@ -18,12 +18,12 @@ pub struct Sequence {
     // These Need To Be Combined -+
     indices: Vec<u8>,           //|
     velocities: Vec<u8>,        //|
-    dispositions: Vec<u8>,
+    dispositions: Vec<u8>,              // Todo: Add indicator for 'Tonic' and Intervals in relation to the tonic, and then create inversion module.
     // ---------------------------+
     tones: Vec<Tone>,
     chords: Vec<Chord>,
     scales: Vec<Scale>,
-    key_map: Vec<PitchclassAnalyzer>
+    key_map: Vec<PitchgroupAnalyzer>
 }
 
 // Stores a Vector of Tones, and their associated Chords
@@ -67,36 +67,8 @@ impl Sequence {
 
     fn find_pitch_groups(&mut self) {   // This needs to eventually account for secondary and even tertiary pitchgroups to determine favorability towards defining harmony and dissonance
         // create an array of tones
-        let pitchclasses = self.tones.iter().map(|t| t.note().pitch_class()).collect::<Vec<_>>();
-        let pitchgroups = PitchGroup::from_pitch_classes(pitchclasses); // This gets
-
-        // Add the notes from the pitchgroups that aren't in the tones
-        for pitchgroup in pitchgroups.iter() {
-            let mut found = Vec::new();
-            let mut missing = Vec::new();
-
-            for tone in self.tones.iter() {
-                // We expect that if we've gotten this far then we already have the note being played
-                let pitch_class_name = pitchgroup.pitch_classes().iter().find(|&p| p == &tone.pitch_class()).unwrap().note();
-
-
-                if pitchgroup.pitch_classes().contains(&tone.note().pitch_class()) {
-                    // get the name of the pitch class from the pitch group
-                    found.push(pitch_class_name);
-                } else {
-                    missing.push(pitch_class_name);
-                }
-            }
-
-            let p = found.len() as f64 / pitchgroup.pitch_classes().len() as f64;
-
-            self.key_map.push(PitchgroupAnalyzer {
-                pitchgroup: pitchgroup.clone(),
-                probability: p,
-                members: found,
-                offnotes: missing
-            });
-        }
+        self.key_map.push(PitchGroupKernel::new(self.tones));
+        
 
         // first we want to get the first top pitchgroup(s) 
         //          note: we could have ties
@@ -113,15 +85,15 @@ impl Sequence {
         }
 
         // if we have 1 pitchgroup then we want to add all the notes from the pitchgroup (harmonious - uniform)
-        // if top_pitchgroups.len() == 1 {
-        //     let top_pitchgroup = top_pitchgroups.first().unwrap();
-        //     let uniform = top_pitchgroup.pitch_classes().iter().map(|p| p.note()).collect::<Vec<_>();
-        //     self.dispositions = self.dispositions.iter().map(|d| if uniform.contains(&d) { 2 } else { 4 }).collect::<Vec<_>>();
-        // } else {
-        //     // if we have more than 1 pitchgroup then we want to add all the notes from the pitchgroups (dissonant - non-uniform)
-        //     let dissonant = top_pitchgroups.iter().flat_map(|p| p.pitch_classes().iter().map(|p| p.note())).collect::<Vec<_>();
-        //     self.dispositions = self.dispositions.iter().map(|d| if dissonant.contains(&d) { 4 } else { 2 }).collect::<Vec<_>();
-        // }
+        if top_pitchgroups.len() == 1 {
+            let top_pitchgroup = top_pitchgroups.first().unwrap();
+            
+
+            
+        } else {
+            // if we have more than 1 pitchgroup then we want to add all the notes from the pitchgroups (dissonant - non-uniform)
+            
+        }
         
         // if we subtract the tones from the two pitchgroups we get the difference between the two pitchgroups (dissonant - non-uniform)
 

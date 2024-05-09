@@ -63,41 +63,29 @@ impl PitchMode {
             PitchMode::Locrian(notes) => notes,
         }
     }
+
+    // TODO: Migrate all of this to Scale type
     /// Get [PitchClass](audiotheorem::types::PitchClass) in the Tonic position of this
     /// [PitchMode](audiotheorem::types::PitchMode).
-    pub fn tonic(&self) -> PitchClass {
-        self.notes()[0]
-    }
+    pub fn tonic(&self) -> PitchClass { self.notes()[0] }
     /// Get [PitchClass](audiotheorem::types::PitchClass) in the Supertonic position of this
     /// [PitchMode](audiotheorem::types::PitchMode).
-    pub fn supertonic(&self) -> PitchClass {
-        self.notes()[1]
-    }
+    pub fn supertonic(&self) -> PitchClass { self.notes()[1] }
     /// Get [PitchClass](audiotheorem::types::PitchClass) in the Mediant position of this
     /// [PitchMode](audiotheorem::types::PitchMode).
-    pub fn mediant(&self) -> PitchClass {
-        self.notes()[2]
-    }
+    pub fn mediant(&self) -> PitchClass { self.notes()[2] }
     /// Get [PitchClass](audiotheorem::types::PitchClass) in the Subdominant position of this
     /// [PitchMode](audiotheorem::types::PitchMode).
-    pub fn subdominant(&self) -> PitchClass {
-        self.notes()[3]
-    }
+    pub fn subdominant(&self) -> PitchClass { self.notes()[3] }
     /// Get [PitchClass](audiotheorem::types::PitchClass) in the Dominant position of this
     /// [PitchMode](audiotheorem::types::PitchMode).
-    pub fn dominant(&self) -> PitchClass {
-        self.notes()[4]
-    }
+    pub fn dominant(&self) -> PitchClass { self.notes()[4] }
     /// Get [PitchClass](audiotheorem::types::PitchClass) in the Submediant position of this
     /// [PitchMode](audiotheorem::types::PitchMode).
-    pub fn submediant(&self) -> PitchClass {
-        self.notes()[5]
-    }
+    pub fn submediant(&self) -> PitchClass { self.notes()[5] }
     /// Get [PitchClass](audiotheorem::types::PitchClass) in the Subtonic position of this
     /// [PitchMode](audiotheorem::types::PitchMode).
-    pub fn subtonic(&self) -> PitchClass {
-        self.notes()[6]
-    }
+    pub fn subtonic(&self) -> PitchClass { self.notes()[6] }
 }
 
 impl fmt::Display for PitchMode {

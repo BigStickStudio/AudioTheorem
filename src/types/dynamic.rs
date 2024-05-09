@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Richard I. Christopher, NeoTec Digital. All Rights Reserved.
+// Copyright 2023-2024 Richard I. Christopher, NeoTec Digital. All Rights Reserved.
 //
 
 use std::fmt;

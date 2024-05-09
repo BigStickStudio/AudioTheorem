@@ -323,42 +323,18 @@ impl PitchGroup {
     pub fn mixolydian(&self) -> PitchMode {
         use super::PitchClass::*;
         match *self {
-            PitchGroup::Cn => {
-                PitchMode::mixolydian([Gn, An, Bn, Cn, Dn, En, Fn])
-            }
-            PitchGroup::Gn => {
-                PitchMode::mixolydian([Dn, En, Fs, Gn, An, Bn, Cn])
-            }
-            PitchGroup::Dn => {
-                PitchMode::mixolydian([An, Bn, Cs, Dn, En, Fs, Gn])
-            }
-            PitchGroup::An => {
-                PitchMode::mixolydian([En, Fs, Gs, An, Bn, Cs, Dn])
-            }
-            PitchGroup::En => {
-                PitchMode::mixolydian([Bn, Cs, Ds, En, Fs, Gs, An])
-            }
-            PitchGroup::Bn => {
-                PitchMode::mixolydian([Fs, Gs, As, Bn, Cs, Ds, En])
-            }
-            PitchGroup::Fs => {
-                PitchMode::mixolydian([Cs, Ds, Fn, Fs, Gs, As, Bn])
-            }
-            PitchGroup::Cs => {
-                PitchMode::mixolydian([Gs, As, Cn, Cs, Ds, Fn, Fs])
-            }
-            PitchGroup::Gs => {
-                PitchMode::mixolydian([Ds, Fn, Gn, Gs, As, Cn, Cs])
-            }
-            PitchGroup::Ds => {
-                PitchMode::mixolydian([As, Cn, Dn, Ds, Fn, Gn, Gs])
-            }
-            PitchGroup::As => {
-                PitchMode::mixolydian([Fn, Gn, An, As, Cn, Dn, Ds])
-            }
-            PitchGroup::Fn => {
-                PitchMode::mixolydian([Cn, Dn, En, Fn, Gn, An, As])
-            }
+            PitchGroup::Cn => { PitchMode::mixolydian([Gn, An, Bn, Cn, Dn, En, Fn]) }
+            PitchGroup::Gn => { PitchMode::mixolydian([Dn, En, Fs, Gn, An, Bn, Cn]) }
+            PitchGroup::Dn => { PitchMode::mixolydian([An, Bn, Cs, Dn, En, Fs, Gn]) }
+            PitchGroup::An => { PitchMode::mixolydian([En, Fs, Gs, An, Bn, Cs, Dn]) }
+            PitchGroup::En => { PitchMode::mixolydian([Bn, Cs, Ds, En, Fs, Gs, An]) }
+            PitchGroup::Bn => { PitchMode::mixolydian([Fs, Gs, As, Bn, Cs, Ds, En]) }
+            PitchGroup::Fs => { PitchMode::mixolydian([Cs, Ds, Fn, Fs, Gs, As, Bn]) }
+            PitchGroup::Cs => { PitchMode::mixolydian([Gs, As, Cn, Cs, Ds, Fn, Fs]) }
+            PitchGroup::Gs => { PitchMode::mixolydian([Ds, Fn, Gn, Gs, As, Cn, Cs]) }
+            PitchGroup::Ds => { PitchMode::mixolydian([As, Cn, Dn, Ds, Fn, Gn, Gs]) }
+            PitchGroup::As => { PitchMode::mixolydian([Fn, Gn, An, As, Cn, Dn, Ds]) }
+            PitchGroup::Fn => { PitchMode::mixolydian([Cn, Dn, En, Fn, Gn, An, As]) }
         }
     }
     /// Get Aeolian [PitchMode](audiotheorem::types::PitchMode) for this
@@ -524,7 +500,7 @@ impl PitchGroup {
                     pitch_class.groups().iter().copied().collect();
                 remaining = remaining.intersection(&groups).copied().collect();
             }
-            
+
             remaining
         };
         debug!("Potential PitchGroups: {:?}", &pitch_groups);
