@@ -10,11 +10,13 @@ pub struct PitchgroupSlice {
     notes: Vec<Note>,               // This is the notes that are being played in the natural accidentals per the 'circle of fifths' (Proprietary, Ancillary, 2024)
     displacements: Vec<bool>,       // This is the same as the members and offnotes fields per index
     accidental: Form,         // This is a fast way of telling us if this is a sharp, flat, or natural note (Cn would be the only Natural Slice) (Proprietary, Ancillary, 2024)
+    probability: f64,                // This is the probability of the pitchgroup slice being played
 }
 
 impl PitchgroupSlice {
     pub fn new(pitchgroup: &PitchGroup, played_pitch_classes: Vec<PitchClass>) -> PitchgroupSlice {
         let pitch_classes: Vec<PitchClass> = pitchgroup.pitch_classes().to_vec();   // All of the possible pitchclasses in the pitchgroup
+        let n_played = played_pitch_classes.len();                                 // The number of pitchclasses that are being played
 
         // TODO: Rayon Parallelization 
         // This turns into a boolean array the length of the pitchclasses, signifying if we are playing a note in the pitchgroup
@@ -32,7 +34,8 @@ impl PitchgroupSlice {
             pitchgroup: pitchgroup.clone(), 
             notes, 
             displacements,
-            accidental
+            accidental,
+            probability: n_played as f64 / pitch_classes.len() as f64
         }
     }
 
@@ -46,7 +49,6 @@ impl PitchgroupSlice {
 pub struct PitchGroupKernel {
     index: usize,
     pitchgroups: Vec<PitchgroupSlice>,  // Pitchgroups are in the same order as Propabilities
-    probabilities: Vec<f64>,            // Probabilities belong to the pitchgroups
     pub uniforms: Vec<Note>,                // Uniforms are the common notes between the top pitchgroups
     pub mediants: Vec<Note>,                // Mediants are the notes that are in the top pitchgroups but not in all of them, and are not nonces.
     pub non_uniforms: Vec<Note>,            // Non-Uniforms are the uncommon notes between the top pitchgroups
@@ -66,22 +68,12 @@ impl PitchGroupKernel {
         // TODO: Add Parallelization using Rayon for Best Attempt at Performance
         // we want to iterate over all of the pitchgroups and determine the probability of a pitchgroup slice
         // as well as collecting the pitchclasses that are in the top pitchgroups (ideally one, but could be a 3 way tie)
-        for pitchgroup in discovered_pitch_groups.iter() {
-            let new_pitchgroup_slice = PitchgroupSlice::new(pitchgroup, played_pitch_classes.clone());
-            
-            // We need to find the probability of this pitchgroup slice by dividing the number of played pitchclasses by the total number of pitchclasses
-            let n_played = new_pitchgroup_slice.displacements.iter().filter(|d| **d).count() as f64;
-            let n_total = new_pitchgroup_slice.displacements.len() as f64;
-            let probability = n_played / n_total;
-
-            pitchgroups.push(new_pitchgroup_slice);
-            probabilities.push(probability);
-        }
+        for pitchgroup in discovered_pitch_groups.iter() 
+            { pitchgroups.push(PitchgroupSlice::new(pitchgroup, played_pitch_classes.clone())); }
 
         PitchGroupKernel { 
             index: 0,
             pitchgroups, 
-            probabilities,
             uniforms: Vec::new(),
             mediants: Vec::new(),
             non_uniforms: Vec::new()
@@ -90,21 +82,8 @@ impl PitchGroupKernel {
 
     // This gives us a collection of the top pitchgroups
     fn top_pitchgroups(&self) -> Vec<PitchgroupSlice> {
-        let zipped_pitchgroups = self.pitchgroups
-                                                                                    .iter()
-                                                                                    .map(|pg| pg.clone())
-                                                                                    .zip(self.probabilities.iter())
-                                                                                    .map(|(pg, p)| (pg, *p))
-                                                                                    .collect::<Vec<(PitchgroupSlice, f64)>>();
-        
-        let top_probability = self.probabilities.iter().max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
-
-        // sort by probability and filter out the top pitchgroups
-        zipped_pitchgroups
-            .iter()
-            .filter(|mpg| mpg.1 == *top_probability)
-            .map(|(pg, _)| pg.clone())
-            .collect::<Vec<PitchgroupSlice>>()
+        let max_p = self.pitchgroups.iter().map(|pg| pg.probability).max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
+        self.pitchgroups.iter().filter(|pg| pg.probability == max_p).map(|pg| pg.clone()).collect::<Vec<PitchgroupSlice>>()
     }
 
     // This determines uniformity vs non-uniformity of the top pitchgroups

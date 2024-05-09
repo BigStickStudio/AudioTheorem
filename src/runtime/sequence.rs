@@ -173,7 +173,7 @@ impl Sequence {
     fn delete_tone(&mut self, index: u8) {
         if self.size == 0 { return; }
 
-        self.tones.retain(|&t| t.index() != index);
+        self.tones.retain(|t| t.index() != index);
         self.size = self.tones.len() as u8;
     }
 
