@@ -1,13 +1,15 @@
 //
-// Copyright 2023 Richard I. Christopher, NeoTec Digital. All Rights Reserved.
+// Copyright 2023-2024 Richard I. Christopher, NeoTec Digital for Big Stick Studios under Ancillary. All Rights Reserved. Nexus Project.
 //
 
 use super::super::Sequence;
+use super::super::Disposition;
 use super::texture::Texture;
 use super::camera::{Camera, CameraUniform, CameraController};
 use super::mesh::*;
 use super::instances::{Instance, RawInstance};
 use super::spheres::Sphere;
+use crate::runtime::disposition;
 use crate::types::Dynamic;
 use std::sync::{Arc, Mutex};
 use wgpu::util::DeviceExt;
@@ -99,7 +101,7 @@ impl Engine {
                 let index = x;
                 let position = cgmath::Vector3 { x: x as f32, y: y as f32, z: 0.0 } - instance_displacement;
                 let rotation = cgmath::Quaternion::from_axis_angle(cgmath::Vector3::unit_y(), cgmath::Deg(0.0));
-                Instance { position, rotation, index, dynamic: Dynamic::Off }
+                Instance { position, rotation, index, dynamic: Dynamic::Off, disposition: Disposition::Natural }
             })
         }).collect::<Vec<_>>();
 
@@ -137,6 +139,8 @@ impl Engine {
         let white_sphere = Sphere::White;
         let black_sphere = Sphere::Black;
         let blue_sphere: Sphere = Sphere::Blue8;
+        let green_sphere: Sphere = Sphere::Green;
+        let orange_sphere: Sphere = Sphere::Orange;
 
         diffuse_textures.push(
             super::texture::Texture::from_bytes(
@@ -153,6 +157,18 @@ impl Engine {
         diffuse_textures.push(
             super::texture::Texture::from_bytes(
                 &device, &queue, blue_sphere.diffuse_bytes(), blue_sphere.to_string()
+            )
+        );
+
+        diffuse_textures.push(
+            super::texture::Texture::from_bytes(
+                &device, &queue, green_sphere.diffuse_bytes(), green_sphere.to_string()
+            )
+        );
+
+        diffuse_textures.push(
+            super::texture::Texture::from_bytes(
+                &device, &queue, orange_sphere.diffuse_bytes(), orange_sphere.to_string()
             )
         );
 
@@ -214,6 +230,42 @@ impl Engine {
                         ty: wgpu::BindingType::Sampler (wgpu::SamplerBindingType::Filtering),
                         count: None,
                     }, 
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 6,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Texture {
+                            multisampled: false,
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            sample_type: wgpu::TextureSampleType::Float {
+                                filterable: true,
+                            },
+                        },
+                        count: None,
+                    },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 7,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Sampler (wgpu::SamplerBindingType::Filtering),
+                        count: None,
+                    }, 
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 8,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Texture {
+                            multisampled: false,
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            sample_type: wgpu::TextureSampleType::Float {
+                                filterable: true,
+                            },
+                        },
+                        count: None,
+                    },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 9,
+                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Sampler (wgpu::SamplerBindingType::Filtering),
+                        count: None,
+                    }, 
                 ],
                 label: Some("texture_bind_group_layout"),
             }
@@ -247,6 +299,22 @@ impl Engine {
                     wgpu::BindGroupEntry {
                         binding: 5,
                         resource: wgpu::BindingResource::Sampler(&diffuse_textures[2].sampler),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 6,
+                        resource: wgpu::BindingResource::TextureView(&diffuse_textures[3].view),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 7,
+                        resource: wgpu::BindingResource::Sampler(&diffuse_textures[3].sampler),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 8,
+                        resource: wgpu::BindingResource::TextureView(&diffuse_textures[4].view),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 9,
+                        resource: wgpu::BindingResource::Sampler(&diffuse_textures[4].sampler),
                     }
                 ],
                 label: Some("diffuse_bind_group")
@@ -404,15 +472,18 @@ impl Engine {
         self.camera_controller.process_events(event)
     }
 
-    pub fn enable_tones(&mut self, idx_vel: (Vec<u8>, Vec<u8>)) {
+    pub fn enable_tones(&mut self, idx_vel: (Vec<u8>, Vec<u8>, u8)) {
         // reset all the instances dynamic to off
         for instance in self.instances.iter_mut() {
-            instance.dynamic = Dynamic::Off;            
+            instance.dynamic = Dynamic::Off;
+            instance.disposition = Disposition::Natural;
         }
+
+        let disposition = idx_vel.2;    // This will be dec2bin(0-7) to determine the disposition of the key
 
         // iterate over the indexes and set the velocity
         for (idx, velocity) in idx_vel.0.iter().zip(idx_vel.1.iter()) {
-            self.instances[*idx as usize].set_velocity(velocity);
+            self.instances[*idx as usize].trigger_key(velocity, disposition);
         }
         
         let instance_data = self.instances.iter().map(Instance::raw).collect::<Vec<_>>();

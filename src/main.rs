@@ -136,7 +136,7 @@ fn main() {
 
                 if size != last_sequence_size {
                     last_sequence_size = size;
-                    let idx_vel: (Vec<u8>, Vec<u8>) = read_sequence.get_instance();
+                    let idx_vel: (Vec<u8>, Vec<u8>, u8) = read_sequence.get_instance();
 
                     read_sequence.print_state();
 

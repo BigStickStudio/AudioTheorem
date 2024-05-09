@@ -112,7 +112,7 @@ impl Sequence {
         println!("{:#?}", *self);
     }
 
-    pub fn get_instance(&self) -> (Vec<u8>, Vec<u8>) {
-        (self.indices.clone(), self.velocities.clone())
+    pub fn get_instance(&self) -> (Vec<u8>, Vec<u8>, u8) {
+        (self.indices.clone(), self.velocities.clone(), 1)
     }
 }
