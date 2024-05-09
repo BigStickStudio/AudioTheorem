@@ -24,7 +24,7 @@ fn main() {
     use std::sync::{Arc, Mutex};
     use tokio::time::{self, sleep, Duration};
     use rodio::{OutputStream, Source, dynamic_mixer};
-    use audiotheorem::{runtime::{Events, Engine, Sequence, Waveform}, types::Tuning};
+    use audiotheorem::{runtime::{Events, Engine, Sequence, SequenceData, Waveform}, types::Tuning};
 
     const GRID_SIZE: u8 = 12;
 
@@ -136,11 +136,17 @@ fn main() {
 
                 if size != last_sequence_size {
                     last_sequence_size = size;
-                    let idx_vel: (Vec<u8>, Vec<u8>, u8) = read_sequence.get_instance();
+                    let played_notes: SequenceData = read_sequence.played_notes;
+                    let uniform_notes: SequenceData = read_sequence.uniform_notes;
+                    let nonce_notes: SequenceData = read_sequence.nonce_notes;
+                    let mediant_notes: SequenceData = read_sequence.mediant_notes;
+
+                    gfx.enable_tones(played_notes);
+                    gfx.enable_tones(uniform_notes);
+                    gfx.enable_tones(nonce_notes);
+                    gfx.enable_tones(mediant_notes);
 
                     read_sequence.print_state();
-
-                    gfx.enable_tones(idx_vel);
 
                     // Need to add logic to highlight duplicate 'overlaps' from top rated pitchgroups
 

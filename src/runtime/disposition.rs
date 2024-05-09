@@ -6,7 +6,8 @@ pub enum Disposition {
     Natural,            // Silent - Not being played
     Played,             // Will appear Blue
     Harmonious,         // Will appear Green if these notes are a uniform value amongst the top pitchgroups
-    Dissodant,          // Will appear Orange if these notes are a non-uniform value amongst the top pitchgroups
+    Mediant,            // Will appear Orange if these notes are a non-uniform value amongst the top pitchgroups
+    Dissident,          // Will appear Red if these notes are a non-uniform value amongst the top pitchgroups
 }
 
 impl Disposition {
@@ -14,7 +15,8 @@ impl Disposition {
         match disposition {
             1 => Disposition::Played,
             2 => Disposition::Harmonious,
-            4 => Disposition::Dissodant,
+            4 => Disposition::Mediant,
+            8 => Disposition::Dissident,
             _ => Disposition::Natural
         }
     }
@@ -24,7 +26,9 @@ impl Disposition {
             Disposition::Natural => 0,
             Disposition::Played => 1,
             Disposition::Harmonious => 2,
-            Disposition::Dissodant => 4
+            Disposition::Mediant => 4,
+            Disposition::Dissident => 8
+
         }
     }
 
@@ -33,7 +37,8 @@ impl Disposition {
             Disposition::Natural => 0,
             Disposition::Played => 1,
             Disposition::Harmonious => 2,
-            Disposition::Dissodant => 4
+            Disposition::Mediant => 4,
+            Disposition::Dissident => 8,
         }
     }
 }

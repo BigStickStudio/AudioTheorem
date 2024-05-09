@@ -14,7 +14,8 @@
 // limitations under the License.
 //
 
-/// A Notation of whether a key signature is Sharp or Flat in nature.
+/// A Notation of whether a key signature is Sharp or Flat in nature.\
+#[derive(Copy, Clone, Debug)]
 pub enum Form {
     Flat,
     Natural,

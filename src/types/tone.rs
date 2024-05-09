@@ -15,7 +15,7 @@
 //
 
 // 2023 - RC - velocity paramater and from_index, to_index and to_dynamic functions added (Not Under Apache)
-
+// 2024 - adding velocity factors per Brand Media - Ancillary 2024
 use super::{Note, Octave, Pitch, PitchClass, Dynamic};
 use crate::types::interval::PerfectQuality::Augmented;
 use crate::types::{Interval, PerfectQuality};
@@ -38,9 +38,8 @@ impl Tone {
         return Tone { octave, note, velocity };
     }
 
-    pub fn to_index(&self) -> u8 {
-        (self.octave.to_index() + 1) * 12 + self.note.pitch_class().to_index()
-    }
+    pub fn to_index(&self) -> u8 { (self.octave.to_index() + 1) * 12 + self.note.pitch_class().to_index() }
+    pub fn velocity(&self) -> u8 { self.velocity }
 
     pub fn to_dynamic(&self) -> Dynamic {
         Dynamic::from_velocity(self.velocity)
@@ -48,76 +47,83 @@ impl Tone {
 
     /// Create a new [Tone](audiotheorem::types::Tone) from a [Note](audiotheorem::types::Note) and an
     /// [Octave](audiotheorem::types::Octave).
-    pub fn from_parts(octave: Octave, note: Note, velocity: u8) -> Tone {
-        Tone { octave, note, velocity }
-    }
+    pub fn from_parts(octave: Octave, note: Note, velocity: u8) -> Tone 
+        { Tone { octave, note, velocity } }
+
     /// Convert a [Tone](audiotheorem::types::Tone) into a [Note](audiotheorem::types::Note).
-    pub fn note(&self) -> Note {
-        self.note
-    }
+    pub fn note(&self) -> Note { self.note }
+
     /// Convert a [Tone](audiotheorem::types::Tone) into a [Pitch](audiotheorem::types::Pitch).
-    pub fn pitch(&self) -> Pitch {
-        Pitch::from((12 * self.octave.to_index()) + self.note.pitch_class().to_index())
-    }
+    pub fn pitch(&self) -> Pitch 
+        { Pitch::from((12 * self.octave.to_index()) + self.note.pitch_class().to_index()) }
+
     /// Convert a [Tone](audiotheorem::types::Tone) into a [PitchClass](audiotheorem::types::PitchClass).
-    pub fn pitch_class(&self) -> PitchClass {
-        self.note.pitch_class()
-    }
+    pub fn pitch_class(&self) -> PitchClass 
+        { self.note.pitch_class() }
+
     /// Convert a [Tone](audiotheorem::types::Tone) into an [Octave](audiotheorem::types::Octave).
-    pub fn octave(&self) -> Octave {
-        self.octave
-    }
+    pub fn octave(&self) -> Octave 
+        { self.octave }
 }
 
 impl fmt::Display for Tone {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        format_args!("{}{}:{}", self.note, self.octave, self.velocity).fmt(f)
-    }
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result 
+        { format_args!("{}{}:{}", self.note, self.octave, self.velocity).fmt(f) }
 }
 
 impl std::ops::Add<Interval> for Tone {
     type Output = Option<Self>;
     fn add(self, interval: Interval) -> Self::Output {
-        if interval == Interval::First(PerfectQuality::TripleDiminished) {
-            self - Interval::First(PerfectQuality::TripleAugmented)
-        } else if interval == Interval::First(PerfectQuality::DoubleDiminished) {
-            self - Interval::First(PerfectQuality::DoubleAugmented)
-        } else if interval == Interval::First(PerfectQuality::Diminished) {
-            self - Interval::First(PerfectQuality::Augmented)
-        } else {
-            if let Some(pitch) = self.pitch() + interval {
-                Some(Tone {
-                    note: (self.note + interval)?,
-                    octave: pitch.octave(),
-                    velocity: self.velocity,
-                })
-            } else {
-                None
+        if interval == Interval::First(PerfectQuality::TripleDiminished) 
+            { self - Interval::First(PerfectQuality::TripleAugmented) } 
+        else if interval == Interval::First(PerfectQuality::DoubleDiminished) 
+            { self - Interval::First(PerfectQuality::DoubleAugmented) } 
+        else if interval == Interval::First(PerfectQuality::Diminished) 
+            { self - Interval::First(PerfectQuality::Augmented) } 
+        else 
+            {
+                if let Some(pitch) = self.pitch() + interval 
+                    {
+                        Some(
+                            Tone 
+                                {
+                                    note: (self.note + interval)?,
+                                    octave: pitch.octave(),
+                                    velocity: self.velocity,
+                                }
+                            )
+                    } 
+                else 
+                    { None }
             }
-        }
     }
 }
 
 impl std::ops::Sub<Interval> for Tone {
     type Output = Option<Self>;
     fn sub(self, interval: Interval) -> Self::Output {
-        if interval == Interval::First(PerfectQuality::TripleDiminished) {
-            self + Interval::First(PerfectQuality::TripleAugmented)
-        } else if interval == Interval::First(PerfectQuality::DoubleDiminished) {
-            self + Interval::First(PerfectQuality::DoubleAugmented)
-        } else if interval == Interval::First(PerfectQuality::Diminished) {
-            self + Interval::First(PerfectQuality::Augmented)
-        } else {
-            if let Some(pitch) = self.pitch() - interval {
-                Some(Tone {
-                    note: (self.note - interval)?,
-                    octave: pitch.octave(),
-                    velocity: self.velocity,
-                })
-            } else {
-                None
+        if interval == Interval::First(PerfectQuality::TripleDiminished) 
+            { self + Interval::First(PerfectQuality::TripleAugmented) } 
+        else if interval == Interval::First(PerfectQuality::DoubleDiminished) 
+            { self + Interval::First(PerfectQuality::DoubleAugmented) } 
+        else if interval == Interval::First(PerfectQuality::Diminished) 
+            { self + Interval::First(PerfectQuality::Augmented) } 
+        else 
+            {
+                if let Some(pitch) = self.pitch() - interval 
+                    {
+                        Some(
+                            Tone 
+                                {
+                                    note: (self.note - interval)?,
+                                    octave: pitch.octave(),
+                                    velocity: self.velocity,
+                                }
+                            )
+                    } 
+                else 
+                    { None }
             }
-        }
     }
 }
 

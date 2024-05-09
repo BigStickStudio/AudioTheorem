@@ -70,6 +70,7 @@ pub struct RawInstance {
     pub color_factor: u32,
 }
 
+// Used for Vertex Buffer Layout
 impl RawInstance {
     pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
         use std::mem;

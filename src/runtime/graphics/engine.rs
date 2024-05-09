@@ -4,12 +4,13 @@
 
 use super::super::Sequence;
 use super::super::Disposition;
+use super::spheres;
 use super::texture::Texture;
 use super::camera::{Camera, CameraUniform, CameraController};
 use super::mesh::*;
 use super::instances::{Instance, RawInstance};
 use super::spheres::Sphere;
-use crate::runtime::disposition;
+use crate::runtime::{disposition, SequenceData};
 use crate::types::Dynamic;
 use std::sync::{Arc, Mutex};
 use wgpu::util::DeviceExt;
@@ -44,6 +45,7 @@ pub struct Engine {
 }
 
 impl Engine {
+    // Todo: Break this into init functions
     pub async fn new(window: Window, grid_size: u32, square: &TexturedSquare<'_>) -> Self {
         env_logger::init();
 
@@ -134,51 +136,19 @@ impl Engine {
         let num_vertices = square.vertices.len() as u32;
         let num_indices = square.indices.len() as u32;
 
-        let mut diffuse_textures: Vec<Texture> = Vec::new(); 
-
-        let white_sphere = Sphere::White;
-        let black_sphere = Sphere::Black;
-        let blue_sphere: Sphere = Sphere::Blue8;
-        let green_sphere: Sphere = Sphere::Green;
-        let orange_sphere: Sphere = Sphere::Orange;
-
-        diffuse_textures.push(
-            super::texture::Texture::from_bytes(
-                &device, &queue, white_sphere.diffuse_bytes(), white_sphere.to_string()
-            )
-        );
-
-        diffuse_textures.push(
-            super::texture::Texture::from_bytes(
-                &device, &queue, black_sphere.diffuse_bytes(), black_sphere.to_string()
-            )
-        );
-
-        diffuse_textures.push(
-            super::texture::Texture::from_bytes(
-                &device, &queue, blue_sphere.diffuse_bytes(), blue_sphere.to_string()
-            )
-        );
-
-        diffuse_textures.push(
-            super::texture::Texture::from_bytes(
-                &device, &queue, green_sphere.diffuse_bytes(), green_sphere.to_string()
-            )
-        );
-
-        diffuse_textures.push(
-            super::texture::Texture::from_bytes(
-                &device, &queue, orange_sphere.diffuse_bytes(), orange_sphere.to_string()
-            )
-        );
+        let spheres: Vec<Sphere> = vec![Sphere::White, Sphere::Black, Sphere::Blue8, Sphere::Green, Sphere::Orange, Sphere::Red];
+        let diffuse_textures: Vec<Texture> = spheres
+                                                .iter()
+                                                .map(|sphere| 
+                                                    { Texture::from_bytes(&device, &queue, sphere.diffuse_bytes(), sphere.to_string())})
+                                                .collect();
 
         // We are creating a layout for the textures that we are going to use in the shader
         let texture_bind_group_layout = device.create_bind_group_layout(
             &wgpu::BindGroupLayoutDescriptor {
                 entries: &[
                     wgpu::BindGroupLayoutEntry {
-                        binding: 0,
-                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        binding: 0, visibility: wgpu::ShaderStages::FRAGMENT,
                         ty: wgpu::BindingType::Texture {
                             multisampled: false,
                             view_dimension: wgpu::TextureViewDimension::D2,
@@ -189,14 +159,12 @@ impl Engine {
                         count: None,
                     },
                     wgpu::BindGroupLayoutEntry {
-                        binding: 1,
-                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        binding: 1, visibility: wgpu::ShaderStages::FRAGMENT,
                         ty: wgpu::BindingType::Sampler (wgpu::SamplerBindingType::Filtering),
                         count: None,
                     },
                     wgpu::BindGroupLayoutEntry {
-                        binding: 2,
-                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        binding: 2, visibility: wgpu::ShaderStages::FRAGMENT,
                         ty: wgpu::BindingType::Texture {
                             multisampled: false,
                             view_dimension: wgpu::TextureViewDimension::D2,
@@ -207,14 +175,12 @@ impl Engine {
                         count: None,
                     },
                     wgpu::BindGroupLayoutEntry {
-                        binding: 3,
-                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        binding: 3, visibility: wgpu::ShaderStages::FRAGMENT,
                         ty: wgpu::BindingType::Sampler (wgpu::SamplerBindingType::Filtering),
                         count: None,
                     },
                     wgpu::BindGroupLayoutEntry {
-                        binding: 4,
-                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        binding: 4, visibility: wgpu::ShaderStages::FRAGMENT,
                         ty: wgpu::BindingType::Texture {
                             multisampled: false,
                             view_dimension: wgpu::TextureViewDimension::D2,
@@ -225,14 +191,12 @@ impl Engine {
                         count: None,
                     },
                     wgpu::BindGroupLayoutEntry {
-                        binding: 5,
-                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        binding: 5, visibility: wgpu::ShaderStages::FRAGMENT,
                         ty: wgpu::BindingType::Sampler (wgpu::SamplerBindingType::Filtering),
                         count: None,
                     }, 
                     wgpu::BindGroupLayoutEntry {
-                        binding: 6,
-                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        binding: 6, visibility: wgpu::ShaderStages::FRAGMENT,
                         ty: wgpu::BindingType::Texture {
                             multisampled: false,
                             view_dimension: wgpu::TextureViewDimension::D2,
@@ -243,14 +207,12 @@ impl Engine {
                         count: None,
                     },
                     wgpu::BindGroupLayoutEntry {
-                        binding: 7,
-                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        binding: 7, visibility: wgpu::ShaderStages::FRAGMENT,
                         ty: wgpu::BindingType::Sampler (wgpu::SamplerBindingType::Filtering),
                         count: None,
                     }, 
                     wgpu::BindGroupLayoutEntry {
-                        binding: 8,
-                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        binding: 8, visibility: wgpu::ShaderStages::FRAGMENT,
                         ty: wgpu::BindingType::Texture {
                             multisampled: false,
                             view_dimension: wgpu::TextureViewDimension::D2,
@@ -261,11 +223,26 @@ impl Engine {
                         count: None,
                     },
                     wgpu::BindGroupLayoutEntry {
-                        binding: 9,
-                        visibility: wgpu::ShaderStages::FRAGMENT,
+                        binding: 9, visibility: wgpu::ShaderStages::FRAGMENT,
                         ty: wgpu::BindingType::Sampler (wgpu::SamplerBindingType::Filtering),
                         count: None,
                     }, 
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 10, visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Texture {
+                            multisampled: false,
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            sample_type: wgpu::TextureSampleType::Float {
+                                filterable: true,
+                            },
+                        },
+                        count: None,
+                    },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 11, visibility: wgpu::ShaderStages::FRAGMENT,
+                        ty: wgpu::BindingType::Sampler (wgpu::SamplerBindingType::Filtering),
+                        count: None,
+                    }
                 ],
                 label: Some("texture_bind_group_layout"),
             }
@@ -276,51 +253,36 @@ impl Engine {
             &wgpu::BindGroupDescriptor {
                 layout: &texture_bind_group_layout,
                 entries: &[
-                    wgpu::BindGroupEntry {
-                        binding: 0,
-                        resource: wgpu::BindingResource::TextureView(&diffuse_textures[0].view),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 1,
-                        resource: wgpu::BindingResource::Sampler(&diffuse_textures[0].sampler),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 2,
-                        resource: wgpu::BindingResource::TextureView(&diffuse_textures[1].view),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 3,
-                        resource: wgpu::BindingResource::Sampler(&diffuse_textures[1].sampler),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 4,
-                        resource: wgpu::BindingResource::TextureView(&diffuse_textures[2].view),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 5,
-                        resource: wgpu::BindingResource::Sampler(&diffuse_textures[2].sampler),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 6,
-                        resource: wgpu::BindingResource::TextureView(&diffuse_textures[3].view),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 7,
-                        resource: wgpu::BindingResource::Sampler(&diffuse_textures[3].sampler),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 8,
-                        resource: wgpu::BindingResource::TextureView(&diffuse_textures[4].view),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 9,
-                        resource: wgpu::BindingResource::Sampler(&diffuse_textures[4].sampler),
-                    }
+                    wgpu::BindGroupEntry 
+                        { binding: 0, resource: wgpu::BindingResource::TextureView(&diffuse_textures[0].view), },
+                    wgpu::BindGroupEntry 
+                        { binding: 1, resource: wgpu::BindingResource::Sampler(&diffuse_textures[0].sampler), },
+                    wgpu::BindGroupEntry 
+                        { binding: 2, resource: wgpu::BindingResource::TextureView(&diffuse_textures[1].view), },
+                    wgpu::BindGroupEntry 
+                        { binding: 3, resource: wgpu::BindingResource::Sampler(&diffuse_textures[1].sampler), },
+                    wgpu::BindGroupEntry 
+                        { binding: 4, resource: wgpu::BindingResource::TextureView(&diffuse_textures[2].view), },
+                    wgpu::BindGroupEntry 
+                        { binding: 5, resource: wgpu::BindingResource::Sampler(&diffuse_textures[2].sampler), },
+                    wgpu::BindGroupEntry 
+                        { binding: 6, resource: wgpu::BindingResource::TextureView(&diffuse_textures[3].view), },
+                    wgpu::BindGroupEntry 
+                        { binding: 7, resource: wgpu::BindingResource::Sampler(&diffuse_textures[3].sampler), },
+                    wgpu::BindGroupEntry 
+                        { binding: 8, resource: wgpu::BindingResource::TextureView(&diffuse_textures[4].view), },
+                    wgpu::BindGroupEntry 
+                        { binding: 9, resource: wgpu::BindingResource::Sampler(&diffuse_textures[4].sampler), },
+                    wgpu::BindGroupEntry 
+                        { binding: 10, resource: wgpu::BindingResource::TextureView(&diffuse_textures[5].view), },
+                    wgpu::BindGroupEntry 
+                        { binding: 11, resource: wgpu::BindingResource::Sampler(&diffuse_textures[5].sampler), }
                 ],
                 label: Some("diffuse_bind_group")
             }
         );
 
+        // Fixed Camera - TODO: allow for camera movement in specific scenarios -> this becomes part of the graphics engine for Nexus
         let camera = Camera {
             eye: (2.5, 7.0, 12.0).into(),
             target: (2.5, 6.0, 0.0).into(),
@@ -472,19 +434,19 @@ impl Engine {
         self.camera_controller.process_events(event)
     }
 
-    pub fn enable_tones(&mut self, idx_vel: (Vec<u8>, Vec<u8>, u8)) {
+    pub fn enable_tones(&mut self, iv: SequenceData) {
         // reset all the instances dynamic to off
-        for instance in self.instances.iter_mut() {
+        self.instances.iter_mut().for_each(|instance| {
             instance.dynamic = Dynamic::Off;
             instance.disposition = Disposition::Natural;
-        }
+        });
 
-        let disposition = idx_vel.2;    // This will be dec2bin(0-7) to determine the disposition of the key
+
+        let disposition = iv.2;    // This will be dec2bin(0-7) to determine the disposition of the key
 
         // iterate over the indexes and set the velocity
-        for (idx, velocity) in idx_vel.0.iter().zip(idx_vel.1.iter()) {
-            self.instances[*idx as usize].trigger_key(velocity, disposition);
-        }
+        for (idx, velocity) in idx_vel.0.iter().zip(idx_vel.1.iter()) 
+            { self.instances[*idx as usize].trigger_key(velocity, disposition); }
         
         let instance_data = self.instances.iter().map(Instance::raw).collect::<Vec<_>>();
 

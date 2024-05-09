@@ -5,7 +5,7 @@ mod graphics;
 mod disposition;
 mod pitchgroupkernel;
 
-pub use self::sequence::Sequence;
+pub use self::sequence::{Sequence, SequenceData};
 pub use self::graphics::{Engine,TexturedSquare};
 pub use self::midi::Events;
 pub use self::waveform::{Waveform, WaveformType};

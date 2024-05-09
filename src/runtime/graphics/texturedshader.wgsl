@@ -69,6 +69,10 @@ var green_sampler: sampler;
 var orange_diffuse: texture_2d<f32>;
 @group(0) @binding(9)
 var orange_sampler: sampler;
+@group(0) @binding(10)
+var red_diffuse: texture_2d<f32>;
+@group(0) @binding(11)
+var red_sampler: sampler;
 
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
@@ -77,6 +81,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     var blue_sample = textureSample(blue_diffuse, blue_sampler, in.tex_coords);
     var green_sample = textureSample(orange_diffuse, orange_sampler, in.tex_coords);
     var orange_sample = textureSample(orange_diffuse, orange_sampler, in.tex_coords);
+    var red_sample = textureSample(orange_diffuse, orange_sampler, in.tex_coords);
 
     var black_and_white = mix(black_sample, white_sample, in.white_key);
 
@@ -88,6 +93,9 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     if (in.color_factor == 4u)
         { return mix(black_and_white, orange_sample, in.velocity * 1.25); }
+
+    if (in.color_factor == 8u)
+        { return mix(black_and_white, red_sample, in.velocity * 1.25); }
 
    return black_and_white;
 }

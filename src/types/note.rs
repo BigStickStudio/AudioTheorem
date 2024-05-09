@@ -21,7 +21,7 @@ use std::{cmp, fmt};
 
 /// [Notes](audiotheorem::types::Note) are names given to a specific
 /// [PitchClass](audiotheorem::types::PitchClass).
-#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub enum Note {
     A(Accidental),
     B(Accidental),
@@ -109,8 +109,9 @@ impl Note {
             Note::G(acc) => acc,
         }
     }
-    /// [PitchClass](audiotheorem::types::PitchClass) of this [Note](audiotheorem::types::Note).
-    pub fn pitch_class(&self) -> PitchClass {
+
+    // Determines the number of the pitchclass index based on the note and accidental
+    pub fn index(&self) -> u8 {
         let x1 = match *self {
             Note::C(_) => 0,
             Note::D(_) => 2,
@@ -127,8 +128,12 @@ impl Note {
             Accidental::Sharp => 13,
             Accidental::DoubleSharp => 14,
         };
-        PitchClass::from_index((x1 + x2) % 12 as u8)
+        (x1 + x2) % 12
     }
+
+    /// [PitchClass](audiotheorem::types::PitchClass) of this [Note](audiotheorem::types::Note).
+    pub fn pitch_class(&self) -> PitchClass { PitchClass::from_index(self.index()) }
+
     /// Is this [Note](audiotheorem::types::Note) enharmonic.
     pub fn enharmonic(&self) -> bool {
         use PitchClass::*;
@@ -167,7 +172,7 @@ impl fmt::Debug for Note {
 
 /// [Accidentals](audiotheorem::types::Accidental) describe if a
 /// [Note](audiotheorem::types::Note) is natural, sharp or flat.
-#[derive(Copy, Clone, Ord, Eq, PartialOrd, PartialEq)]
+#[derive(Copy, Clone, Ord, Eq, PartialOrd, PartialEq, Hash)]
 pub enum Accidental {
     DoubleFlat,
     Flat,
