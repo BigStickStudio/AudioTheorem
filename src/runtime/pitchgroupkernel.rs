@@ -13,13 +13,14 @@ pub struct PitchgroupSlice {
     probability: u8,                // This is the probability of the pitchgroup slice being played
 }
 
+// Used to determine all of the pitchgroups associated with the played notes
 impl PitchgroupSlice {
     pub fn new(pitchgroup: &PitchGroup, played_pitch_classes: Vec<PitchClass>) -> PitchgroupSlice {
         let pitch_classes: Vec<PitchClass> = pitchgroup.pitch_classes().to_vec();   // All of the possible pitchclasses in the pitchgroup
-        let n_played = played_pitch_classes.len();                                 // The number of pitchclasses that are being played
 
         // TODO: Rayon Parallelization 
         // This turns into a boolean array the length of the pitchclasses, signifying if we are playing a note in the pitchgroup
+        // There is probably a better way to do this, but this is simple and works for now
         let displacements: Vec<bool> = pitch_classes.iter().map(|pc| played_pitch_classes.contains(pc)).collect::<Vec<bool>>();
 
         // We collect all of the natural notes in the pitchgroup from the Matrix
@@ -35,7 +36,7 @@ impl PitchgroupSlice {
             notes, 
             displacements,
             accidental,
-            probability: ((n_played as f64 / pitch_classes.len() as f64) * 100.0) as u8
+            probability: ((played_pitch_classes.len()  as f64 / pitch_classes.len() as f64) * 100.0) as u8
         }
     }
 
@@ -48,7 +49,7 @@ impl PitchgroupSlice {
 #[derive(Clone, Debug)]
 pub struct PitchGroupKernel {
     index: usize,
-    pitchgroups: Vec<PitchgroupSlice>,  // Pitchgroups are in the same order as Propabilities
+    pitchgroup_slices: Vec<PitchgroupSlice>,  // Pitchgroups are in the same order as Propabilities
     pub uniforms: Vec<Note>,                // Uniforms are the common notes between the top pitchgroups
     pub mediants: Vec<Note>,                // Mediants are the notes that are in the top pitchgroups but not in all of them, and are not nonces.
     pub non_uniforms: Vec<Note>,            // Non-Uniforms are the uncommon notes between the top pitchgroups
@@ -56,32 +57,26 @@ pub struct PitchGroupKernel {
 
 impl PitchGroupKernel {
     pub fn new(tones: Vec<Tone>) -> PitchGroupKernel {
-        let mut pitchgroups: Vec<PitchgroupSlice> = Vec::new();
-
         // We start by getting the tones being played in pitchclass form
-        let played_pitch_classes: Vec<PitchClass> = tones.iter().map(|t| t.pitch_class()).collect::<Vec<PitchClass>>(); 
+        let played_pitch_classes: Vec<PitchClass> = tones.iter().map(|t| t.pitch_class()).collect::<Vec<PitchClass>>();
 
-        // This gets us all of the pitch groups that this collection of tones belongs to - Ideally 1 but could be approximately half
-        let discovered_pitch_groups: Vec<PitchGroup> = PitchGroup::from_pitch_classes(played_pitch_classes.clone()); 
-
-        // TODO: Add Parallelization using Rayon for Best Attempt at Performance
-        // we want to iterate over all of the pitchgroups and determine the probability of a pitchgroup slice
-        // as well as collecting the pitchclasses that are in the top pitchgroups (ideally one, but could be a 3 way tie)
-        for pitchgroup in discovered_pitch_groups.iter() 
-            { pitchgroups.push(PitchgroupSlice::new(pitchgroup, played_pitch_classes.clone())); }
-
+        // and then using the pitchclasses to collect all of the pitch groups associated with the played notes.
+        // This would Ideally be 1 Pitchgroup but could be approximately half.
         PitchGroupKernel { 
-            index: 0,
-            pitchgroups, 
-            uniforms: Vec::new(),
-            mediants: Vec::new(),
-            non_uniforms: Vec::new()
-        }
+                index: 0,
+                pitchgroup_slices: PitchGroup::from_pitch_classes(played_pitch_classes.clone())
+                                            .iter()
+                                            .map(|pg| PitchgroupSlice::new(pg, played_pitch_classes.clone()))
+                                            .collect::<Vec<PitchgroupSlice>>(),
+                uniforms: Vec::new(),
+                mediants: Vec::new(),
+                non_uniforms: Vec::new()
+            }
     }
 
     pub fn clear(&mut self) {
         self.index = 0;
-        self.pitchgroups.clear();
+        self.pitchgroup_slices.clear();
         self.uniforms.clear();
         self.mediants.clear();
         self.non_uniforms.clear();
@@ -89,11 +84,22 @@ impl PitchGroupKernel {
 
     // This gives us a collection of the top pitchgroups
     fn top_pitchgroups(&self) -> Vec<PitchgroupSlice> {
-        let max_p = self.pitchgroups.iter().map(|pg| pg.probability).max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
-        self.pitchgroups.iter().filter(|pg| pg.probability == max_p).map(|pg| pg.clone()).collect::<Vec<PitchgroupSlice>>()
+        if self.pitchgroups.len() == 0 { return Vec::new(); }
+
+        let max_p = self.pitchgroup_slices.iter()
+                                        .map(|pg| pg.probability)
+                                        .max_by(|a, b| a.partial_cmp(b).unwrap())
+                                        .unwrap();
+
+        return self.pitchgroup_slices.iter()
+                                        .filter(|pg| pg.probability == max_p)
+                                        .map(|pg| pg.clone())
+                                        .collect::<Vec<PitchgroupSlice>>();
     }
 
     // This determines uniformity vs non-uniformity of the top pitchgroups
+    // as well as collecting the pitchclasses that are in the top pitchgroups 
+    // This would (ideally narrow down the total pitchgroups to one, but could be a 3 way tie, or more depending on the number of notes played)
     pub fn normalize(&mut self) {
         use collections::HashSet;
         let top_pitchgroups = self.top_pitchgroups();
@@ -103,7 +109,9 @@ impl PitchGroupKernel {
             self.uniforms = top_pitchgroups.first().unwrap().get_displaced();
         } else {
             // we want to collect all of the notes that are in all of of the displacements of the top pitchgroups
-            let displacements: HashSet<Note> = top_pitchgroups.iter().flat_map(|pg| pg.get_displaced()).collect::<HashSet<Note>>();
+            let displacements: HashSet<Note> = top_pitchgroups.iter()
+                                        .flat_map(|pg| pg.get_displaced())
+                                        .collect::<HashSet<Note>>();
 
             let mut total_found: HashSet<Note> = HashSet::new();
             let mut total_missing: HashSet<Note> = HashSet::new();
@@ -115,21 +123,20 @@ impl PitchGroupKernel {
                 let pitch_group_displaced: Vec<Note> = pitchgroup.get_displaced();
                 
                 // We need a collection of the notes that are in the pitchgroup but not in the other pitchgroups
-                let found: HashSet<Note> = pitch_group_displaced
+                let found: HashSet<Note> = pitch_group_displaced.iter()
+                                        .filter(|n| 
+                                            top_pitchgroups
                                                 .iter()
-                                                .filter(|n| 
-                                                    top_pitchgroups
-                                                        .iter()
-                                                        .all(|pg| pg.get_displaced().contains(n))
-                                                    )
-                                                .map(|n| *n)
-                                                .collect::<HashSet<Note>>();
+                                                .all(|pg| pg.get_displaced().contains(n))
+                                            )
+                                        .map(|n| *n)
+                                        .collect::<HashSet<Note>>();
  
                 let missing: HashSet<Note> = pitch_group_displaced
-                                                .iter()
-                                                .filter(|n| !found.contains(n))
-                                                .map(|n| *n)
-                                                .collect::<HashSet<Note>>();
+                                        .iter()
+                                        .filter(|n| !found.contains(n))
+                                        .map(|n| *n)
+                                        .collect::<HashSet<Note>>();
 
                 total_found.extend(found);
                 total_missing.extend(missing);

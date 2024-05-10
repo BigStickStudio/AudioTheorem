@@ -36,48 +36,62 @@ fn main() {
     let gfx_read_sequence: Arc<Mutex<Sequence>> = Arc::clone(&write_sequence);
     let audio_read_sequence: Arc<Mutex<Sequence>> = Arc::clone(&write_sequence);
 
-    
+    //////////
+    // MIDI //
+    //////////
+
     // Midi Loop = // Used as a buffer to store the midi events for the graphics loop
     rt.spawn(async move { Events::read_midi(move |index, velocity| { write_sequence.lock().unwrap().process_input(index, velocity); })});
 
+
+
+    ///////////
+    // AUDIO //
+    ///////////
+
     // Audio Loop
-    rt.spawn(async move {
-        // Audio Settings
-        let wave_table_size = 1440;     // 120 samples per octave - 10 samples per pitchclass
-        let sample_rate = 44100;
+    // rt.spawn(async move {
+    //     // Audio Settings
+    //     let wave_table_size = 1440;     // 120 samples per octave - 10 samples per pitchclass
+    //     let sample_rate = 44100;
 
-        let mut wave_table: Vec<f32> = Vec::with_capacity(wave_table_size);
-        for i in 0..wave_table_size { wave_table.push((i as f32 / wave_table_size as f32 * 2.0 * std::f32::consts::PI).sin()); }
+    //     let mut wave_table: Vec<f32> = Vec::with_capacity(wave_table_size);
+    //     for i in 0..wave_table_size { wave_table.push((i as f32 / wave_table_size as f32 * 2.0 * std::f32::consts::PI).sin()); }
 
-        let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-        let sink = Sink::try_new(&stream_handle).unwrap();
+    //     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+    //     let sink = Sink::try_new(&stream_handle).unwrap();
 
-        loop {
-            // get our midi data
-            let read_sequence = audio_read_sequence.lock().unwrap().deref().clone();
-            let size = read_sequence.get_size();
+    //     loop {
+    //         // get our midi data
+    //         let read_sequence = audio_read_sequence.lock().unwrap().deref().clone();
+    //         let size = read_sequence.get_size();
             
-            // clear the sink
-            sink.clear();
+    //         // clear the sink
+    //         sink.clear();
 
-            // if we have no data, sleep for a bit
-            if size <= 0 { let _ = sleep(Duration::from_millis(10)); continue; } 
+    //         // if we have no data, sleep for a bit
+    //         if size <= 0 { let _ = sleep(Duration::from_millis(10)); continue; } 
 
-            // create a new mixer
-            let (controller, mixer) = dynamic_mixer::mixer::<f32>(2, sample_rate);
+    //         // create a new mixer
+    //         let (controller, mixer) = dynamic_mixer::mixer::<f32>(2, sample_rate);
 
-            // get all the tones and add them to the mixer, and throw them into the sink
-            for tone in read_sequence.tones() {
-                let mut oscillator = Waveform::new(sample_rate, wave_table.clone());
-                oscillator.set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
-                controller.add(oscillator.convert_samples());
-            }
+    //         // get all the tones and add them to the mixer, and throw them into the sink
+    //         for tone in read_sequence.tones() {
+    //             let mut oscillator = Waveform::new(sample_rate, wave_table.clone());
+    //             oscillator.set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
+    //             controller.add(oscillator.convert_samples());
+    //         }
 
-            // play the sink
-            sink.append(mixer);
-            sink.sleep_until_end();
-        }
-    });
+    //         // play the sink
+    //         sink.append(mixer);
+    //         sink.sleep_until_end();
+    //     }
+    // });
+
+
+    //////////////
+    // GRAPHICS //
+    //////////////
 
     // Graphics Loop
     rt.block_on(async move {
@@ -132,29 +146,33 @@ fn main() {
             Event::MainEventsCleared => { gfx.window.request_redraw(); },                             // Request the redraw
             _ => { // On any other event we want to update our state
                 // TODO: Use a channel here instead of a mutex/arc
-                let read_sequence = gfx_read_sequence.lock().unwrap();
+                let read_sequence = Arc::clone(&gfx_read_sequence).lock().unwrap().deref().clone();
                 let size = read_sequence.get_size();
 
                 if size != last_sequence_size {
                     last_sequence_size = size;
                     read_sequence.print_state();
+                    gfx.refresh_instances();
 
-                    if (size <= 0) { return; }
-                    
+                    // If we don't have anything we want to clear the buffer and exit
+                    if size <= 0 { 
+                        gfx.update_instance_buffer();
+                        return; 
+                    }
+
                     // TODO: Need to integrate caching to only update the changed notes
                     let played_notes: SequenceData = read_sequence.played_notes.clone();
                     let uniform_notes: SequenceData = read_sequence.uniform_notes.clone();
                     let nonce_notes: SequenceData = read_sequence.nonce_notes.clone();
                     let mediant_notes: SequenceData = read_sequence.mediant_notes.clone();
 
-                    gfx.refresh_instances();
                     gfx.enable_tones(played_notes);
                     gfx.enable_tones(uniform_notes);
                     gfx.enable_tones(mediant_notes);
                     gfx.enable_tones(nonce_notes);
 
+                    gfx.update_instance_buffer();
                 }
-
             }
         });
     });

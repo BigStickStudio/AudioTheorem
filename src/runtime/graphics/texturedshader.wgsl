@@ -79,9 +79,9 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     var white_sample = textureSample(white_diffuse, white_sampler, in.tex_coords);
     var black_sample = textureSample(black_diffuse, black_sampler, in.tex_coords);
     var blue_sample = textureSample(blue_diffuse, blue_sampler, in.tex_coords);
-    var green_sample = textureSample(orange_diffuse, orange_sampler, in.tex_coords);
+    var green_sample = textureSample(green_diffuse, green_sampler, in.tex_coords);
     var orange_sample = textureSample(orange_diffuse, orange_sampler, in.tex_coords);
-    var red_sample = textureSample(orange_diffuse, orange_sampler, in.tex_coords);
+    var red_sample = textureSample(red_diffuse, red_sampler, in.tex_coords);
 
     var black_and_white = mix(black_sample, white_sample, in.white_key);
 
@@ -95,9 +95,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     if (in.color_factor == 2u)
         { return mix(black_and_white, blue_sample, in.velocity * 1.25); }
 
-
     if (in.color_factor == 1u) 
-        { return mix(black_and_white, green_sample, in.velocity * 1.25); } // TODO: We should switch all of these to a more comprehensive adding for the color factor with respect to the white key (invert and sub)
+        { return mix(black_and_white, green_sample, in.velocity * 3.25); } // TODO: We should switch all of these to a more comprehensive adding for the color factor with respect to the white key (invert and sub)
 
 
    return black_and_white;

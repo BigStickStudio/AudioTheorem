@@ -434,6 +434,18 @@ impl Engine {
         self.camera_controller.process_events(event)
     }
 
+    pub fn update_instance_buffer(&mut self) {
+        let instance_data = self.instances.iter().map(Instance::raw).collect::<Vec<_>>();
+
+        self.instance_buffer = self.device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Instance Buffer"),
+                contents: bytemuck::cast_slice(&instance_data),
+                usage: wgpu::BufferUsages::VERTEX,
+            }
+        );
+    }
+
     pub fn refresh_instances(&mut self) {
         self.instances.iter_mut().for_each(|instance| {
             instance.dynamic = Dynamic::Off;
@@ -447,17 +459,6 @@ impl Engine {
                 self.instances[i.index as usize].trigger_key(i.velocity, sequence.disposition); 
                 println!("Index: {}, Velocity: {}, Disposition: {:?}", i.index, i.velocity, sequence.disposition);
             }
-        
-        let instance_data = self.instances.iter().map(Instance::raw).collect::<Vec<_>>();
-
-        self.instance_buffer = self.device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("Instance Buffer"),
-                contents: bytemuck::cast_slice(&instance_data),
-                usage: wgpu::BufferUsages::VERTEX,
-            }
-        );
-
     }
 
     pub fn update(&mut self) {
