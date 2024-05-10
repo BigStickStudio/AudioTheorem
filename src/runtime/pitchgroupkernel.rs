@@ -84,7 +84,7 @@ impl PitchGroupKernel {
 
     // This gives us a collection of the top pitchgroups
     fn top_pitchgroups(&self) -> Vec<PitchgroupSlice> {
-        if self.pitchgroups.len() == 0 { return Vec::new(); }
+        if self.pitchgroup_slices.len() == 0 { return Vec::new(); } // This really should be an Option so we can throw an error on the unwrap
 
         let max_p = self.pitchgroup_slices.iter()
                                         .map(|pg| pg.probability)
@@ -168,24 +168,24 @@ impl PitchGroupKernel {
 
     fn prev(&mut self) -> Option<PitchgroupSlice> {
         if self.index > 0 {
-            let prev = self.pitchgroups[self.index].clone();
-            self.index -= 1 % self.pitchgroups.len();
+            let prev = self.pitchgroup_slices[self.index].clone();
+            self.index -= 1 % self.pitchgroup_slices.len();
             return Some(prev);
         }
         None
     }
 
     fn current(&self) -> Option<PitchgroupSlice> {
-        if self.index < self.pitchgroups.len() {
-            return Some(self.pitchgroups[self.index].clone());
+        if self.index < self.pitchgroup_slices.len() {
+            return Some(self.pitchgroup_slices[self.index].clone());
         }
         None
     }
 
     fn next(&mut self) -> Option<PitchgroupSlice> {
-        if self.index < self.pitchgroups.len() {
-            let next = self.pitchgroups[self.index].clone();
-            self.index += 1 % self.pitchgroups.len();
+        if self.index < self.pitchgroup_slices.len() {
+            let next = self.pitchgroup_slices[self.index].clone();
+            self.index += 1 % self.pitchgroup_slices.len();
             return Some(next);
         }
         None

@@ -79,23 +79,23 @@ impl Sequence {
 
     pub fn get_size(&self) -> u8 { self.size } // needs to be thrown away
 
-    fn construct_chords(&mut self) { 
-        self.chords.clear();
-        if self.tones.len() == 0 { return; }
+    // fn construct_chords(&mut self) { 
+    //     self.chords.clear();
+    //     if self.tones.len() == 0 { return; }
 
-        for root in self.tones.iter() {
-            let root_note = root.note();
-            let mut chord_shape = Vec::new();
+    //     for root in self.tones.iter() {
+    //         let root_note = root.note();
+    //         let mut chord_shape = Vec::new();
 
-            for tone in self.tones.iter() {
-                if root != tone {
-                    chord_shape.push((tone.note(), Interval::distance(root.note(), tone.note()).unwrap()));
-                }
-            }
+    //         for tone in self.tones.iter() {
+    //             if root != tone {
+    //                 chord_shape.push((tone.note(), Interval::distance(root.note(), tone.note()).unwrap()));
+    //             }
+    //         }
 
-            self.chords.push(Chord{ root: root_note, intervals: chord_shape })
-        }
-    }
+    //         self.chords.push(Chord{ root: root_note, intervals: chord_shape })
+    //     }
+    // }
 
     fn find_scales(&mut self) { // This is a mess that needs to be agnostic to pitchgroups
         self.scales.clear();
@@ -111,7 +111,7 @@ impl Sequence {
 
     // This needs to eventually account for secondary and even tertiary pitchgroups to determine favorability towards defining harmony and dissonance
     fn find_pitch_groups(&mut self) {
-        self.key_map.clear();
+        self.key_map = PitchGroupKernel::new(self.tones());
         self.played_notes.clear();
         self.uniform_notes.clear();
         self.mediant_notes.clear();
