@@ -86,17 +86,17 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     var black_and_white = mix(black_sample, white_sample, in.white_key);
 
 
-    if (in.color_factor == 8u)
-        { return mix(black_and_white, red_sample, in.velocity * 1.25); }
+    if (in.color_factor == 8u)  // These are notes that have no uniformity
+        { return mix(black_and_white, red_sample, in.velocity * 3.75); }    // Velocity needs to be multiplied because Midi stops at 128 
 
-    if (in.color_factor == 4u)
-        { return mix(black_and_white, orange_sample, in.velocity * 1.25); }
+    if (in.color_factor == 4u)  // These are notes that are in some but not complete uniformity
+        { return mix(black_and_white, orange_sample, in.velocity * 2.55); } // .. but beware as our table goes to 144
 
-    if (in.color_factor == 2u)
-        { return mix(black_and_white, blue_sample, in.velocity * 1.25); }
+    if (in.color_factor == 2u) // these are notes that are in complete uniformity .. i.e. found in all other potential pitchgroups
+        { return mix(black_and_white, green_sample, in.velocity * 1.25); } /// we will need to clamp and slope with a custom lerp
 
-    if (in.color_factor == 1u) 
-        { return mix(black_and_white, green_sample, in.velocity * 3.25); } // TODO: We should switch all of these to a more comprehensive adding for the color factor with respect to the white key (invert and sub)
+    if (in.color_factor == 1u) // These are the notes that we are playing
+        { return mix(black_and_white, blue_sample, in.velocity * 4.25); } // TODO: We should switch all of these to a more comprehensive adding for the color factor with respect to the white key (invert and sub)
 
 
    return black_and_white;
