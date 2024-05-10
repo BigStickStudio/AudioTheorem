@@ -19,19 +19,23 @@ pub struct IV {
 
 #[derive(Clone, Debug)]
 pub struct SequenceData {
-    pub iv: Vec<IV>,                             // Midi Velocity
+    pub iv: Vec<IV>,                        // Midi Velocity
     pub disposition: u8                     // Disposition of the Note (0 = Not Used, 1)
+}
+
+impl SequenceData {
+    pub fn clear(&mut self) { self.iv.clear(); }
 }
 
 #[derive(Clone, Debug)]
 pub struct Sequence {
     size: u8,
-    // These Need To Be Combined ---------+
-    pub played_notes: SequenceData,        // Todo: Add indicator for 'Tonic' and Intervals in relation to the tonic, and then create inversion module.
-    pub uniform_notes: SequenceData,       // 
-    pub nonce_notes: SequenceData,         //    All three of these can be combined by simple scoring their disposition in a gradient from 1.0 to 0.0
-    pub mediant_notes: SequenceData,       // 
-    // -----------------------------------+
+    // ---- These Need To Be Combined -----+
+    pub played_notes: SequenceData,         // Todo: Add indicator for 'Tonic' and Intervals in relation to the tonic, and then create inversion module.
+    pub uniform_notes: SequenceData,        // 
+    pub mediant_notes: SequenceData,        //      All three of these can be combined by simple scoring their disposition in a gradient from 1.0 to 0.0
+    pub nonce_notes: SequenceData,          //
+    // --------- and refactored -----------+
     tones: Vec<Tone>,                       // These are for certain our played notes
     chords: Vec<Chord>,                     // These are the inversions from the notes we are playing
     scales: Vec<Scale>,                     // TODO: This is the collection of scales from the given intervals
@@ -85,12 +89,15 @@ impl Sequence {
     }
 
     // This needs to eventually account for secondary and even tertiary pitchgroups to determine favorability towards defining harmony and dissonance
-    fn find_pitch_groups(&mut self) {   
+    fn find_pitch_groups(&mut self) {
+        // We have to exit early if we have no tones
+        if self.tones.len() == 0 { return; }
+
         // create an array of tones
         self.key_map = PitchGroupKernel::new(self.tones.clone());
+        self.key_map.normalize();
 
         // TODO: Rayon parallelize this - These Hashed Values are going to be small enough to not need to be parallelized
-        let played_hash_set: std::collections::HashSet<u8> = self.tones.iter().map(|t| t.index()).collect();
         let uniform_hash_set: std::collections::HashSet<u8> = self.key_map.uniforms.iter().map(|p| p.index()).collect();
         let mediant_hash_set: std::collections::HashSet<u8> = self.key_map.mediants.iter().map(|p| p.index()).collect();
         let nonce_hash_set: std::collections::HashSet<u8> = self.key_map.non_uniforms.iter().map(|p| p.index()).collect();
@@ -110,18 +117,18 @@ impl Sequence {
 
             // We can try to turn this off but 
             // we add an octave above and below at half the velocity 
-            if index + 12 < 144 
-                { self.played_notes.iv.push(IV{ index: index + 12, velocity: velocity / 3 }); }
+            if index < 132 
+                { self.played_notes.iv.push(IV{ index: index + 12, velocity: velocity / 2 }); }
 
-            if index - 12 > 0 
-                { self.played_notes.iv.push(IV{ index: index - 12, velocity: velocity / 3 }); } 
+            if index > 12 
+                { self.played_notes.iv.push(IV{ index: index - 12, velocity: velocity / 2 }); } 
 
             //   .. and maybe a third octave at a quarter the velocity
-            if index + 24 < 144 
-                { self.played_notes.iv.push(IV{ index: index + 24, velocity: velocity / 5 }); }
+            if index < 120 
+                { self.played_notes.iv.push(IV{ index: index + 24, velocity: velocity / 4 }); }
 
-            if index - 24 > 0 
-                { self.played_notes.iv.push(IV{ index: index - 24, velocity: velocity / 5 }); }
+            if index > 24
+                { self.played_notes.iv.push(IV{ index: index - 24, velocity: velocity / 4 }); }
         }
 
         ///////////////
@@ -129,13 +136,13 @@ impl Sequence {
         ///////////////
         
         // We want to be +/- 12 from the least and greatest index, or at least at the limits
-        if least_index - 12 < 0 
-            { least_index = 0; } 
+        if least_index < 12 
+            { least_index = 0; }        // We never want to be less than 0
         else 
             { least_index -= 12; }
 
-        if greatest_index + 12 > 144 
-            { greatest_index = 144; } 
+        if greatest_index >= 132 // 144 - 12 
+            { greatest_index = 144; }   // We also don't want to be greater than 144
         else 
             { greatest_index += 12; }
 
@@ -177,11 +184,19 @@ impl Sequence {
         self.size = self.tones.len() as u8;
     }
 
+    fn reset_conditionals(&mut self) {
+        self.key_map.clear();
+        self.played_notes.clear();
+        self.uniform_notes.clear();
+        self.nonce_notes.clear();
+        self.mediant_notes.clear();
+    }
+
     pub fn process_input(&mut self, index: u8, velocity: u8) {
         if velocity > 0 { self.add_tone(index, velocity); } 
         else { self.delete_tone(index); }
         
-        self.chords.clear();
+        self.reset_conditionals();
         self.construct_chords();
         self.find_pitch_groups();
     }

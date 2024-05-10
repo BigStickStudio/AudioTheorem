@@ -443,7 +443,10 @@ impl Engine {
 
     pub fn enable_tones(&mut self, sequence: SequenceData) {
         for i in sequence.iv.iter()
-            { self.instances[i.index as usize].trigger_key(i.velocity, sequence.disposition); }
+            { 
+                self.instances[i.index as usize].trigger_key(i.velocity, sequence.disposition); 
+                println!("Index: {}, Velocity: {}, Disposition: {:?}", i.index, i.velocity, sequence.disposition);
+            }
         
         let instance_data = self.instances.iter().map(Instance::raw).collect::<Vec<_>>();
 

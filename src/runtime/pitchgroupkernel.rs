@@ -10,7 +10,7 @@ pub struct PitchgroupSlice {
     notes: Vec<Note>,               // This is the notes that are being played in the natural accidentals per the 'circle of fifths' (Proprietary, Ancillary, 2024)
     displacements: Vec<bool>,       // This is the same as the members and offnotes fields per index
     accidental: Form,         // This is a fast way of telling us if this is a sharp, flat, or natural note (Cn would be the only Natural Slice) (Proprietary, Ancillary, 2024)
-    probability: f64,                // This is the probability of the pitchgroup slice being played
+    probability: u8,                // This is the probability of the pitchgroup slice being played
 }
 
 impl PitchgroupSlice {
@@ -35,7 +35,7 @@ impl PitchgroupSlice {
             notes, 
             displacements,
             accidental,
-            probability: n_played as f64 / pitch_classes.len() as f64
+            probability: ((n_played as f64 / pitch_classes.len() as f64) * 100.0) as u8
         }
     }
 
@@ -57,7 +57,6 @@ pub struct PitchGroupKernel {
 impl PitchGroupKernel {
     pub fn new(tones: Vec<Tone>) -> PitchGroupKernel {
         let mut pitchgroups: Vec<PitchgroupSlice> = Vec::new();
-        let mut probabilities: Vec<f64> = Vec::new();
 
         // We start by getting the tones being played in pitchclass form
         let played_pitch_classes: Vec<PitchClass> = tones.iter().map(|t| t.pitch_class()).collect::<Vec<PitchClass>>(); 
@@ -80,6 +79,14 @@ impl PitchGroupKernel {
         }
     }
 
+    pub fn clear(&mut self) {
+        self.index = 0;
+        self.pitchgroups.clear();
+        self.uniforms.clear();
+        self.mediants.clear();
+        self.non_uniforms.clear();
+    }
+
     // This gives us a collection of the top pitchgroups
     fn top_pitchgroups(&self) -> Vec<PitchgroupSlice> {
         let max_p = self.pitchgroups.iter().map(|pg| pg.probability).max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
@@ -87,7 +94,7 @@ impl PitchGroupKernel {
     }
 
     // This determines uniformity vs non-uniformity of the top pitchgroups
-    fn normalize(&mut self) {
+    pub fn normalize(&mut self) {
         use collections::HashSet;
         let top_pitchgroups = self.top_pitchgroups();
 

@@ -131,11 +131,17 @@ fn main() {
             },
             Event::MainEventsCleared => { gfx.window.request_redraw(); },                             // Request the redraw
             _ => { // On any other event we want to update our state
+                // TODO: Use a channel here instead of a mutex/arc
                 let read_sequence = gfx_read_sequence.lock().unwrap();
                 let size = read_sequence.get_size();
 
                 if size != last_sequence_size {
                     last_sequence_size = size;
+                    read_sequence.print_state();
+
+                    if (size <= 0) { return; }
+                    
+                    // TODO: Need to integrate caching to only update the changed notes
                     let played_notes: SequenceData = read_sequence.played_notes.clone();
                     let uniform_notes: SequenceData = read_sequence.uniform_notes.clone();
                     let nonce_notes: SequenceData = read_sequence.nonce_notes.clone();
@@ -147,10 +153,6 @@ fn main() {
                     gfx.enable_tones(mediant_notes);
                     gfx.enable_tones(nonce_notes);
 
-                    read_sequence.print_state();
-
-                    // Need to add logic to highlight duplicate 'overlaps' from top rated pitchgroups
-                    println!("Sequence Size: {}", last_sequence_size);
                 }
 
             }
