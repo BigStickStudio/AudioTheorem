@@ -32,7 +32,7 @@ fn main() {
     let rt = tokio::runtime::Runtime::new().unwrap();
 
     // Midi Sequence Buffer
-    let write_sequence: Arc<Mutex<Sequence>> = Arc::new(Mutex::new(Sequence::new()));
+    let write_sequence: Arc<Mutex<Sequence>> = Arc::new(Mutex::new(Sequence::new(Vec::new())));
     let gfx_read_sequence: Arc<Mutex<Sequence>> = Arc::clone(&write_sequence);
     let audio_read_sequence: Arc<Mutex<Sequence>> = Arc::clone(&write_sequence);
 

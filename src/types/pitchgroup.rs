@@ -488,23 +488,23 @@ impl PitchGroup {
 
 
     // Added by NeoTec Circa 2024, Richard I Christopher.
-    pub fn from_pitch_classes(pitch_classes: Vec<PitchClass>) -> Vec<PitchGroup> {
+    // This is a core component of the Audio Theorem project under Nexus Proprietary License.
+    pub fn split_classes(pitch_classes: Vec<PitchClass>) -> (Vec<PitchGroup>, Vec<PitchGroup>) {
         // This is a safeguard to ensure that the pitch_classes vector is not empty
         if pitch_classes.is_empty() { return Vec::new(); }
 
-        let pitch_groups = {
-            let mut remaining: HashSet<PitchGroup> = PitchGroup::all().iter().copied().collect();
+        let mut all: HashSet<PitchGroup> = PitchGroup::all().iter().copied().collect();
+        let pitch_class_groups: HashSet<PitchGroup> = pitch_class.groups().iter().copied().collect();
+
+        let mut harmonic_groups = Vec::new();
+        let mut dissonant_groups = Vec::new();
 
             for pitch_class in pitch_classes {
-                let groups: HashSet<PitchGroup> =
-                    pitch_class.groups().iter().copied().collect();
-                remaining = remaining.intersection(&groups).copied().collect();
+                harmonic_groups = all.intersection(&pitch_class_groups).copied().collect();
+                dissonant_groups = all.difference(&pitch_class_groups).copied().collect();
             }
 
-            remaining
-        };
-        debug!("Potential PitchGroups: {:?}", &pitch_groups);
-        pitch_groups.iter().copied().collect()
+        (harmonic_groups, dissonant_groups)
     }
 
 }

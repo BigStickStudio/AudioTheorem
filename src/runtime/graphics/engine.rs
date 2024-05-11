@@ -10,7 +10,7 @@ use super::camera::{Camera, CameraUniform, CameraController};
 use super::mesh::*;
 use super::instances::{Instance, RawInstance};
 use super::spheres::Sphere;
-use crate::runtime::{disposition, SequenceData};
+use crate::runtime::{subsequence, SequenceData};
 use crate::types::Dynamic;
 use std::sync::{Arc, Mutex};
 use wgpu::util::DeviceExt;

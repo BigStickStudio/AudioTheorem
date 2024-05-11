@@ -27,7 +27,7 @@ use std::fmt;
 pub struct Tone {
     octave: Octave,
     note: Note,
-    velocity: u8
+    pub velocity: u8
 }
 
 impl Tone {
