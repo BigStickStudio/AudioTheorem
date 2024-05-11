@@ -6,5 +6,4 @@ pub fn main() {
     println!("!!! Audio Theorem !!!");
     println!("=====================");
     
-    audiotheorem::graphics::Gui::start();
 }

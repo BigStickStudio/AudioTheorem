@@ -14,43 +14,12 @@ struct Chord {
     intervals: Vec<(Note, Interval)>
 }
 
-#[derive(Copy, Clone, Debug)]
-pub struct IV {
-    pub index: u8,
-    pub velocity: u8
-}
-
-#[derive(Clone, Debug)]
-pub struct SequenceData {
-    pub iv: Vec<IV>,                        // Midi Velocity
-    pub disposition: u8                     // Disposition of the Note (0 = Not Used, 1)
-}
-
-impl SequenceData {
-    pub fn clear(&mut self) { self.iv.clear(); }
-
-    pub fn add(&mut self, index: u8, velocity: u8) {
-        // we need to check if the index is already in the vector
-        if let Some(iv) = self.iv.iter_mut().find(|iv| iv.index == index) {
-            // if it is we need to update the velocity if it is greater
-            if iv.velocity < velocity { iv.velocity = velocity; }
-            return;
-        }
-
-        self.iv.push(IV{ index, velocity });
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct Sequence {
     size: u8,
-    // ---- These Need To Be Combined -----+
-    pub played_notes: SequenceData,         // Todo: Add indicator for 'Tonic' and Intervals in relation to the tonic, and then create inversion module.
-    pub uniform_notes: SequenceData,        // 
-    pub mediant_notes: SequenceData,        //      All three of these can be combined by simple scoring their disposition in a gradient from 1.0 to 0.0
-    pub nonce_notes: SequenceData,          //
-    // --------- and refactored -----------+
-
+             // Todo: Add indicator for 'Tonic' and Intervals in relation to the tonic, and then create inversion module.
+    pub played_notes: Vec<SequenceData>,
     tones: Vec<Tone>,                       // These are for certain our played notes
     //chords: Vec<Chord>,                     // These are the inversions from the notes we are playing
     scales: Vec<Scale>,                     // TODO: This is the collection of scales from the given intervals
@@ -62,14 +31,7 @@ impl Sequence {
     pub fn new() -> Sequence {
         Sequence { 
             size: 0, 
-            played_notes:                   // These are going to be indicative of the tones that are played
-                SequenceData{ iv: Vec::new(), disposition: Disposition::Played.as_u8() },
-            uniform_notes:                  // These are the notes that are in all the top pitchgroups
-                SequenceData{ iv: Vec::new(), disposition: Disposition::Harmonious.as_u8() },      
-            nonce_notes:                    // These are the notes that are only in one pitchgroup
-                SequenceData{ iv: Vec::new(), disposition: Disposition::Dissident.as_u8() },
-            mediant_notes:                  // These are the notes that are in more than one but not all pitchgroups
-                SequenceData{ iv: Vec::new(), disposition: Disposition::Mediant.as_u8() },
+                                
             tones: Vec::new(),              // The Tones that are currently being played
             //chords: Vec::new(),             // Really just used to check intervals and inversions
             scales: Vec::new(),             // Essentially Useless at this point
@@ -121,7 +83,7 @@ impl Sequence {
         // create an array of tones
         self.key_map.normalize();
 
-        // TODO: Rayon parallelize this - These Hashed Values are going to be small enough to not need to be parallelized
+        // TODO: Rayon parallelize this - we cab even combine these as a HashSet of Slices as well.
         let uniform_hash_set: std::collections::HashSet<u8> = self.key_map.uniforms.iter().map(|p| p.index()).collect();
         let mediant_hash_set: std::collections::HashSet<u8> = self.key_map.mediants.iter().map(|p| p.index()).collect();
         let nonce_hash_set: std::collections::HashSet<u8> = self.key_map.non_uniforms.iter().map(|p| p.index()).collect();
@@ -144,14 +106,14 @@ impl Sequence {
             if index < 132 
                 { self.played_notes.add(index + 12, velocity / 2); }
 
-            if index > 12 
+            if index > 11
                 { self.played_notes.add(index - 12, velocity / 2); } 
 
             //   .. and maybe a third octave at a quarter the velocity
             if index < 120 
                 { self.played_notes.add(index + 24, velocity / 4); }
 
-            if index > 24
+            if index > 23
                 { self.played_notes.add(index - 24, velocity / 4); }
         }
 
@@ -159,6 +121,13 @@ impl Sequence {
         // RESONANCE //
         ///////////////
         
+        // We need to come up with a format to split groupings if they grow beyond a +/-
+         /*
+            0-8
+         
+         
+          */
+
         // We want to be +/- 12 from the least and greatest index, or at least at the limits
         if least_index < 12 
             { least_index = 0; }        // We never want to be less than 0
@@ -169,6 +138,8 @@ impl Sequence {
             { greatest_index = 144; }   // We also don't want to be greater than 144
         else 
             { greatest_index += 12; }
+
+        //
 
         // We iterate from 1 octave below to 1 octave above, and if we have a pitchclass
         // that is any of the disposed pitchgroups, we add it to the appropriate SequenceData 

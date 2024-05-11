@@ -140,6 +140,13 @@ impl Interval {
             Interval::Fourteenth(q) => Degree::Subtonic(q),
         }
     }
+
+    // Richard I Christopher, came up with this method with the help of Hans Uhlig in 2019.
+    //                        and left this note in 2024, to remember the good times.
+    //                        I came here to figure out how far to implement "shadows" +/- 3 on 14 = 21 // 2 = 10
+    //                         .. or if 7 (12) + 3 (4) = 10 .. // 2 = 4
+    //                                                  #musicmath
+
     /// Get [Steps](audiotheorem::types::Steps) measurement for this
     /// [Interval](audiotheorem::types::Interval).
     pub fn steps(&self) -> Steps {

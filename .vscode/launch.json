@@ -1,0 +1,249 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'audiotheorem'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=audiotheorem"
+                ],
+                "filter": {
+                    "name": "audiotheorem",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'audiotheorem'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=audiotheorem",
+                    "--package=audiotheorem"
+                ],
+                "filter": {
+                    "name": "audiotheorem",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'audiotheorem'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=audiotheorem",
+                    "--package=audiotheorem"
+                ],
+                "filter": {
+                    "name": "audiotheorem",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'test'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=test",
+                    "--package=audiotheorem"
+                ],
+                "filter": {
+                    "name": "test",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'test'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=test",
+                    "--package=audiotheorem"
+                ],
+                "filter": {
+                    "name": "test",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'graphics'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=graphics",
+                    "--package=audiotheorem"
+                ],
+                "filter": {
+                    "name": "graphics",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'graphics'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=graphics",
+                    "--package=audiotheorem"
+                ],
+                "filter": {
+                    "name": "graphics",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'intervals'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=intervals",
+                    "--package=audiotheorem"
+                ],
+                "filter": {
+                    "name": "intervals",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'intervals'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=intervals",
+                    "--package=audiotheorem"
+                ],
+                "filter": {
+                    "name": "intervals",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'midi'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=midi",
+                    "--package=audiotheorem"
+                ],
+                "filter": {
+                    "name": "midi",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'midi'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=midi",
+                    "--package=audiotheorem"
+                ],
+                "filter": {
+                    "name": "midi",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'scales'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=scales",
+                    "--package=audiotheorem"
+                ],
+                "filter": {
+                    "name": "scales",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'scales'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=scales",
+                    "--package=audiotheorem"
+                ],
+                "filter": {
+                    "name": "scales",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
