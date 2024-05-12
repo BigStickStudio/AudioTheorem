@@ -29,6 +29,8 @@ impl Key {
 
         // we build a collection of Tonic notes that are being played starting with the voicings
         let collection: Vec<Tonic> = voicings.iter().map(|t| t.clone()).collect::<Vec<Tonic>();
+        
+        // we keep all the non-voicing 
 
         // We need to determine if this is a sharp, flat, or natural note
         let is_sharp = notes.iter().any(|n| n.sharp());
