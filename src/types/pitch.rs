@@ -62,40 +62,36 @@ pub struct Pitch(u8);
 
 impl Pitch {
     /// Not for External Use
-    pub const fn from_index(index: u8) -> Pitch {
-        Pitch(index)
-    }
+    pub const fn from_index(index: u8) -> Pitch { Pitch(index) }
+
     /// Not for External Use
-    pub(crate) const fn to_index(&self) -> u8 {
-        self.0
-    }
+    pub(crate) const fn to_index(&self) -> u8 { self.0 }
+    
     /// Get Natural Note for this Pitch
     pub fn note(&self) -> Note {
         Matrix::natural(&self.pitch_class(), &self.pitch_class().group())
             .unwrap()
     }
+
     /// Get Natural Tone for this Pitch
-    pub fn tone(&self) -> Tone {
-        Tone::from_parts(self.octave(), self.note(), 65)
-    }
+    pub fn tone(&self) -> Tone { Tone::from_parts(self.octave(), self.note()) }
+
     /// Get [Notes](audiotheorem::types::Pitch) for this [Pitch](audiotheorem::types::Pitch).
-    pub fn names(&self) -> &'static [Note] {
-        self.pitch_class().names()
-    }
+    pub fn names(&self) -> &'static [Note] { self.pitch_class().names() }
+
     /// Get [PitchClass](audiotheorem::types::PitchClass) of this [Pitch](audiotheorem::types::Pitch)
-    pub fn pitch_class(&self) -> PitchClass {
-        PitchClass::from_index(self.0 % 12)
-    }
+    pub fn pitch_class(&self) -> PitchClass { PitchClass::from_index(self.0 % 12) }
+
     /// Get [Octave](audiotheorem::types::Octave) of this [Pitch](audiotheorem::types::Pitch)
-    pub fn octave(&self) -> Octave {
-        Octave::from_index(self.0 / 12).unwrap()
-    }
+    pub fn octave(&self) -> Octave { Octave::from_index(self.0 / 12).unwrap() }
+
     /// Get the semitone steps between two [Pitches](audiotheorem::types::Pitch).
     pub fn distance(&self, other: &Pitch) -> Steps {
         let l = self.to_index() as u16;
         let r = other.to_index() as u16;
         Steps::from(if r > l { r - l } else { l - r })
     }
+    
     /// Get Frequency of [Pitch](audiotheorem::types::Pitch).
     pub fn frequency(&self, tuning: Tuning) -> f32 {
         FREQUENCIES[self.0 as usize][tuning as usize]

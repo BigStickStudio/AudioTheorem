@@ -13,5 +13,6 @@ struct Chord {
     intervals: Vec<(Note, Interval)>
     // we need to add a vector where we add a gradient based the maximum derivation and the minimum derivation 
         // ++ while !> /2
+    // and bounds of 14ths, and splitting sequences based on scale and interval limits
         // .. we could plug machine learning here in the future to determine the best chord for a given set of notes (proprietary Nexus.)
 }

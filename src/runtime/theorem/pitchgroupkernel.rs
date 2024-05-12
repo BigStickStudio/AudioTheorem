@@ -1,60 +1,18 @@
 // Written and Created by Richard I. Christopher, Big Stick Studio, 2024
 
-use std::collections;
-
-use crate::types::{Form, Matrix, Note, Pitch, PitchClass, PitchGroup, Tone};
-
-#[derive(Clone, Debug)]
-pub struct Key {
-    pitchgroup: PitchGroup,         // This is the pitchgroup that this slice belongs to
-    notes: Vec<Note>,               // These are the collected notes being played in their 'natural form' per the 'circle of fifths'
-    accidental: Form,               // Fast Sharp, Flat, or Natural note (Cn would be the only Natural Slice)
-    probability: u8,                // This is the probability of the pitchgroup slice being played -> we could systematically map these with a sequence e.g. Matrix type
-        /*
-            The inversion of this gives us  `Negative Harmony` i.e. 'inferred' Dissonance aka 'Disposition'
-            Proprietary - All Rights Reserved - Big Stick Studio - The NEXUS Project
-        */
-}
-
-// Used to determine all of the pitchgroups associated with the played notes
-impl Key {
-    pub fn new(pitchgroup: &PitchGroup, played_pitch_classes: Vec<PitchClass>) -> Key {
-        let possible_pitch_classes: Vec<PitchClass> = pitchgroup.pitch_classes().to_vec();   // All of the possible pitchclasses in the pitchgroup
-
-        // TODO: Rayon Parallelization 
-        // We collect all of the natural notes in the pitchgroup from the Matrix
-        let notes: Vec<Note> = possible_pitch_classes.iter().map(|pc| Matrix::natural(pc, pitchgroup).unwrap()).collect::<Vec<Note>>();
-
-        // We need to determine if this is a sharp, flat, or natural note
-        let is_sharp = notes.iter().any(|n| n.sharp());
-        let is_flat = notes.iter().any(|n| n.flat());
-        let accidental = if is_sharp { Form::Sharp } else if is_flat { Form::Flat } else { Form::Natural };
-
-        PitchgroupSlice { 
-            pitchgroup: pitchgroup.clone(), 
-            notes, 
-            accidental,
-            probability: ((played_pitch_classes.len()  as f64 / pitch_classes.len() as f64) * 100.0) as u8
-        }
-    }
-
-    pub fn get_displaced(&self) -> Vec<Note> {
-        // This gives us all of the notes that are NOT being played in the pitchgroup (all of the 0's from the displacements)
-
-    }
-}
+use std::collections::{self, HashSet};
+use crate::types::{Tone, PitchClass, Note, PitchGroup};
+use super::Key;
 
 #[derive(Clone, Debug)]
 pub struct PitchGroupKernel {
     index: usize,
-    keys: Vec<Key>,                  // Pitchgroups are in the same order as Propabilities
-    dissidents: Vec<PitchGroup>,     // These are the Pitchgroups - we don't do anything with these yet.
-    lower_bound: u8,                 // This is the lower bound of the dynamic range for a set of keys - 7
-    upper_bound: u8,                 // This is the upper bound of the dynamic range for a set of keys + 7
+    keys: Vec<Key>,
+    dissidents: Vec<PitchGroup>,     // These are the negative pitchgroups that are not being played - we may not need this
 }
 
 impl PitchGroupKernel {
-    pub fn new(tones: Vec<Tone>) -> PitchGroupKernel {
+    pub fn new(tones: Vec<Tone>) -> PitchGroupKernel { // Where do tones come from?
         // We start by getting the tones being played in pitchclass form
         let pitch_classes: Vec<PitchClass> = tones.iter().map(|t| t.pitch_class()).collect::<Vec<PitchClass>>(); // We can eventually make this our consumer with a lock/mutex
 
@@ -65,42 +23,53 @@ impl PitchGroupKernel {
         PitchGroupKernel { 
                 index: 0,
                 keys: harmonious.iter()
-                                .map(|pg| 
-                                    Key::new(pg, pitch_classes.clone())) 
-                                            .collect::<Vec<PitchgroupSlice>>(),
+                                .map(|pg| Key::new(pg, pitch_classes.clone())) 
+                                .collect::<Vec<Key>>(),
                 dissidents: dissidence,//.iter().map(|pg| pg.clone()).collect::<Vec<PitchGroup>>() // This is expensive and we shouldn't do it.. Do we need it?
-                lower_bound: 0, upper_bound: 144
             }
     }
 
     pub fn clear(&mut self) {
         self.index = 0;
-        self.pitchgroup_slices.clear();
-
+        self.keys.clear();
+        self.dissidents.clear();
     }
 
     // This gives us a collection of the top pitchgroups
-    fn top_pitchgroups(&self) -> Vec<PitchgroupSlice> {
-        if self.pitchgroup_slices.len() == 0 { return Vec::new(); } // This really should be an Option so we can throw an error on the unwrap
+    fn top_pitchgroups(&self) -> Option<Vec<PitchGroup>> {
+        let mut top_pitchgroups: Vec<PitchGroup> = Vec::new();
+        let mut top_probability = 0;
 
-        let max_p = self.pitchgroup_slices.iter()
-                                        .map(|pg| pg.probability)
-                                        .max_by(|a, b| a.partial_cmp(b).unwrap())
-                                        .unwrap();
+        for key in self.keys.iter() 
+            {
+                if key.probability > top_probability 
+                    {
+                        top_probability = key.probability;
+                        top_pitchgroups.clear();
+                        top_pitchgroups.push(key.pitchgroup.clone());
+                    } 
+                else if key.probability == top_probability 
+                    {
+                        top_pitchgroups.push(key.pitchgroup.clone());
+                    }
+            }
 
-        return self.pitchgroup_slices.iter()
-                                        .filter(|pg| pg.probability == max_p)
-                                        .map(|pg| pg.clone())
-                                        .collect::<Vec<PitchgroupSlice>>();
+        Some(top_pitchgroups)
     }
 
     // This determines uniformity vs non-uniformity of the top pitchgroups
     // as well as collecting the pitchclasses that are in the top pitchgroups 
     // This would (ideally narrow down the total pitchgroups to one, but could be a 3 way tie, or more depending on the number of notes played)
-    pub fn normalize(&mut self) {
+    pub fn normalize(&mut self, played_tones: Vec<Tone>) -> Vec<Note> {
         use collections::HashSet;
-        let top_pitchgroups = self.top_pitchgroups();
+        let top_pitchgroups = self.top_pitchgroups().unwrap().clone();   // This step is necessary as this is when we determine the most favorable pitchgroups
+        // but we don't do anything with it yet..
 
+        // if we only have 1 top pitchgroup, then we can just make all of the notes in the kernel the same level of harmony
+        if 
+
+        // we want to get the common notes between the top pitchgroups by taking the pitchclasses that are in ALL of the top pitchgroups
+        let uniform 
     }
 
 

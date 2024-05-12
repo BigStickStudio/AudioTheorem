@@ -63,29 +63,29 @@ impl Matrix {
     /// | As | M2 |    | M3 | P4 |    | P5 |    | M6 |    | M7 | P1 |    |
     /// | Fn | P5 |    | M6 |    | M7 | P1 |    | M2 |    | M3 | P4 |    |
     ///
-    pub fn interval(pc: &PitchClass, pg: &PitchGroup) -> Option<Interval> {
+    pub fn interval(pc: &PitchClass, pg: &PitchGroup) -> Option<Interval> { // TODO: Extent this to include 2 octave intervals using a "ladder" system
         use crate::types::{Interval::*, MajorQuality::*, PerfectQuality::*};
         match (pc, pg) {
-            // Column 0
-            (PitchClass::Cn, PitchGroup::Cn) => Some(First(Perfect)), // Row 0
-            (PitchClass::Cn, PitchGroup::Gn) => Some(Fourth(Perfect)), // Row 1
-            (PitchClass::Cn, PitchGroup::Cs) => Some(Seventh(Major)), // Row 7
-            (PitchClass::Cn, PitchGroup::Gs) => Some(Third(Major)),   // Row 8
-            (PitchClass::Cn, PitchGroup::Ds) => Some(Sixth(Major)),   // Row 9
-            (PitchClass::Cn, PitchGroup::As) => Some(Second(Major)),  // Row 10
-            (PitchClass::Cn, PitchGroup::Fn) => Some(Fifth(Perfect)), // Row 11
+            // Column 0                                  we can sort by |  index   |  group  |  steps
+            (PitchClass::Cn, PitchGroup::Cn) => Some(First(Perfect)),  // Row 0    |    0    |    0
+            (PitchClass::Cn, PitchGroup::As) => Some(Second(Major)),   // Row 10   |    10   |    2
+            (PitchClass::Cn, PitchGroup::Gs) => Some(Third(Major)),    // Row 8    |    8    |    4
+            (PitchClass::Cn, PitchGroup::Gn) => Some(Fourth(Perfect)), // Row 1    |    7    |    5
+            (PitchClass::Cn, PitchGroup::Fn) => Some(Fifth(Perfect)),  // Row 11   |    5    |    7
+            (PitchClass::Cn, PitchGroup::Ds) => Some(Sixth(Major)),    // Row 9    |    3    |    9
+            (PitchClass::Cn, PitchGroup::Cs) => Some(Seventh(Major)),  // Row 7    |    1    |    11
             // Column 1
-            (PitchClass::Cs, PitchGroup::Dn) => Some(Seventh(Major)), // Row 2
-            (PitchClass::Cs, PitchGroup::An) => Some(Third(Major)),   // Row 3
-            (PitchClass::Cs, PitchGroup::En) => Some(Sixth(Major)),   // Row 4
-            (PitchClass::Cs, PitchGroup::Bn) => Some(Second(Major)),  // Row 5
-            (PitchClass::Cs, PitchGroup::Fs) => Some(Fifth(Perfect)), // Row 6
             (PitchClass::Cs, PitchGroup::Cs) => Some(First(Perfect)), // Row 7
+            (PitchClass::Cs, PitchGroup::Bn) => Some(Second(Major)),  // Row 5
+            (PitchClass::Cs, PitchGroup::An) => Some(Third(Major)),   // Row 3
             (PitchClass::Cs, PitchGroup::Gs) => Some(Fourth(Perfect)), // Row 8
+            (PitchClass::Cs, PitchGroup::Fs) => Some(Fifth(Perfect)), // Row 6
+            (PitchClass::Cs, PitchGroup::En) => Some(Sixth(Major)),   // Row 4
+            (PitchClass::Cs, PitchGroup::Dn) => Some(Seventh(Major)), // Row 2
             // Column 2
+            (PitchClass::Dn, PitchGroup::Dn) => Some(First(Perfect)), // Row 2
             (PitchClass::Dn, PitchGroup::Cn) => Some(Second(Major)), // Row 0
             (PitchClass::Dn, PitchGroup::Gn) => Some(Fifth(Perfect)), // Row 1
-            (PitchClass::Dn, PitchGroup::Dn) => Some(First(Perfect)), // Row 2
             (PitchClass::Dn, PitchGroup::An) => Some(Fourth(Perfect)), // Row 3
             (PitchClass::Dn, PitchGroup::Ds) => Some(Seventh(Major)), // Row 9
             (PitchClass::Dn, PitchGroup::As) => Some(Third(Major)),  // Row 10

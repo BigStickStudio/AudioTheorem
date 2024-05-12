@@ -16,39 +16,41 @@
 
 // 2023 - RC - velocity paramater and from_index, to_index and to_dynamic functions added (Not Under Apache)
 // 2024 - adding velocity factors per Brand Media - Ancillary 2024
-use super::{Note, Octave, Pitch, PitchClass, Dynamic};
+use super::{octave, Dynamic, Note, Octave, Pitch, PitchClass};
 use crate::types::interval::PerfectQuality::Augmented;
 use crate::types::{Interval, PerfectQuality};
 use std::fmt;
 
+
+// Velocity and Harmony were amended as part of a proprietary system as part of the Nexus Project under Big Stick Studio on behalf of Ancillary, Inc. 2024
 /// [Tone](audiotheorem::types::Tone) is a [Note](audiotheorem::types::Note) at a specific
 /// [Octave](audiotheorem::types::Octave).
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Tone {
     octave: Octave,
     note: Note,
-    pub velocity: u8
+ 
 }
 
 impl Tone {
     // creates a new [Tone](audiotheorem::types::Tone) from an index
+    // This was all rewritting by RIC per BSS Nexus Project 2024 vvv
     pub fn from_iv(index: u8, velocity: u8) -> Tone {
-        let octave = Octave::from_index(index / 12 - 1).unwrap();
-        let note = Pitch::from_index(index % 12).note(); // Finds the pitch and then gives the natural note // This needs to be done in a way  that can find the correct note based on the pitchgroup - not just the natural note
-        return Tone { octave, note, velocity };
+        let pitch = Pitch::from_index(index); // Finds the pitch of the index 
+        return Tone { octave: pitch.octave(), note: pitch.note() };
     }
 
-    pub fn index(&self) -> u8 { (self.octave.to_index() + 1) * 12 + self.note.pitch_class().to_index() }
+    pub fn index(&self) -> u8 { self.index }
     pub fn velocity(&self) -> u8 { self.velocity }
+    pub fn harmony(&self) -> u8 { self.harmony }
 
-    pub fn to_dynamic(&self) -> Dynamic {
-        Dynamic::from_velocity(self.velocity)
-    }
-
+    pub fn to_dynamic(&self) -> Dynamic { Dynamic::from_velocity(self.velocity) }
+    // This was all rewritting by RIC per BSS Nexus Project 2024 ^^^
+ 
     /// Create a new [Tone](audiotheorem::types::Tone) from a [Note](audiotheorem::types::Note) and an
     /// [Octave](audiotheorem::types::Octave).
-    pub fn from_parts(octave: Octave, note: Note, velocity: u8) -> Tone 
-        { Tone { octave, note, velocity } }
+    pub fn from_parts(octave: Octave, note: Note) -> Tone 
+        { Tone { octave, note } }
 
     /// Convert a [Tone](audiotheorem::types::Tone) into a [Note](audiotheorem::types::Note).
     pub fn note(&self) -> Note { self.note }
@@ -89,7 +91,6 @@ impl std::ops::Add<Interval> for Tone {
                                 {
                                     note: (self.note + interval)?,
                                     octave: pitch.octave(),
-                                    velocity: self.velocity,
                                 }
                             )
                     } 
@@ -115,9 +116,8 @@ impl std::ops::Sub<Interval> for Tone {
                         Some(
                             Tone 
                                 {
-                                    note: (self.note - interval)?,
+                                    note: (self.note - interval)?, // this is not immune to error since we can't guarentee the note will be correct
                                     octave: pitch.octave(),
-                                    velocity: self.velocity,
                                 }
                             )
                     } 
@@ -137,7 +137,7 @@ mod tests {
         println!("Sharps");
         for octave in Octave::all().iter() {
             for note in Note::sharps().iter() {
-                let tone = Tone::from_parts(octave.clone(), note.clone(), 65);
+                let tone = Tone::from_parts(octave.clone(), note.clone());
                 print!("{} ", tone);
             }
             println!();
@@ -145,7 +145,7 @@ mod tests {
         println!("Flats");
         for octave in Octave::all().iter() {
             for note in Note::flats().iter() {
-                let tone = Tone::from_parts(octave.clone(), note.clone(), 65);
+                let tone = Tone::from_parts(octave.clone(), note.clone());
                 print!("{} ", tone);
             }
             println!();
@@ -171,33 +171,33 @@ mod tests {
         }
         test(
             // F6 + Fourth(DoubleAugmented) = B#7
-            Tone::from_parts(Octave::ThreeLine, Note::F(Accidental::Natural), 65),
+            Tone::from_parts(Octave::ThreeLine, Note::F(Accidental::Natural)),
             Interval::Fourth(PerfectQuality::DoubleAugmented),
-            Some(Tone::from_parts(Octave::FourLine, Note::B(Accidental::Sharp), 65)),
+            Some(Tone::from_parts(Octave::FourLine, Note::B(Accidental::Sharp))),
         );
         test(
             // G4 + Fourth(Perfect) = C5
-            Tone::from_parts(Octave::OneLine, Note::G(Accidental::Natural), 65),
+            Tone::from_parts(Octave::OneLine, Note::G(Accidental::Natural)),
             Interval::Fourth(PerfectQuality::Perfect),
-            Some(Tone::from_parts(Octave::TwoLine, Note::C(Accidental::Natural), 65)),
+            Some(Tone::from_parts(Octave::TwoLine, Note::C(Accidental::Natural))),
         );
         test(
             // B11 + Third(Major) = None
-            Tone::from_parts(Octave::SevenLine, Note::B(Accidental::Natural), 65),
+            Tone::from_parts(Octave::SevenLine, Note::B(Accidental::Natural)),
             Interval::Third(MajorQuality::Major),
             None,
         );
         test(
             // C4 + First(Perfect) = C4
-            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65),
+            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural)),
             Interval::First(PerfectQuality::Perfect),
-            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65)),
+            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural))),
         );
         test(
             // C4 + First(Diminished) = Cb3
-            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65),
+            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural)),
             Interval::First(PerfectQuality::Diminished),
-            Some(Tone::from_parts(Octave::Small, Note::C(Accidental::Flat), 65)),
+            Some(Tone::from_parts(Octave::Small, Note::C(Accidental::Flat))),
         );
     }
 
@@ -220,25 +220,25 @@ mod tests {
         }
         test(
             // C4 - First(Perfect) = C4
-            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65),
+            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural)),
             Interval::First(PerfectQuality::Perfect),
-            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65)),
+            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural)))
         );
         test(
             // C4 - First(Diminished) = C#4
-            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65),
+            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural)),
             Interval::First(PerfectQuality::Diminished),
-            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Sharp), 65)),
+            Some(Tone::from_parts(Octave::OneLine, Note::C(Accidental::Sharp))),
         );
         test(
             // C4 - First(Augmented) = Cb3
-            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural), 65),
+            Tone::from_parts(Octave::OneLine, Note::C(Accidental::Natural)),
             Interval::First(PerfectQuality::Augmented),
-            Some(Tone::from_parts(Octave::Small, Note::C(Accidental::Flat), 65)),
+            Some(Tone::from_parts(Octave::Small, Note::C(Accidental::Flat))),
         );
         test(
             // D-1 - Third(Major) = None
-            Tone::from_parts(Octave::DoubleContra, Note::D(Accidental::Natural), 65),
+            Tone::from_parts(Octave::DoubleContra, Note::D(Accidental::Natural)),
             Interval::Third(MajorQuality::Major),
             None,
         );

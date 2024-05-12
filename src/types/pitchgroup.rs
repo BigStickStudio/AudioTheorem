@@ -491,7 +491,7 @@ impl PitchGroup {
     // This is a core component of the Audio Theorem project under Nexus Proprietary License.
     pub fn split_classes(pitch_classes: Vec<PitchClass>) -> (Vec<PitchGroup>, Vec<PitchGroup>) {
         // This is a safeguard to ensure that the pitch_classes vector is not empty
-        if pitch_classes.is_empty() { return Vec::new(); }
+        if pitch_classes.is_empty() { return (Vec::new(), Vec::new()); } // What do we really want to return here? are all pitch groups valid, or none?
 
         let mut all: HashSet<PitchGroup> = PitchGroup::all().iter().copied().collect();
         let pitch_class_groups: HashSet<PitchGroup> = pitch_class.groups().iter().copied().collect();
@@ -499,10 +499,10 @@ impl PitchGroup {
         let mut harmonic_groups = Vec::new();
         let mut dissonant_groups = Vec::new();
 
-            for pitch_class in pitch_classes {
-                harmonic_groups = all.intersection(&pitch_class_groups).copied().collect();
-                dissonant_groups = all.difference(&pitch_class_groups).copied().collect();
-            }
+        for pitch_class in pitch_classes {
+            harmonic_groups = all.intersection(&pitch_class_groups).copied().collect();
+            dissonant_groups = all.difference(&pitch_class_groups).copied().collect();
+        }
 
         (harmonic_groups, dissonant_groups)
     }

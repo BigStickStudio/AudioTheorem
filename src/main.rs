@@ -32,16 +32,16 @@ fn main() {
     let rt = tokio::runtime::Runtime::new().unwrap();
 
     // Midi Sequence Buffer
-    let write_sequence: Arc<Mutex<Sequence>> = Arc::new(Mutex::new(Sequence::new(Vec::new())));
-    let gfx_read_sequence: Arc<Mutex<Sequence>> = Arc::clone(&write_sequence);
-    let audio_read_sequence: Arc<Mutex<Sequence>> = Arc::clone(&write_sequence);
+    let write_theorem: Arc<Mutex<Sequence>> = Arc::new(Mutex::new(Theorem::new())); // Going to have to make this a channel and move the mutex' inside the sequence
+    let gfx_read_theorem: Arc<Mutex<Sequence>> = Arc::clone(&write_theorem);
+    let audio_read_theorem: Arc<Mutex<Sequence>> = Arc::clone(&write_theorem);
 
     //////////
     // MIDI //
     //////////
 
     // Midi Loop = // Used as a buffer to store the midi events for the graphics loop
-    rt.spawn(async move { Events::read_midi(move |index, velocity| { write_sequence.lock().unwrap().process_input(index, velocity); })});
+    rt.spawn(async move { Events::read_midi(move |index, velocity| { write_theorem.lock().unwrap().process_input(index, velocity); })});
 
 
 
@@ -63,8 +63,8 @@ fn main() {
 
     //     loop {
     //         // get our midi data
-    //         let read_sequence = audio_read_sequence.lock().unwrap().deref().clone();
-    //         let size = read_sequence.get_size();
+    //         let read_theorem = audio_read_theorem.lock().unwrap().deref().clone();
+    //         let size = read_theorem.get_size();
             
     //         // clear the sink
     //         sink.clear();
@@ -76,7 +76,7 @@ fn main() {
     //         let (controller, mixer) = dynamic_mixer::mixer::<f32>(2, sample_rate);
 
     //         // get all the tones and add them to the mixer, and throw them into the sink
-    //         for tone in read_sequence.tones() {
+    //         for tone in read_theorem.tones() {
     //             let mut oscillator = Waveform::new(sample_rate, wave_table.clone());
     //             oscillator.set_frequency(tone.pitch().frequency(Tuning::A4_440Hz));
     //             controller.add(oscillator.convert_samples());
@@ -105,76 +105,81 @@ fn main() {
         let mut gfx = Engine::new(window, GRID_SIZE.into(), &TexturedSquare::new()).await;
         let mut last_sequence_size = gfx_read_sequence.lock().unwrap().get_size();
 
-        event_loop.run(move |event, _, control_flow| match event {
+        event_loop.run(move |event, _, control_flow| 
+            match event {
 
-            Event::WindowEvent {    // Handle Window Events                                         // Handle Window Events
-                ref event,
-                window_id,
-            } if window_id == gfx.window.id() => if !gfx.input(event) {
-                match event {
-                    WindowEvent::CloseRequested
-                    | WindowEvent::KeyboardInput {
-                        input: 
-                            KeyboardInput {
-                                state: ElementState::Pressed,
-                                virtual_keycode: Some(VirtualKeyCode::Escape),
-                                ..
+                Event::WindowEvent 
+                    {    // Handle Window Events
+                        ref event,
+                        window_id,
+                    } 
+                    if window_id == gfx.window.id() => 
+                        if !gfx.input(event) 
+                            {
+                                match event {
+                                    WindowEvent::CloseRequested
+                                    | WindowEvent::KeyboardInput {
+                                        input: 
+                                            KeyboardInput {
+                                                state: ElementState::Pressed,
+                                                virtual_keycode: Some(VirtualKeyCode::Escape),
+                                                ..
+                                            },
+                                        ..
+                                    } => *control_flow = ControlFlow::Exit,
+                                    WindowEvent::Resized(physical_size) => {
+                                        gfx.resize(*physical_size);
+                                    },
+                                    WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
+                                        gfx.resize(**new_inner_size);
+                                    },
+                                    _ => {
+
+
+                                    }
+                                }
                             },
-                        ..
-                    } => *control_flow = ControlFlow::Exit,
-                    WindowEvent::Resized(physical_size) => {
-                        gfx.resize(*physical_size);
-                    },
-                    WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                        gfx.resize(**new_inner_size);
-                    },
-                    _ => {
 
+                Event::RedrawRequested(window_id) 
+                    if window_id == gfx.window.id() => 
+                        {          // Redraw the window
+                            gfx.update();
+                            match gfx.render() 
+                                {
+                                    Ok(_) => {},
+                                    Err(wgpu::SurfaceError::Lost) => gfx.resize(gfx.size),
+                                    Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
+                                    Err(e) => eprintln!("{:?}", e),
+                                }
+                        },
 
-                    }
-                }
-            },
-            Event::RedrawRequested(window_id) if window_id == gfx.window.id() => {          // Redraw the window
-                gfx.update();
-                match gfx.render() {
-                    Ok(_) => {},
-                    Err(wgpu::SurfaceError::Lost) => gfx.resize(gfx.size),
-                    Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
-                    Err(e) => eprintln!("{:?}", e),
-                }
-            },
-            Event::MainEventsCleared => { gfx.window.request_redraw(); },                             // Request the redraw
-            _ => { // On any other event we want to update our state
-                // TODO: Use a channel here instead of a mutex/arc
-                let read_sequence = Arc::clone(&gfx_read_sequence).lock().unwrap().deref().clone();
-                let size = read_sequence.get_size();
+                Event::MainEventsCleared => { gfx.window.request_redraw(); }, // Request the redraw
 
-                if size != last_sequence_size {
-                    last_sequence_size = size;
-                    read_sequence.print_state();
-                    gfx.refresh_instances();
+                _ => { // On any other event we want to update our state
+                    // TODO: Use a channel here instead of a mutex/arc
+                    let read_sequence = Arc::clone(&gfx_read_sequence).lock().unwrap().deref().clone();
+                    let size = read_sequence.get_size();
 
-                    // If we don't have anything we want to clear the buffer and exit
-                    if size <= 0 { 
+                    if size != last_sequence_size {
+                        last_sequence_size = size;
+                        read_sequence.print_state();
+                        gfx.refresh_instances();
+
+                        // If we don't have anything we want to clear the buffer and exit
+                        if size <= 0 { 
+                            gfx.update_instance_buffer();
+                            return; 
+                        }
+
+                        // TODO: Need to integrate caching to only update the changed notes
+
+                        gfx.enable_tones(nonce_notes);
+
                         gfx.update_instance_buffer();
-                        return; 
                     }
-
-                    // TODO: Need to integrate caching to only update the changed notes
-                    let played_notes: SequenceData = read_sequence.played_notes.clone();
-                    let uniform_notes: SequenceData = read_sequence.uniform_notes.clone();
-                    let nonce_notes: SequenceData = read_sequence.nonce_notes.clone();
-                    let mediant_notes: SequenceData = read_sequence.mediant_notes.clone();
-
-                    gfx.enable_tones(played_notes);
-                    gfx.enable_tones(uniform_notes);
-                    gfx.enable_tones(mediant_notes);
-                    gfx.enable_tones(nonce_notes);
-
-                    gfx.update_instance_buffer();
                 }
             }
-        });
+        );
     });
 
 
