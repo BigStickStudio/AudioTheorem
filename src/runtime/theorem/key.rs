@@ -46,10 +46,7 @@ impl Key {
         }
     }
 
-    pub fn root(&self) -> Note {
-        self.notes[0].clone()
-    }
-
+    pub fn root(&self) -> Tonic { self.collection[0].clone() }
     pub fn is_sharp(&self) -> bool { self.accidental == Form::Sharp }
     pub fn is_flat(&self) -> bool { self.accidental == Form::Flat }
     pub fn is_natural(&self) -> bool { self.accidental == Form::Natural }
