@@ -17,14 +17,18 @@ pub struct Key {
 
 // Used to determine all of the pitchgroups associated with the played notes
 impl Key {
-    pub fn new(pitchgroup: &PitchGroup, played_pitch_classes: Vec<PitchClass>) -> Key {
+    pub fn new(pitchgroup: &PitchGroup, voicings: Vec<Tonic>) -> Key {
         // TODO: Rayon Parallelization 
 
         // We get all the pitch classes belonging to this pitchgroup
         let possible_pitch_classes: HashSet<PitchClass> = pitchgroup.pitch_classes().iter().map(|pc| pc.clone()).collect::<HashSet<PitchClass>>();
 
-        // We collect all of the natural notes in the pitchgroup from the Matrix
-        let collection = possible_pitch_classes.iter().map(|pc| Tonic::from_pitch_class(pc.clone())).collect::<Vec<Tonic>>();
+        // We let the Matrix tell us whether we should be sharp or flat
+        let natural_notes: Vec<Note> = possible_pitch_classes.iter().map(|pc| Matrix::natural(pc, pitchgroup)).collect::<Vec<Note>>(); 
+        // I'd like to learn to create a function that can take various pieces and assemble a Tonic from them
+
+        // we build a collection of Tonic notes that are being played starting with the voicings
+        let collection: Vec<Tonic> = voicings.iter().map(|t| t.clone()).collect::<Vec<Tonic>();
 
         // We need to determine if this is a sharp, flat, or natural note
         let is_sharp = notes.iter().any(|n| n.sharp());
@@ -34,6 +38,7 @@ impl Key {
         
         Key { 
             pitchgroup: pitchgroup.clone(), 
+            collection,
             accidental,
             probability: ((played_pitch_classes.len()  as f64 / pitch_classes.len() as f64) * 100.0) as u8
         }

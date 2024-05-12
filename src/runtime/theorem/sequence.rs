@@ -5,48 +5,26 @@
 use cgmath::num_traits::clamp;
 
 use crate::types::{sequences, Interval, Note, Pitch, PitchClass, PitchGroup, Scale, Tone};
-use super::{subsequence::Subsequence, PitchGroupKernel, Tonic};
+use super::{subsequence::Subsequence, PitchGroupKernel, Subsequence};
 
 
 // TODO: Determine Sequence Filter based on how we are determining 'range'
 // TODO: define 'range'
 pub struct Sequence {
-    pub upper_bound: u8,                // This is the upper bound of the dynamic range for a set of keys + 7 but we may need to make this part of a filter (proprietary NEXUS)
-    pub lower_bound: u8,                // This is the lower bound of the dynamic range for a set of keys - 7
-    tonic_set: TonicSet,                       // This is where we want to compare inversions and shapes and define  - limits({scale -> 12, chord -> 14th(aug^3|dim^3)})
+    seq: Vec<Subsequence>,                       // This is where we want to compare inversions and shapes and define  - limits({scale -> 12, chord -> 14th(aug^3|dim^3)})
 }
 
 impl Sequence {
     pub fn new() -> Sequence 
         { 
             Sequence 
-                { 
-                    upper_bound: self.upper_bound(),
-                    lower_bound: self.lower_bound(),
-                    tonic_set: TonicSet::new()
-                } 
+                { seq: vec![Subsequence::new()] } 
         }
 
     pub fn clear(&mut self) { 
-        self.tones.clear(); 
-        self.upper_bound = 144;
-        self.lower_bound = -1;
-        self.key_map.clear();
-        self.tonic.clear();
+        self.seq.clear();
     }
 
-    pub fn upper_bound(&self) -> u8 { self.tones.iter().map(|t| t.index()).max().unwrap_or(144) }
-    pub fn lower_bound(&self) -> u8 { self.tones.iter().map(|t| t.index()).min().unwrap_or(-1)}
-
-    // We calculate +7 and -7 from the current upper and lower bounds of the tones or 
-    // max of 143 and min of 0
-    pub fn calculate_bounds(&mut self) {
-        self.upper_bound = clamp(self.upper_bound() + 7, 0, 143); // 144 is the max index
-        self.lower_bound = clamp(self.lower_bound() - 7, 0, 143); // 0 is the min index
-    }
-
-    // Returns the gap between the upper and lower bounds (should be less than 28 for a scale and 12 (or 24) for a chord) - and smaller for tetrachordal voicings
-    pub fn limits(&self) -> u8 { self.upper_bound() - self.lower_bound() }
 
     // We need to pre-emptively find out if our sequence bounds are less than a 14th or more than 2 octaves
        // So we need to make sure it's less than 28 notes from the root
