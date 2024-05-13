@@ -4,7 +4,7 @@
 
 use crate::types::Dynamic;
 use cgmath::prelude::*;
-use super::super::Disposition;
+use winit::dpi::Size;
 
 #[derive(Debug)]
 pub struct Instance {
@@ -12,7 +12,7 @@ pub struct Instance {
     pub rotation: cgmath::Quaternion<f32>,
     pub index: u32,
     pub dynamic: Dynamic,
-    pub disposition: Disposition,
+    pub harmony: u32
 }
 
 impl Instance {
@@ -57,7 +57,7 @@ impl Instance {
     // This is a trigger key function that will be used to trigger the key .. that's all
     pub fn trigger_key(&mut self, velocity: u8, disposition: u8) {
         self.dynamic = Dynamic::from_velocity(velocity);
-        self.disposition = disposition;
+        self.harmony = disposition as u32;
     }
 }
 

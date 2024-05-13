@@ -2,8 +2,9 @@
 use std::collections::HashSet;
 
 use super::{chord::Chord, Subsequence};
-use crate::types::{Interval, Octave, PitchClass, Scale, Tone};
+use crate::types::{Interval, Note, Matrix, Octave, PitchClass, Scale, Tone};
 
+#[derive(Eq, Hash, PartialEq)]
 pub struct Tonic {
     pub note: Note,
     pub tone: Tone,        // This can give us pitch, and we could use frequency or cents
@@ -16,12 +17,8 @@ pub struct Tonic {
 impl Tonic {
     pub fn from_note(note: Note, octave: Octave, velocity: u8, harmony: u8) -> Tonic {
         let tone = Tone::from_parts(octave, note);
-        Tonic { note, tone, index: tone.index(), velocity, harmony }
-    }
-
-    pub fn from_pitch_class(pc: PitchClass, octave: Octave, velocity: u8, harmony: u8) -> Tonic {
-        let note = None; // This is where we need to find the note from the pitchclass
-        Tonic { note, tone: Tone::from_parts(octave, note), index: tone.index(), velocity, harmony }
+        let index = octave.to_index() * 12 + note.pitch_class().to_index();
+        Tonic { note, tone, index, velocity, harmony }
     }
 
     pub fn from_ivh(index: u8, velocity: u8, harmony: u8) -> Tonic {

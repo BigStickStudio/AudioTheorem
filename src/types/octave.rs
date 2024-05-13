@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-use std::fmt;
+use std::{fmt, hash::Hash};
 
 /// [Octave](audiotheorem::types::Octave) of a [Pitch](audiotheorem::types::Pitch).
-#[derive(Copy, Clone, PartialOrd, PartialEq)]
+#[derive(Copy, Clone, PartialOrd, PartialEq, Eq, Hash)]
 pub enum Octave {
     DoubleContra,
     SubContra,
@@ -140,6 +140,7 @@ impl Octave {
         }
     }
 }
+
 
 impl fmt::Debug for Octave {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

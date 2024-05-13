@@ -4,6 +4,7 @@ mod sequence;
 mod subsequence;
 mod chord;
 mod tonic;
+mod theorem;
 
 pub use self::pitchgroupkernel::PitchGroupKernel;
 pub use self::key::Key;

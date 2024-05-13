@@ -5,7 +5,7 @@
 use cgmath::num_traits::clamp;
 
 use crate::types::{sequences, Interval, Note, Pitch, PitchClass, PitchGroup, Scale, Tone};
-use super::{subsequence::Subsequence, PitchGroupKernel, Subsequence};
+use super::{PitchGroupKernel, Subsequence};
 
 
 // TODO: Determine Sequence Filter based on how we are determining 'range'
@@ -21,43 +21,25 @@ impl Sequence {
                 { seq: vec![Subsequence::new()] } 
         }
 
-    pub fn clear(&mut self) { 
-        self.seq.clear();
-    }
+    pub fn clear(&mut self) { self.seq.clear(); }
 
-
-    // We need to pre-emptively find out if our sequence bounds are less than a 14th or more than 2 octaves
-       // So we need to make sure it's less than 28 notes from the root
-    // For now, we only do this with new notes played.. we still need to 'normalize' to get the pitchgroupkernel data
-    pub fn play_note(&mut self, index: u8, velocity: u8) -> bool // It would be nice if we could embed the midi/format/wavetable here too
+    
+        // This is going to get complicated quickly..
+        // .. we have to account for sequences having the potential to merge,
+        // .. or collapse, or split, or to potentially have multiple instances that share the same notes
+    pub fn process_input(&mut self, index: u8, velocity: u8)
         {
-            // We need to check if the note is within the bounds of the sequence
-            if self.tones.len() == 0 { 
-                self.tones.insert(Tone::from_iv(index, velocity)); 
-                self.calculate_bounds();
-                return true; 
-            }
-
-            self.calculate_bounds();
-
-            // so, we need to check if the index is already in the vector
-            if let Some(tone) = self.tones.get(&index)
-                { 
-                    // if it is, we need to update the velocity if it is greater, and exit.
-                    if tone.velocity() < velocity 
-                        { 
-                            self.tones.remove(&index); 
-                            self.tones.insert(Tone::from_iv(index, velocity)); 
+            for sub in self.seq.iter_mut()
+                {
+                    if sub.within_bounds(index)
+                        {
+                            sub.play_note(index, velocity);
                         }
-                    return true;
                 }
 
-                // Todo: Implement an Enum Filter for bounds factors for Scales 12, Chords 14, +/7
-            if index < self.lower_bound || index > self.upper_bound { return false; }
-
-            // otherwise, add it
-            self.tones.push(Disposition{tone: Tone::from_iv(index, velocity), harmony: 0});
-            return true;
+            // if we get here, we need to create a new subsequence
+            self.seq.push(Subsequence::new());
+            self.seq.last_mut().unwrap().play_note(index, velocity);
         }
 }
 

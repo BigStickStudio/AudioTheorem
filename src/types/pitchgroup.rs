@@ -494,7 +494,7 @@ impl PitchGroup {
         if pitch_classes.is_empty() { return (Vec::new(), Vec::new()); } // What do we really want to return here? are all pitch groups valid, or none?
 
         let mut all: HashSet<PitchGroup> = PitchGroup::all().iter().copied().collect();
-        let pitch_class_groups: HashSet<PitchGroup> = pitch_class.groups().iter().copied().collect();
+        let pitch_class_groups: HashSet<PitchGroup> = pitch_classes.groups().iter().copied().collect();
 
         let mut harmonic_groups = Vec::new();
         let mut dissonant_groups = Vec::new();

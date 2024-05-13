@@ -17,6 +17,7 @@
 use super::PitchClass;
 use crate::types::note::Accidental::Natural;
 use crate::types::{Interval, MajorQuality, PerfectQuality, Steps};
+use std::hash::Hash;
 use std::{cmp, fmt};
 
 /// [Notes](audiotheorem::types::Note) are names given to a specific

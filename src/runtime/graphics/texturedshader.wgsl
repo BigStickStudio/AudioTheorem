@@ -13,7 +13,7 @@ struct InstanceInput {
     @location(8) model_matrix_3: vec4<f32>,
     @location(9) velocity: f32,
     @location(10) white_key: f32,
-    @location(11) color_factor: u32,
+    @location(11) harmony: u32,
 }
 
 struct VertexInput {
@@ -26,7 +26,7 @@ struct VertexOutput {
     @location(0) tex_coords: vec2<f32>,
     @location(1) velocity: f32,
     @location(2) white_key: f32,
-    @location(3) color_factor: u32,
+    @location(3) harmony: u32,
 };
 
 @vertex
@@ -43,7 +43,7 @@ fn vs_main(model: VertexInput, instance: InstanceInput) -> VertexOutput {
     out.tex_coords = model.tex_coords;
     out.velocity = instance.velocity;
     out.white_key = instance.white_key;
-    out.color_factor = instance.color_factor;
+    out.harmony = instance.harmony;
 
     return out;
 }
@@ -85,19 +85,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     var black_and_white = mix(black_sample, white_sample, in.white_key);
 
+    if (in.color_factor == 0u)
+        { return mix(black_and_white, blue_sample, in.velocity * 4.25); } 
 
-    if (in.color_factor == 8u)  // These are notes that have no uniformity
-        { return mix(black_and_white, red_sample, in.velocity * 3.75); }    // Velocity needs to be multiplied because Midi stops at 128 
-
-    if (in.color_factor == 4u)  // These are notes that are in some but not complete uniformity
-        { return mix(black_and_white, orange_sample, in.velocity * 2.55); } // .. but beware as our table goes to 144
-
-    if (in.color_factor == 2u) // these are notes that are in complete uniformity .. i.e. found in all other potential pitchgroups
-        { return mix(black_and_white, green_sample, in.velocity * 1.25); } /// we will need to clamp and slope with a custom lerp
-
-    if (in.color_factor == 1u) // These are the notes that we are playing
-        { return mix(black_and_white, blue_sample, in.velocity * 4.25); } // TODO: We should switch all of these to a more comprehensive adding for the color factor with respect to the white key (invert and sub)
-
+    if (in.color_factor > 1u)
+        { return mix(mix(green_sample, orange_sample, (in.color_factor / 255) as f32), black_and_white, in.velocity * 4.25); }
 
    return black_and_white;
 }

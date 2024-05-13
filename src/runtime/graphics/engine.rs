@@ -3,14 +3,12 @@
 //
 
 use super::super::Sequence;
-use super::super::Disposition;
 use super::spheres;
 use super::texture::Texture;
 use super::camera::{Camera, CameraUniform, CameraController};
 use super::mesh::*;
 use super::instances::{Instance, RawInstance};
 use super::spheres::Sphere;
-use crate::runtime::{subsequence, SequenceData};
 use crate::types::Dynamic;
 use std::sync::{Arc, Mutex};
 use wgpu::util::DeviceExt;
@@ -98,14 +96,14 @@ impl Engine {
         );
 
         // We are creating a grid of instances
-        let instances = (0..grid_size).flat_map(|y| {
+        let instances: Vec<Instance> = (0..grid_size).flat_map(|y| {
             (0..grid_size).map(move |x| {
                 let index = x;
                 let position = cgmath::Vector3 { x: x as f32, y: y as f32, z: 0.0 } - instance_displacement;
                 let rotation = cgmath::Quaternion::from_axis_angle(cgmath::Vector3::unit_y(), cgmath::Deg(0.0));
-                Instance { position, rotation, index, dynamic: Dynamic::Off, disposition: Disposition::Natural }
+                Instance { position, rotation, index, dynamic: Dynamic::Off, harmony: 255} // This isn't right, we need to figure out a default harmony here to negate dynamic shader logic
             })
-        }).collect::<Vec<_>>();
+        }).collect();
 
         let instance_data = instances.iter().map(Instance::raw).collect::<Vec<_>>();
 
@@ -449,13 +447,19 @@ impl Engine {
     pub fn refresh_instances(&mut self) {
         self.instances.iter_mut().for_each(|instance| {
             instance.dynamic = Dynamic::Off;
-            instance.disposition = Disposition::Natural;
+            instance.harmony = 255;
         });
     }
 
-    pub fn enable_tones(&mut self, sequence: SequenceData) {
-        for i in sequence.iv.iter()
-            { self.instances[i.index as usize].trigger_key(i.velocity, sequence.disposition); }
+    pub fn enable_tones(&mut self, sequence: Sequence) {
+        for subsequence in sequence.sequences.iter() {
+            for tone in subsequence.tones.iter() {
+                let index = tone.index();
+                let velocity = tone.velocity();
+                let disposition = tone.disposition();
+                self.instances[index as usize].trigger_key(velocity, disposition); // Does this work like this? :thinking:
+            }
+        }
     }
 
     pub fn update(&mut self) {

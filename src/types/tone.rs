@@ -29,7 +29,6 @@ use std::fmt;
 pub struct Tone {
     octave: Octave,
     note: Note,
- 
 }
 
 impl Tone {
@@ -40,13 +39,6 @@ impl Tone {
         return Tone { octave: pitch.octave(), note: pitch.note() };
     }
 
-    pub fn index(&self) -> u8 { self.index }
-    pub fn velocity(&self) -> u8 { self.velocity }
-    pub fn harmony(&self) -> u8 { self.harmony }
-
-    pub fn to_dynamic(&self) -> Dynamic { Dynamic::from_velocity(self.velocity) }
-    // This was all rewritting by RIC per BSS Nexus Project 2024 ^^^
- 
     /// Create a new [Tone](audiotheorem::types::Tone) from a [Note](audiotheorem::types::Note) and an
     /// [Octave](audiotheorem::types::Octave).
     pub fn from_parts(octave: Octave, note: Note) -> Tone 
@@ -70,7 +62,7 @@ impl Tone {
 
 impl fmt::Display for Tone {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result 
-        { format_args!("{}{}:{}", self.note, self.octave, self.velocity).fmt(f) }
+        { format_args!("{}{}", self.note, self.octave).fmt(f) }
 }
 
 impl std::ops::Add<Interval> for Tone {
@@ -125,6 +117,11 @@ impl std::ops::Sub<Interval> for Tone {
                     { None }
             }
     }
+}
+
+impl Hash for Tone {
+    fn hash<H: Hasher>(&self, state: &mut H) 
+        { self.octave.hash(state); self.note.hash(state); }
 }
 
 #[cfg(test)]

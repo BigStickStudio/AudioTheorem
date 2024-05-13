@@ -61,12 +61,30 @@ impl PitchGroupKernel {
         }
 
         // we want to get the common tones between the top keys
-       let uniform_tones: Vec<Tonic> = Vec::new(); // This is where we will put the common tones between the top keys
-       for key in top_keys.iter() {
-           if top_keys.iter().all(|k| k.collection.iter().any(|t| key.collection.contains(t))) {
-               uniform_tones.extend(key.collection.iter().map(|t| Tonic::from_note(t.note, t, t.velocity, 1)));
-           }
-       }
+        let uniform_tones: Vec<Tonic> = Vec::new(); // This is where we will put the common tones between the top keys
+        for key in top_keys.iter() {
+            if top_keys.iter().all(|k| k.collection.iter().any(|t| key.collection.contains(t))) {
+                uniform_tones.extend(key.collection.iter().map(|t| Tonic::from_note(t.note, t, t.velocity, 1)));
+            }
+        }
+
+        // we want to determine the % of the top keys that each note is in
+        let non_uniform_keys = self.keys.iter().filter(|k| !top_keys.contains(k)).collect::<Vec<Key>>();
+       
+        // TODO: figure out if this is right or not.. I have no clue. it's just some b.s to placehold until testing
+        // we then want to calculate the ratio of a given note in the top keys, and calculate the number of keys that it is scaled between 0-255
+        let mut non_uniform_tones: Vec<Tonic> = Vec::new();
+        for key in non_uniform_keys.iter() {
+            let ratio = key.probability as f64 / top_keys.iter().map(|k| k.probability).sum::<u8>() as f64;
+            let harmony = (ratio * 255.0) as u8;
+            non_uniform_tones.extend(key.collection.iter().map(|t| Tonic::from_note(t.note, t.octave, t.velocity, harmony)));
+        }
+
+        // we want to return the uniform tones and the non-uniform tones
+        let mut result = HashSet::new();
+        result.extend(uniform_tones);
+        result.extend(non_uniform_tones);
+        result
     }
 
 

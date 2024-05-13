@@ -1,13 +1,13 @@
 
-use std::collections::HashSet;
-use crate::types::{PitchGroup, PitchClass, Note, Tonic, Form, Matrix};
+use std::collections::{self, HashSet};
+use crate::types::{PitchGroup, PitchClass, Note, Form, Matrix};
 use super::{PitchGroupKernel, Tonic};
 
 #[derive(Clone, Debug)]
 pub struct Key {
     pub pitchgroup: PitchGroup,         // This is the pitchgroup that this slice belongs to
-    pub collection: Vec<Tonic>,               // These are the collected notes being played in their 'natural form' per the 'circle of fifths' Matrix
-    accidental: Form,               // Fast Sharp, Flat, or Natural note (Cn would be the only Natural Slice)
+    pub notes: Vec<Notes>,         // This is the collection of notes found from the matrix
+    accidental: Form,                   // Fast Sharp, Flat, or Natural note (Cn would be the only Natural Slice)
     pub probability: u8,                // This is the probability of the pitchgroup slice being played -> we could systematically map these with a sequence e.g. Matrix type
         /*
             The inversion of this gives us  `Negative Harmony` i.e. 'inferred' Dissonance aka 'Disposition'
@@ -21,17 +21,11 @@ impl Key {
         // TODO: Rayon Parallelization 
 
         // We get all the pitch classes belonging to this pitchgroup
-        let possible_pitch_classes: HashSet<PitchClass> = pitchgroup.pitch_classes().iter().map(|pc| pc.clone()).collect::<HashSet<PitchClass>>();
+        let pitch_classes: HashSet<PitchClass> = pitchgroup.pitch_classes().iter().map(|pc| pc.clone()).collect::<HashSet<PitchClass>>();
 
         // We let the Matrix tell us whether we should be sharp or flat
-        let natural_notes: Vec<Note> = possible_pitch_classes.iter().map(|pc| Matrix::natural(pc, pitchgroup)).collect::<Vec<Note>>(); 
-        // I'd like to learn to create a function that can take various pieces and assemble a Tonic from them
-
-        // we build a collection of Tonic notes that are being played starting with the voicings
-        let collection: Vec<Tonic> = voicings.iter().map(|t| t.clone()).collect::<Vec<Tonic>();
+        let notes: Vec<Note> = possible_pitch_classes.iter().map(|pc| Matrix::natural(pc, pitchgroup)).collect::<Vec<Note>>(); 
         
-        // we keep all the non-voicing 
-
         // We need to determine if this is a sharp, flat, or natural note
         let is_sharp = notes.iter().any(|n| n.sharp());
         let is_flat = notes.iter().any(|n| n.flat());
@@ -40,9 +34,9 @@ impl Key {
         
         Key { 
             pitchgroup: pitchgroup.clone(), 
-            collection,
+            notes,
             accidental,
-            probability: ((played_pitch_classes.len()  as f64 / pitch_classes.len() as f64) * 100.0) as u8
+            probability: ((voicings.len()  as f64 / pitch_classes.len() as f64) * 100.0) as u8
         }
     }
 
