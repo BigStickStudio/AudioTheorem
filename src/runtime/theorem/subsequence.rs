@@ -77,8 +77,7 @@ impl Subsequence {
             self.tones.insert(Tonic::new(index, velocity, 0));
 
             // This is the speculative - theoretical logic
-            self.kernel = PitchGroupKernel::new(self.tones.clone());
-            self.speculative = self.kernel.normalize(self.tones.clone()); // This needs to be extrapolated to the sequence logic level
+            self.sync();
             // We need to update the kernel, but unfortunately we don't have a good update method to preserve caching or space-time complexity
         }
 
@@ -93,6 +92,12 @@ impl Subsequence {
                 upper_bound: self.upper_bound,
                 lower_bound: self.lower_bound
             }
+        }
+
+    pub fn sync(&mut self)
+        {
+            self.kernel = PitchGroupKernel::new(self.tones.clone());
+            self.speculative = self.kernel.normalize(self.tones.clone());
         }
 
     pub fn calculate_harmonies(&mut self) 

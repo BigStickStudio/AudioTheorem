@@ -2,6 +2,7 @@
 use std::collections::{self, HashSet};
 use crate::types::{PitchGroup, PitchClass, Note, Form, Matrix};
 use super::{PitchGroupKernel, Tonic};
+use std::fmt::{self, Display, Formatter};
 
     // In theory the scales should be the same for all keys in a pitchgroup
 
@@ -49,4 +50,16 @@ impl Key {
     pub fn is_sharp(&self) -> bool { self.accidental == Form::Sharp }
     pub fn is_flat(&self) -> bool { self.accidental == Form::Flat }
     pub fn is_natural(&self) -> bool { self.accidental == Form::Natural }
+}
+
+impl Display for Key {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "{:?} - {:?} - {:?} \n", self.pitchgroup, self.accidental, self.probability);
+
+        for note in self.notes.iter() {
+            writeln!(f, "{:?} ", note);
+        }
+
+        Ok(())
+    }
 }

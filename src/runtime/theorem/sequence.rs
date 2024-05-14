@@ -29,7 +29,9 @@ impl Sequence {
         let played_tones: Vec<Tonic> = self.sequences.iter().map(|s: &Subsequence| s.tones.iter().map(|t| t.clone()).collect::<Vec<Tonic>>()).flatten().collect();
         let speculative_tones: Vec<Tonic> = self.sequences.iter().map(|s: &Subsequence| s.speculative.iter().map(|t| t.clone()).collect::<Vec<Tonic>>()).flatten().collect();
 
-        played_tones.iter().chain(speculative_tones.iter()).map(|t: &Tonic| t.clone()).collect()
+        let mut tones: Vec<Tonic> = played_tones.clone();
+        tones.extend(speculative_tones);
+        tones
     }
     
         // This is going to get complicated quickly..
@@ -45,7 +47,19 @@ impl Sequence {
                             if sub.tones.iter().any(|t| t.index == index)
                                 {
                                     sub.tones.retain(|t| t.index != index);
-                                    sub.calculate_bounds();
+
+                                    // if the sequence is empty, remove it
+                                    if sub.tones.is_empty()
+                                        {
+                                            sub.upper_bound = 255;
+                                            sub.lower_bound = 0;
+                                        }
+                                    else
+                                        {
+                                            sub.calculate_bounds();
+                                        }
+
+                                    sub.sync();
                                 }
                         }
                     return;

@@ -3,6 +3,7 @@
 use std::collections::{self, HashSet};
 use crate::types::{Tone, PitchClass, Note, PitchGroup};
 use super::{Key, Tonic};
+use std::fmt::{self, Display, Formatter};
 
 #[derive(Clone, Debug)]
 pub struct PitchGroupKernel {
@@ -53,7 +54,6 @@ impl PitchGroupKernel {
             // and we want to go through each note in a key
             for note in key.notes.iter() {
                 // if the played note is in the top key we could update it's name here (but we're not going to yet)
-
                 // and we want to know if that note is in all of the other top keys
                 if top_keys.iter().all(|k| k.notes.iter().any(|n| n == note)) {
                     // TODO: We need to figure out how to calculate the intermediate 
@@ -75,7 +75,7 @@ impl PitchGroupKernel {
         }        
 
         // (formula and methods proprietary - Big Stick Studio - The NEXUS Project 2024-2025)
-        played_notes.intersection(&played_tones).map(|t| t.clone()).collect::<HashSet<Tonic>>() // This is the speculative set of notes
+        played_notes
     }
 }
 
@@ -90,6 +90,12 @@ impl Iterator for PitchGroupKernel {
             return Some(next);
         }
         None
+    }
+}
+
+impl Display for PitchGroupKernel {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "{:?}", self.keys)
     }
 }
 //impl FromIterator
