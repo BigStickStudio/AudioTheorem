@@ -101,7 +101,7 @@ impl Engine {
                 let index = x;
                 let position = cgmath::Vector3 { x: x as f32, y: y as f32, z: 0.0 } - instance_displacement;
                 let rotation = cgmath::Quaternion::from_axis_angle(cgmath::Vector3::unit_y(), cgmath::Deg(0.0));
-                Instance { position, rotation, index, dynamic: Dynamic::Off, harmony: 255} // This isn't right, we need to figure out a default harmony here to negate dynamic shader logic
+                Instance { position, rotation, index, dynamic: Dynamic::Off, harmony: 255.0}
             })
         }).collect();
 
@@ -447,7 +447,7 @@ impl Engine {
     pub fn refresh_instances(&mut self) {
         self.instances.iter_mut().for_each(|instance| {
             instance.dynamic = Dynamic::Off;
-            instance.harmony = 255;
+            instance.harmony = 255.0;
         });
     }
 

@@ -13,7 +13,7 @@ struct InstanceInput {
     @location(8) model_matrix_3: vec4<f32>,
     @location(9) velocity: f32,
     @location(10) white_key: f32,
-    @location(11) harmony: u32,
+    @location(11) harmony: f32,
 }
 
 struct VertexInput {
@@ -26,7 +26,7 @@ struct VertexOutput {
     @location(0) tex_coords: vec2<f32>,
     @location(1) velocity: f32,
     @location(2) white_key: f32,
-    @location(3) harmony: u32,
+    @location(3) harmony: f32,
 };
 
 @vertex
@@ -85,11 +85,17 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     var black_and_white = mix(black_sample, white_sample, in.white_key);
 
-    if (in.color_factor == 0u)
+
+    if (in.harmony == 0f)
         { return mix(black_and_white, blue_sample, in.velocity * 4.25); } 
 
-    if (in.color_factor > 1u)
-        { return mix(mix(green_sample, orange_sample, (in.color_factor / 255) as f32), black_and_white, in.velocity * 4.25); }
+    if (in.harmony >= 1f)
+        { 
+            //return mix(mix(green_sample, orange_sample, (in.harmony / 255.0)), black_and_white, in.velocity * 4.25); 
+            let harmony_factor = in.harmony / 255.0;
+            let green_orange = mix(green_sample, orange_sample, harmony_factor);
+            return mix(green_orange, black_and_white, in.velocity * 4.25);
+        }
 
    return black_and_white;
 }

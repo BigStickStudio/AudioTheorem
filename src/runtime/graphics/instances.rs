@@ -12,7 +12,7 @@ pub struct Instance {
     pub rotation: cgmath::Quaternion<f32>,
     pub index: u32,
     pub dynamic: Dynamic,
-    pub harmony: u32
+    pub harmony: f32
 }
 
 impl Instance {
@@ -57,7 +57,7 @@ impl Instance {
     // This is a trigger key function that will be used to trigger the key .. that's all
     pub fn trigger_key(&mut self, velocity: u8, disposition: u8) {
         self.dynamic = Dynamic::from_velocity(velocity);
-        self.harmony = disposition as u32;
+        self.harmony = disposition as f32;
     }
 }
 
@@ -67,7 +67,7 @@ pub struct RawInstance {
     pub model: [[f32; 4]; 4],
     pub velocity: f32,
     pub white_key: f32,
-    pub color_factor: u32,
+    pub color_factor: f32,
 }
 
 // Used for Vertex Buffer Layout
@@ -111,7 +111,7 @@ impl RawInstance {
                 wgpu::VertexAttribute {                         // Color Factor
                     offset: mem::size_of::<[f32; 18]>() as wgpu::BufferAddress,
                     shader_location: 11,
-                    format: wgpu::VertexFormat::Uint32
+                    format: wgpu::VertexFormat::Float32
                 }
             ]
         }
