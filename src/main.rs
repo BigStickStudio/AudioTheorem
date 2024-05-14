@@ -24,7 +24,7 @@ fn main() {
     use std::sync::{Arc, Mutex};
     use tokio::time::{self, sleep, Duration};
     use rodio::{OutputStream, Source, dynamic_mixer};
-    use audiotheorem::{runtime::{Events, Engine, Sequence, SequenceData, Waveform}, types::Tuning};
+    use audiotheorem::{runtime::{Events, Engine, Sequence, Waveform}, types::Tuning};
 
     const GRID_SIZE: u8 = 12;
 
@@ -32,7 +32,7 @@ fn main() {
     let rt = tokio::runtime::Runtime::new().unwrap();
 
     // Midi Sequence Buffer
-    let write_theorem: Arc<Mutex<Sequence>> = Arc::new(Mutex::new(Theorem::new())); // Going to have to make this a channel and move the mutex' inside the sequence
+    let write_theorem: Arc<Mutex<Sequence>> = Arc::new(Mutex::new(Sequence::new())); // Going to have to make this a channel and move the mutex' inside the sequence
     let gfx_read_theorem: Arc<Mutex<Sequence>> = Arc::clone(&write_theorem);
     let audio_read_theorem: Arc<Mutex<Sequence>> = Arc::clone(&write_theorem);
 
@@ -103,7 +103,7 @@ fn main() {
         let event_loop = EventLoop::new();
         let window = WindowBuilder::new().build(&event_loop).unwrap();
         let mut gfx = Engine::new(window, GRID_SIZE.into(), &TexturedSquare::new()).await;
-        let mut last_sequence_size = gfx_read_sequence.lock().unwrap().get_size();
+        let mut last_sequence_size = gfx_read_theorem.lock().unwrap().get_size();
 
         event_loop.run(move |event, _, control_flow| 
             match event {
@@ -157,12 +157,13 @@ fn main() {
 
                 _ => { // On any other event we want to update our state
                     // TODO: Use a channel here instead of a mutex/arc
-                    let read_sequence = Arc::clone(&gfx_read_sequence).lock().unwrap().deref().clone();
-                    let size = read_sequence.get_size();
+                    let read_sequence = Arc::clone(&gfx_read_theorem); // This is most likely overkill - but I think I needed it..  (if you can't see this my screen is bigger than yours)
+                    let t_read = read_sequence.lock().unwrap();
+                    let size = t_read.get_size();
 
                     if size != last_sequence_size {
                         last_sequence_size = size;
-                        read_sequence.print_state();
+                        t_read.print_state();
                         gfx.refresh_instances();
 
                         // If we don't have anything we want to clear the buffer and exit
@@ -173,7 +174,7 @@ fn main() {
 
                         // TODO: Need to integrate caching to only update the changed notes
 
-                        gfx.enable_tones(nonce_notes);
+                        gfx.enable_tones(t_read.tones());
 
                         gfx.update_instance_buffer();
                     }

@@ -493,19 +493,16 @@ impl PitchGroup {
         // This is a safeguard to ensure that the pitch_classes vector is not empty
         if pitch_classes.is_empty() { return (Vec::new(), Vec::new()); } // What do we really want to return here? are all pitch groups valid, or none?
 
-        let mut all: HashSet<PitchGroup> = PitchGroup::all().iter().copied().collect();
-        let pitch_class_groups: HashSet<PitchGroup> = pitch_classes.groups().iter().copied().collect();
+        let all: HashSet<PitchGroup> = PitchGroup::all().iter().copied().collect();
+        let pitch_class_groups: HashSet<PitchGroup> = pitch_classes.iter().map(|pc| pc.groups()).flatten().collect();
 
-        let mut harmonic_groups = Vec::new();
-        let mut dissonant_groups = Vec::new();
-
-        for pitch_class in pitch_classes {
-            harmonic_groups = all.intersection(&pitch_class_groups).copied().collect();
-            dissonant_groups = all.difference(&pitch_class_groups).copied().collect();
-        }
+        let harmonic_groups: Vec<PitchGroup> = all.intersection(&pitch_class_groups).copied().collect();
+        let dissonant_groups: Vec<PitchGroup> = all.difference(&pitch_class_groups).copied().collect();
 
         (harmonic_groups, dissonant_groups)
     }
+    // Added by NeoTec Circa 2024, Richard I Christopher. ^^
+    // get off my dick.
 
 }
 

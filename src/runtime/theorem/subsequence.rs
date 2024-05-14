@@ -13,7 +13,7 @@
 
 use std::collections::HashSet;
 use super::{Chord, PitchGroupKernel, Tonic};
-use crate::types::{Tone, Interval, Scale};
+use crate::types::{Tone, Interval, Scale, Note};
 
 pub struct Subsequence {
     pub tones: HashSet<Tonic>,          // These are initially the tones being played, and we add the tones from the pitchgroupkernel across the entire bounds
@@ -32,7 +32,7 @@ impl Subsequence {
             speculative: HashSet::new(),
             chords: HashSet::new(), 
             scales: HashSet::new(), 
-            kernel: PitchGroupKernel::new(Vec::new()),
+            kernel: PitchGroupKernel::new(HashSet::new()),
             upper_bound: 144,       // These need to be swapped for a filter type
             lower_bound: 0
         } 
@@ -48,10 +48,11 @@ impl Subsequence {
 
     // We calculate +7 and -7 from the current upper and lower bounds of the tones or 
     // max of 143 and min of 0
-    pub fn calculate_bounds(&mut self) {
-        self.upper_bound = (self.upper_bound() + 7).clamp(0, 144); // 144 is the max index
-        self.lower_bound = (self.lower_bound() - 7).clamp(0, 144); // 0 is the min index
-    }
+    pub fn calculate_bounds(&mut self) 
+        {
+            self.upper_bound = (self.upper_bound() + 7).clamp(0, 144); // 144 is the max index
+            self.lower_bound = (self.lower_bound() - 7).clamp(0, 144); // 0 is the min index
+        }
 
     pub fn within_bounds(&self, index: u8) -> bool 
         {
@@ -67,28 +68,19 @@ impl Subsequence {
             // We need to check if the note is within the bounds of the sequence
             if self.tones.len() == 0 
                 { 
-                    self.tones.insert(Tonic::from_ivh(index, velocity, 0));
+                    self.tones.insert(Tonic::new(index, velocity, 0));
                     self.calculate_bounds();
                 }
 
+            // This is the actual 'play' logic
             self.calculate_bounds();
+            self.tones.insert(Tonic::new(index, velocity, 0));
 
-            // We can probably delete this now that we are recreating speculative notes
-            // // This should never happen because we are checking if a new note is already being played
-            // // But when it comes to speculative notes, we need to check for an 'overlap' with the played notes
-            // // so, we need to check if the index is already in the vector
-            // if self.tones.iter().any(|t| t.index() == index) { 
-            //     // we need to update the velocity of the note
-            //     self.tones.iter_mut().find(|t| t.index() == index).unwrap().velocity = velocity;
-            //     return;
-            // }
-                
-            self.tones.insert(Tonic::from_ivh(index, velocity, 0));
-
-            // We need to update the kernel
-            self.kernel.update(self.tones.clone());
+            // This is the speculative - theoretical logic
+            self.kernel = PitchGroupKernel::new(self.tones.clone());
             self.speculative = self.kernel.normalize(self.tones.clone()); // This needs to be extrapolated to the sequence logic level
-    }
+            // We need to update the kernel, but unfortunately we don't have a good update method to preserve caching or space-time complexity
+        }
 
     fn cloned(&self) -> Subsequence
         {

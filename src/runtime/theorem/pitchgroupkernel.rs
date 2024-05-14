@@ -11,12 +11,14 @@ pub struct PitchGroupKernel {
     dissidents: Vec<PitchGroup>,     // These are the negative pitchgroups that are not being played - we may not need this
 }
 
+// It's expensive, but we just create a new pitchgroup every time, for now
 impl PitchGroupKernel {
-    pub fn new(tones: Vec<Tonic>) -> PitchGroupKernel { // Where do tones come from?
+    pub fn new(tones: HashSet<Tonic>) -> PitchGroupKernel { // Where do tones come from?
         if tones.is_empty() { return PitchGroupKernel { index: 0, keys: Vec::new(), dissidents: Vec::new() }; }
 
+        // We can eventually make this our consumer with a lock/mutex
         // We start by getting the tones being played in pitchclass form
-        let pitch_classes: Vec<PitchClass> = tones.iter().map(|t| t.pitch_class()).collect::<Vec<PitchClass>>(); // We can eventually make this our consumer with a lock/mutex
+        let pitch_classes: Vec<PitchClass> = tones.iter().map(|t| t.pitch_class().unwrap()).collect::<Vec<PitchClass>>(); 
         // and then we get the pitchgroups that contain the notes, and the ones that don't
         let (harmonious, dissidence) = PitchGroup::split_classes(pitch_classes.clone());
 
@@ -30,12 +32,6 @@ impl PitchGroupKernel {
             }
     }
 
-    pub fn clear(&mut self) {
-        self.index = 0;
-        self.keys.clear();
-        self.dissidents.clear();
-    }
-
     // This gives the highest probability keys
     fn top_keys (&self) -> Option<Vec<Key>> {
         let max_prob = self.keys.iter().map(|k| k.probability).max().unwrap_or(0);
@@ -45,42 +41,41 @@ impl PitchGroupKernel {
     // This determines harmony of the top pitchgroups, and returns a given set of 'names' (not fool-proof)
     // This would (ideally narrow down the total pitchgroups to one, but could be a 3 way tie, 
     // or more depending on the number of notes played)
-    pub fn normalize(&mut self, played_tones: HashSet<Tonic>) -> HashSet<Note> {
+    pub fn normalize(&mut self, played_tones: HashSet<Tonic>) -> HashSet<Tonic> {
         let top_keys = self.top_keys().unwrap_or(Vec::new());
         let n_of_top_keys = top_keys.len();
         // but we don't do anything with it yet..
         
-        let played_notes: HashSet<Note> = played_tones.iter().map(|t| t.note().unwrap()).collect::<HashSet<Note>>();
+        let mut played_notes = played_tones.iter().map(|t| t.clone()).collect::<HashSet<Tonic>>();
 
         // we want to go through all the top keys
         for key in top_keys.iter() {
             // and we want to go through each note in a key
             for note in key.notes.iter() {
+                // if the played note is in the top key we could update it's name here (but we're not going to yet)
+
                 // and we want to know if that note is in all of the other top keys
                 if top_keys.iter().all(|k| k.notes.iter().any(|n| n == note)) {
                     // TODO: We need to figure out how to calculate the intermediate 
                           // velocity from the notes played around it
 
                     // if it we want to add it with a 1 as the most harmonious
-                    played_notes.insert(Tonic::new(note.index, 100, 1));
+                    played_notes.extend(Tonic::new(note.index(), 100, 1));
                     continue;
                 }
 
                 // else we want to count the n of keys that have the note
                 let n_of_top = top_keys.iter().filter(|k| k.notes.iter().any(|n| n == note)).count();
                 
-                // nt to add it with a value that is inversely proportional to the number of keys that have the note
-                played_notes.insert(Tonic::new(note.index, 100, (255 - (n_of_top / n_of_top_keys * 255))));
-
+                // TODO: weave in the velocity from the notes played around it (Atomics?)
+                // and then add it with 255 being the most dissonant.. the more notes in the top keys - the more harmonious
+                played_notes.extend(Tonic::new(note.index(), 100, 255 - (n_of_top / n_of_top_keys * 255) as u8));
             }
+
         }        
 
-    // (formula and methods proprietary - Big Stick Studio - The NEXUS Project 2024-2025)
-        played_notes
-    }
-
-    pub fn update(&mut self, tones: HashSet<Tonic>) {
-        self.keys = tones.iter().map(|t| Key::new(&t.pitchgroup, vec![t.clone()])).collect::<Vec<Key>>();
+        // (formula and methods proprietary - Big Stick Studio - The NEXUS Project 2024-2025)
+        played_notes.intersection(&played_tones).map(|t| t.clone()).collect::<HashSet<Tonic>>() // This is the speculative set of notes
     }
 }
 

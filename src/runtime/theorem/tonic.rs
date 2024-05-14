@@ -4,7 +4,7 @@ use std::collections::HashSet;
 use super::{chord::Chord, Subsequence};
 use crate::types::{Interval, Note, Matrix, Octave, PitchClass, Scale, Tone};
 
-#[derive(Eq, Hash, PartialEq, Clone)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone)]
 pub struct Tonic {
     pub note: Option<Note>,
     pub tone: Option<Tone>,        // This can give us pitch, and we could use frequency or cents
@@ -33,4 +33,13 @@ impl Tonic {
     pub fn pitch_class(&self) -> Option<PitchClass> { Some(self.tone?.pitch_class()) }
     pub fn note(&self) -> Option<Note> { if self.note.is_some() { self.note } else if self.tone.is_some() { Some(self.tone?.note()) } else { None } }
     pub fn velocity(&self) -> u8 { self.velocity }
+}
+
+impl IntoIterator for Tonic {
+    type Item = Tonic;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        vec![self].into_iter()
+    }
 }

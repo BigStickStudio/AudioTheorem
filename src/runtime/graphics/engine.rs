@@ -2,14 +2,14 @@
 // Copyright 2023-2024 Richard I. Christopher, NeoTec Digital for Big Stick Studios under Ancillary. All Rights Reserved. Nexus Project.
 //
 
-use super::super::Sequence;
+use super::super::{Sequence, Tonic};
 use super::spheres;
 use super::texture::Texture;
 use super::camera::{Camera, CameraUniform, CameraController};
 use super::mesh::*;
 use super::instances::{Instance, RawInstance};
 use super::spheres::Sphere;
-use crate::types::Dynamic;
+use crate::types::{Dynamic, Tone};
 use std::sync::{Arc, Mutex};
 use wgpu::util::DeviceExt;
 use winit::event::WindowEvent;
@@ -451,14 +451,12 @@ impl Engine {
         });
     }
 
-    pub fn enable_tones(&mut self, sequence: Sequence) {
-        for subsequence in sequence.sequences.iter() {
-            for tone in subsequence.tones.iter() {
-                let index = tone.index();
-                let velocity = tone.velocity();
-                let disposition = tone.disposition();
-                self.instances[index as usize].trigger_key(velocity, disposition); // Does this work like this? :thinking:
-            }
+    pub fn enable_tones(&mut self, sequence: Vec<Tonic>) { // This eventually will become our middleware for the IO 
+        for tone in sequence.iter() {
+            let index = tone.index;
+            let velocity = tone.velocity;
+            let disposition = tone.harmony;
+            self.instances[index as usize].trigger_key(velocity, disposition); // Does this work like this? :thinking:
         }
     }
 

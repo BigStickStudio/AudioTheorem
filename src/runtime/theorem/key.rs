@@ -3,6 +3,9 @@ use std::collections::{self, HashSet};
 use crate::types::{PitchGroup, PitchClass, Note, Form, Matrix};
 use super::{PitchGroupKernel, Tonic};
 
+    // In theory the scales should be the same for all keys in a pitchgroup
+
+
 #[derive(Clone, Debug)]
 pub struct Key {
     pub pitchgroup: PitchGroup,         // This is the pitchgroup that this slice belongs to
@@ -17,7 +20,7 @@ pub struct Key {
 
 // Used to determine all of the pitchgroups associated with the played notes
 impl Key {
-    pub fn new(pitchgroup: &PitchGroup, voicings: Vec<Tonic>) -> Key {
+    pub fn new(pitchgroup: &PitchGroup, voicings: HashSet<Tonic>) -> Key {
         // TODO: Rayon Parallelization 
 
         // We get all the pitch classes belonging to this pitchgroup
@@ -41,7 +44,8 @@ impl Key {
     }
 
     pub fn len(&self) -> usize { self.notes.len() }
-    pub fn root(&self) -> Tonic { self.notes[0].clone() }
+    pub fn root(&self) -> Note { self.notes[0].clone() }
+    pub fn tonic(&self, note: Note) -> bool { self.root() == note }
     pub fn is_sharp(&self) -> bool { self.accidental == Form::Sharp }
     pub fn is_flat(&self) -> bool { self.accidental == Form::Flat }
     pub fn is_natural(&self) -> bool { self.accidental == Form::Natural }
