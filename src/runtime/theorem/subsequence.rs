@@ -96,8 +96,46 @@ impl Subsequence {
 
     pub fn sync(&mut self)
         {
+            // We could probably improve this by updating the kernel with the new tones
             self.kernel = PitchGroupKernel::new(self.tones.clone());
-            self.speculative = self.kernel.normalize(self.tones.clone());
+            let speculative = self.kernel.normalize(self.tones.clone());
+
+            // We go ahead and exit if this sync was a 'reset'
+            if self.tones.len() == 0
+                { 
+                    self.lower_bound = 0;
+                    self.upper_bound = 144;
+                    self.speculative = speculative;
+                    return; 
+                }
+
+            // We need to iterate from a lower bounds to an upper bounds and add the speculative tones
+            self.calculate_bounds();
+            let mut prev_vel = self.tones.iter().map(|t| t.velocity).sum::<u8>() / self.tones.len() as u8;
+
+            for i in self.lower_bound..self.upper_bound
+                {
+                    // If we find a speculative tone that is in the bounds
+                    if let mut t_tonic = speculative.iter().find(|t| t.index == i % 12).unwrap().clone()
+                        {
+                            // We want to add something to calculate nearby velocity
+                            
+                            // We need to make sure it's not one of the tones we're already playing (at the correct index)
+                            if !self.tones.iter().any(|t| t.index == i)
+                                { 
+                                    t_tonic.index = i;
+                                    t_tonic.velocity = (prev_vel + t_tonic.velocity) / 2;
+                                    self.speculative.insert(t_tonic.clone()); 
+                                    continue;
+                                }
+
+                            if let p_tonic = self.tones.iter().find(|t| t.index == i).unwrap()
+                                { 
+                                    prev_vel = (prev_vel + p_tonic.velocity) / 2;
+                                    self.speculative.insert(p_tonic.clone()); 
+                                }
+                        }
+                }
         }
 
     pub fn calculate_harmonies(&mut self) 

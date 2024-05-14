@@ -43,6 +43,8 @@ impl PitchGroupKernel {
     // This would (ideally narrow down the total pitchgroups to one, but could be a 3 way tie, 
     // or more depending on the number of notes played)
     pub fn normalize(&mut self, played_tones: HashSet<Tonic>) -> HashSet<Tonic> {
+        if played_tones.is_empty() { return HashSet::new(); }
+
         let top_keys = self.top_keys().unwrap_or(Vec::new());
         let n_of_top_keys = top_keys.len();
         // but we don't do anything with it yet..
@@ -69,7 +71,7 @@ impl PitchGroupKernel {
                 
                 // TODO: weave in the velocity from the notes played around it (Atomics?)
                 // and then add it with 255 being the most dissonant.. the more notes in the top keys - the more harmonious
-                played_notes.extend(Tonic::new(note.index(), 100, 255 - (n_of_top / n_of_top_keys * 255) as u8));
+                played_notes.extend(Tonic::new(note.index(), 75, 255 - (n_of_top / n_of_top_keys * 255) as u8));
             }
 
         }        

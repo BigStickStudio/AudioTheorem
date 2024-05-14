@@ -47,18 +47,6 @@ impl Sequence {
                             if sub.tones.iter().any(|t| t.index == index)
                                 {
                                     sub.tones.retain(|t| t.index != index);
-
-                                    // if the sequence is empty, remove it
-                                    if sub.tones.is_empty()
-                                        {
-                                            sub.upper_bound = 255;
-                                            sub.lower_bound = 0;
-                                        }
-                                    else
-                                        {
-                                            sub.calculate_bounds();
-                                        }
-
                                     sub.sync();
                                 }
                         }
