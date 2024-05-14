@@ -49,7 +49,7 @@ impl Instance {
         RawInstance {
             model: (cgmath::Matrix4::from_translation(self.position) * cgmath::Matrix4::from(self.rotation)).into(),
             velocity: self.dynamic_velocity(),
-            color_factor: self.disposition.as_u32(),
+            color_factor: self.harmony.as_u32(),
             white_key : self.index_to_white_key(),
         }
     }

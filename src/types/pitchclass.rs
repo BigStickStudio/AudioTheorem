@@ -24,7 +24,7 @@ use std::fmt;
 /// harmonics used in western music.
 ///
 /// X Axis on Note Table and the [Matrix](audiotheorem::types::Matrix).
-#[derive(Copy, Clone, Debug, Hash, PartialOrd, PartialEq)]
+#[derive(Copy, Clone, Debug, Hash, PartialOrd, PartialEq, Eq)]
 pub enum PitchClass {
     /// C Neutral
     Cn,

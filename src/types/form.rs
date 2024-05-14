@@ -15,7 +15,7 @@
 //
 
 /// A Notation of whether a key signature is Sharp or Flat in nature.\
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Form {
     Flat,
     Natural,

@@ -6,7 +6,7 @@ use super::{PitchGroupKernel, Tonic};
 #[derive(Clone, Debug)]
 pub struct Key {
     pub pitchgroup: PitchGroup,         // This is the pitchgroup that this slice belongs to
-    pub notes: Vec<Notes>,         // This is the collection of notes found from the matrix
+    pub notes: Vec<Note>,         // This is the collection of notes found from the matrix
     accidental: Form,                   // Fast Sharp, Flat, or Natural note (Cn would be the only Natural Slice)
     pub probability: u8,                // This is the probability of the pitchgroup slice being played -> we could systematically map these with a sequence e.g. Matrix type
         /*
@@ -24,7 +24,7 @@ impl Key {
         let pitch_classes: HashSet<PitchClass> = pitchgroup.pitch_classes().iter().map(|pc| pc.clone()).collect::<HashSet<PitchClass>>();
 
         // We let the Matrix tell us whether we should be sharp or flat
-        let notes: Vec<Note> = possible_pitch_classes.iter().map(|pc| Matrix::natural(pc, pitchgroup)).collect::<Vec<Note>>(); 
+        let notes: Vec<Note> = pitch_classes.iter().map(|pc| Matrix::natural(pc, pitchgroup).unwrap()).collect::<Vec<Note>>(); 
         
         // We need to determine if this is a sharp, flat, or natural note
         let is_sharp = notes.iter().any(|n| n.sharp());
@@ -40,7 +40,8 @@ impl Key {
         }
     }
 
-    pub fn root(&self) -> Tonic { self.collection[0].clone() }
+    pub fn len(&self) -> usize { self.notes.len() }
+    pub fn root(&self) -> Tonic { self.notes[0].clone() }
     pub fn is_sharp(&self) -> bool { self.accidental == Form::Sharp }
     pub fn is_flat(&self) -> bool { self.accidental == Form::Flat }
     pub fn is_natural(&self) -> bool { self.accidental == Form::Natural }

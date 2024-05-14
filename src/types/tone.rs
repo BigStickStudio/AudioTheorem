@@ -25,7 +25,7 @@ use std::fmt;
 // Velocity and Harmony were amended as part of a proprietary system as part of the Nexus Project under Big Stick Studio on behalf of Ancillary, Inc. 2024
 /// [Tone](audiotheorem::types::Tone) is a [Note](audiotheorem::types::Note) at a specific
 /// [Octave](audiotheorem::types::Octave).
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Hash, Eq)]
 pub struct Tone {
     octave: Octave,
     note: Note,
@@ -117,11 +117,6 @@ impl std::ops::Sub<Interval> for Tone {
                     { None }
             }
     }
-}
-
-impl Hash for Tone {
-    fn hash<H: Hasher>(&self, state: &mut H) 
-        { self.octave.hash(state); self.note.hash(state); }
 }
 
 #[cfg(test)]
