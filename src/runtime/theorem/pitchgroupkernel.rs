@@ -9,7 +9,7 @@ use std::fmt::{self, Display, Formatter};
 pub struct PitchGroupKernel {
     index: usize,
     keys: Vec<Key>,
-    dissidents: Vec<PitchGroup>,     // These are the negative pitchgroups that are not being played - we may not need this
+    dissidents: Vec<Key>,     // These are the negative pitchgroups that are not being played - we may not need this
 }
 
 // It's expensive, but we just create a new pitchgroup every time, for now
@@ -29,7 +29,9 @@ impl PitchGroupKernel {
                 keys: harmonious.iter()
                                 .map(|pg| Key::new(pg, tones.clone())) 
                                 .collect::<Vec<Key>>(),
-                dissidents: dissidence,//.iter().map(|pg| pg.clone()).collect::<Vec<PitchGroup>>() // This is expensive and we shouldn't do it.. Do we need it?
+                dissidents: dissidence.iter()
+                                .map(|pg| Key::new(pg, tones.clone())) 
+                                .collect::<Vec<Key>>()
             }
     }
 
@@ -46,7 +48,7 @@ impl PitchGroupKernel {
         if played_tones.is_empty() { return HashSet::new(); }
 
         let top_keys = self.top_keys().unwrap_or(Vec::new());
-        let n_of_top_keys = top_keys.len();
+        let dissenter: f32 = 21.25;
         // but we don't do anything with it yet..
         
         let mut played_notes = played_tones.iter().map(|t| t.clone()).collect::<HashSet<Tonic>>();
@@ -62,16 +64,16 @@ impl PitchGroupKernel {
                           // velocity from the notes played around it
 
                     // if it we want to add it with a 1 as the most harmonious
-                    played_notes.extend(Tonic::new(note.index(), 100, 1));
+                    played_notes.extend(Tonic::new(note.index(), 100s, 1));
                     continue;
                 }
 
-                // else we want to count the n of keys that have the note
-                let n_of_top = top_keys.iter().filter(|k| k.notes.iter().any(|n| n == note)).count();
+                // else we want to count the n of dissidenters that have the note
+                let in_dissidents = self.dissidents.iter().filter(|k| k.notes.iter().any(|n| n == note)).count();
                 
                 // TODO: weave in the velocity from the notes played around it (Atomics?)
                 // and then add it with 255 being the most dissonant.. the more notes in the top keys - the more harmonious
-                played_notes.extend(Tonic::new(note.index(), 75, 255 - (n_of_top / n_of_top_keys * 255) as u8));
+                played_notes.extend(Tonic::new(note.index(), 75, dissenter * in_dissidents as u8));
             }
 
         }        

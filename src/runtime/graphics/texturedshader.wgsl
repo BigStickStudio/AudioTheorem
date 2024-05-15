@@ -93,7 +93,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         { 
             //return mix(mix(green_sample, orange_sample, (in.harmony / 255.0)), black_and_white, in.velocity * 4.25); 
             let harmony_factor = in.harmony / 500.0;
-            let green_orange = mix(green_sample, orange_sample, harmony_factor) * 2.0;
+            let green_orange = mix(green_sample, orange_sample, harmony_factor);
             return mix(black_and_white, green_orange, in.velocity * 4.25);
         }
 
