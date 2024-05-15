@@ -48,7 +48,7 @@ impl PitchGroupKernel {
         if played_tones.is_empty() { return HashSet::new(); }
 
         let top_keys = self.top_keys().unwrap_or(Vec::new());
-        let dissenter: f32 = 21.25;
+        let dissenter: f32 = 36.428;
         // but we don't do anything with it yet..
         
         let mut played_notes = played_tones.iter().map(|t| t.clone()).collect::<HashSet<Tonic>>();
@@ -64,7 +64,7 @@ impl PitchGroupKernel {
                           // velocity from the notes played around it
 
                     // if it we want to add it with a 1 as the most harmonious
-                    played_notes.extend(Tonic::new(note.index(), 100s, 1));
+                    played_notes.extend(Tonic::new(note.index(), 100, 1));
                     continue;
                 }
 
@@ -73,7 +73,7 @@ impl PitchGroupKernel {
                 
                 // TODO: weave in the velocity from the notes played around it (Atomics?)
                 // and then add it with 255 being the most dissonant.. the more notes in the top keys - the more harmonious
-                played_notes.extend(Tonic::new(note.index(), 75, dissenter * in_dissidents as u8));
+                played_notes.extend(Tonic::new(note.index(), 75, (dissenter * (in_dissidents as f32)) as u8));
             }
 
         }        
