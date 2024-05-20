@@ -5,8 +5,8 @@
 use crate::types::Dynamic;
 use super::mesh::{TexturedSquare, ColoredSquare};
 
-const SCREEN_WIDTH: f32 = 1200.0;
-const SCREEN_HEIGHT: f32 = 800.0;
+const SCREEN_WIDTH: f32 = 1600.0;
+const SCREEN_HEIGHT: f32 = 1200.0;
 const SQUARE_SIZE: i32 = 16;
 const GRID_SIZE: u8 = 12;
 const DESIRED_FPS: u32 = 1;

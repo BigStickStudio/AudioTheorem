@@ -1,4 +1,6 @@
+//////
 // Vertex shader
+//////
 struct CameraUniform {
     view_proj: mat4x4<f32>,
 }
@@ -48,7 +50,9 @@ fn vs_main(model: VertexInput, instance: InstanceInput) -> VertexOutput {
     return out;
 }
 
+//////
 // Fragment shader
+//////
 @group(0) @binding(0)
 var white_diffuse: texture_2d<f32>;
 @group(0) @binding(1)
@@ -85,16 +89,18 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     var black_and_white = mix(black_sample, white_sample, in.white_key);
 
+    let velocity_factor = in.velocity / 100.0;
+
 
     if (in.harmony == 0f)
-        { return mix(black_and_white, blue_sample, in.velocity * 4.25); } 
+        { return mix(black_and_white, blue_sample, velocity_factor); } 
 
     if (in.harmony >= 1f)
         { 
             //return mix(mix(green_sample, orange_sample, (in.harmony / 255.0)), black_and_white, in.velocity * 4.25); 
             let harmony_factor = in.harmony / 255.0;
             let green_orange = mix(green_sample, orange_sample, harmony_factor);
-            return mix(black_and_white, green_orange, in.velocity * 2.0);
+            return mix(black_and_white, green_orange, velocity_factor);
         }
 
    return black_and_white;
