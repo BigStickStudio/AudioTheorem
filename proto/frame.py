@@ -4,7 +4,7 @@ from colors import Color
 import pygame
 
 class Frame:
-    def __init__ (self, window, x, y, width, height):
+    def __init__ (self, window, x, y, width, height, spacing):
         self.width = width
         self.height = height
         self.x = x
@@ -12,14 +12,19 @@ class Frame:
         self.window = window
         self.frame_color = Color.WHITE.value
         self.midline_color = Color.BLUE.value
-        self.spacing = 3
+        self.spacing = spacing
     
-    def relative_offset(self, index, n_indices, value, scale): # Index would be the X, value would be Y * scale
+    def wavelength_offset(self, index, n_indices, value, scale): # Index would be the X, value would be Y * scale
         # width / n_indices == width of each index * the idx + x 
         relative_x = index * (self.width / n_indices) + self.x
         relative_y = value * ((self.height // 2) / (scale * 2)) + self.y + (self.height // 2)
         return (relative_x, relative_y)
     
+    def bandwidth_offset(self, index, n_indices, amplitude, total_range):
+        left_x = self.x + index * (self.width / n_indices)
+        top_y = self.y + self.height - (amplitude * self.height / total_range)
+        return (left_x, top_y)
+
     def radial_offset(self, index, n_indices, value, scale): # Index would be the X, value would be Y * scale
         # width / n_indices == width of each index * the idx + x 
         relative_x = index * ((self.width // 2) / (n_indices * 2)) + self.x + (self.width // 2)

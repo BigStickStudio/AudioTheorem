@@ -10,3 +10,11 @@ class Wave:
     def __str__(self):
         return f"{self.wave_type} wave at {self.frequency} Hz with amplitude {self.amplitude}"
     
+    def __lt__(self, other):
+        return self.frequency < other.frequency
+    
+    def __eq__(self, other):
+        return self.frequency == other.frequency
+    
+    def __gt__(self, other):
+        return self.frequency > other.frequency
