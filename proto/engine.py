@@ -19,11 +19,12 @@ class Engine:
         self.alpha_xyz = [0, 0, 0] # Alpha represents the amplitude, phase, and sample index
 
         # State
+        self.SAMPLE_RATE = 44100
+        self.SAMPLES = 2048
         self.running = True
         self.waveforms = []
         self.max_amplitude = 200
-        self.waveforms.append(Wave("Sine", 164.81, 100))
-        self.waveforms.append(Wave("Sine", 174.61, 100))
+        self.waveforms.append(Wave("Sine", 432.0, 100, self.SAMPLES, self.SAMPLE_RATE))
         self.top_tally = 0
 
         # Configuration
@@ -33,8 +34,6 @@ class Engine:
         self.resolution = Resolution.SEMITONE
 
         self.sample_idx = 0
-        self.SAMPLES = 2048             # Ideally would be 2048 or higher - Proprietary Ancillary, Tonal Synthesis Superposition
-        self.SAMPLE_RATE = 44100        # How fast we sample the wave
         self.frame_spacing = 3
 
         self.samples = []
@@ -107,14 +106,6 @@ class Engine:
 
         self.alpha_xyz = [0, 0]
 
-        # TODO: I think we actually want to Calculate an entire sample set?
-        for wave in self.waveforms:
-            y = wave.amplitude * math.sin(wave.phase)
-            x = wave.amplitude * math.cos(wave.phase)
-            wave.phase += 2 * math.pi * wave.frequency / self.SAMPLE_RATE
-
-            self.alpha_xyz[0] += x
-            self.alpha_xyz[1] += y
 
         self.samples.append(self.alpha_xyz)
         self.sample_idx = (self.sample_idx + 1) % self.SAMPLES
@@ -160,20 +151,38 @@ class Engine:
             t_range = 100
 
             (left_x, top_y) = self.bottom_right.bandwidth_offset(n, n_bands, amplitude, t_range)
-            rect = pygame.Rect(left_x, self.bottom_right.y + self.bottom_right.height - top_y, bandwidth_width, amplitude * 2)
+            rect = pygame.Rect(left_x, top_y, bandwidth_width, amplitude * 2)
             pygame.draw.rect(self.window, final_color, rect)
             
         return
 
 
     def draw_positions(self):
-        for alpha in self.samples:
-            alpha_index = self.samples.index(alpha)
-            (top_shelf_x, top_shelf_y) = self.top_shelf.wavelength_offset(alpha_index, self.top_tally, alpha[0], self.max_amplitude)
-            pygame.draw.circle(self.window, (255, 255, 255), (top_shelf_x + self.frame_spacing, top_shelf_y), 1)
+        superposition = Wave("Superposition", 0.0, 0)
+
+        for wave in self.waveforms:
+
+            superposition.add(wave)
+
+            # alpha_index = self.samples.index(alpha)
+            # (top_shelf_x, top_shelf_y) = self.top_shelf.wavelength_offset(alpha_index, self.top_tally, alpha[0], self.max_amplitude)
+            # # TODO: Add Color based on phase
+            # pygame.draw.circle(self.window, (255, 255, 255), (top_shelf_x + self.frame_spacing, top_shelf_y), 1)
             
-            (bottom_left_x, bottom_left_y) = self.bottom_left.radial_offset(alpha[0], self.max_amplitude, alpha[1], self.max_amplitude)
-            pygame.draw.circle(self.window, (255, 255, 255), (bottom_left_x + self.frame_spacing, bottom_left_y), 1)
+            # (bottom_left_x, bottom_left_y) = self.bottom_left.radial_offset(alpha[0], self.max_amplitude, alpha[1], self.max_amplitude)
+            # pygame.draw.circle(self.window, (255, 255, 255), (bottom_left_x + self.frame_spacing, bottom_left_y), 1)
+
+
+        # Draw the superposition
+        for i in range(len(superposition.samples)):
+            (top_shelf_x, top_shelf_y) = self.top_shelf.wavelength_offset(i, len(superposition.samples), superposition.samples[i], self.max_amplitude)
+            
+            # factor color by amplitude and phase
+            pygame.draw.circle(self.window, Color.WHITE.value, (top_shelf_x + self.frame_spacing, top_shelf_y), 1)
+
+            i_i = 2 * math.pi * i / len(superposition.samples)
+            (bottom_left_x, bottom_left_y) = self.bottom_left.radial_offset(i_i, self.max_amplitude, superposition.samples[i], self.max_amplitude)
+            pygame.draw.circle(self.window, Color.WHITE.value, (bottom_left_x + self.frame_spacing, bottom_left_y), 1)
 
         self.draw_bands()
 
