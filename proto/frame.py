@@ -22,7 +22,8 @@ class Frame:
     
     def bandwidth_offset(self, index, n_indices, amplitude, total_range):
         left_x = self.x + index * (self.width / n_indices)
-        top_y = self.y + self.height - (amplitude * self.height / total_range)
+        relative_offset = (amplitude * (self.height / total_range)) 
+        top_y = self.y + self.height - relative_offset + (relative_offset // 2)
         return (left_x, top_y)
 
     def radial_offset(self, index, n_indices, value, scale): # Index would be the X, value would be Y * scale

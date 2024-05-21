@@ -6,7 +6,7 @@ import time
 from frame import Frame
 from resolution import Resolution
 from colors import Color
-from waveform import Wave
+from waveform import WaveForm, Wave
 
 class Engine: 
     def __init__(self):
@@ -23,20 +23,24 @@ class Engine:
         self.SAMPLES = 2048
         self.running = True
         self.waveforms = []
-        self.max_amplitude = 200
-        self.waveforms.append(Wave("Sine", 432.0, 100, self.SAMPLES, self.SAMPLE_RATE))
-        self.top_tally = 0
+        self.max_amplitude = 150 # TODO: Make this more dynamic
+        self.waveforms.append(WaveForm("Sine", len(self.waveforms), 220.0, 20, self.SAMPLES, self.SAMPLE_RATE))
+        self.waveforms.append(WaveForm("Sine", len(self.waveforms), 440.0, 40, self.SAMPLES, self.SAMPLE_RATE))
+        self.waveforms.append(WaveForm("Sine", len(self.waveforms), 880.0, 60, self.SAMPLES, self.SAMPLE_RATE))
+        
+        self.superposition = WaveForm("Superposition", 999, 0.0, 0)
+        self.super_index = 0
+
+        for wave in self.waveforms:
+            self.superposition.add(wave)
+        
 
         # Configuration
         self.min_freq = 8.025
         self.max_freq = 32039
         self.frequency_range = self.max_freq - self.min_freq
         self.resolution = Resolution.SEMITONE
-
-        self.sample_idx = 0
         self.frame_spacing = 3
-
-        self.samples = []
 
         # Initialize Pygame
         self.window = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
@@ -98,18 +102,15 @@ class Engine:
         if not self.cyclic_time():
             return False
 
-        # If we have enough samples, we can just use the precalculated sample
-        if len(self.samples) > self.sample_idx:
-            self.alpha_xyz = self.samples[self.sample_idx]
-            self.sample_idx = (self.sample_idx + 1) % self.SAMPLES
-            return True
+        # TODO: Update the waveforms here?
+        #for wave in self.waveforms:
+        #    wave.next_sample() 
 
-        self.alpha_xyz = [0, 0]
+        # copy any waveforms to superposition
+        #self.waveforms.clear()
 
-
-        self.samples.append(self.alpha_xyz)
-        self.sample_idx = (self.sample_idx + 1) % self.SAMPLES
-        self.top_tally += 1
+        #for wave in self.waveforms:
+        #    self.superposition.add(wave)
 
         return True
 
@@ -140,49 +141,68 @@ class Engine:
             band_freq_close = self.min_freq + (n + 1) * bandwidth_range
 
             ## WE ARE ITERATING AND COMPOUNDING ALL OF THE WAVEFORMS HERE ##
-            ##for wave in self.waveforms:
-            ##    relative_freq = wave["Frequency"] 
+            # If the band is one of the wavelengths +/- the start and close of the band, we want to draw a line
+            some_wave = next((wave for wave in self.waveforms if band_freq_start < wave.frequency <= band_freq_close), None)
 
-            ##if band_freq_start < relative_freq <= band_freq_close:
             octave_color = Color.get(n // 12)
             pitchclass_color = Color.get(n % 12)
             final_color = octave_color.lerp(pitchclass_color, 0.56)
             amplitude = 100
             t_range = 100
 
-            (left_x, top_y) = self.bottom_right.bandwidth_offset(n, n_bands, amplitude, t_range)
-            rect = pygame.Rect(left_x, top_y, bandwidth_width, amplitude * 2)
+            if some_wave is not None:
+                (left_x, top_y) = self.bottom_right.bandwidth_offset(n, n_bands, some_wave.amplitude, t_range)
+                rect = pygame.Rect(left_x, top_y, bandwidth_width, some_wave.amplitude * 4)
+                continue
+
+            (left_x, top_y) = self.bottom_right.bandwidth_offset(n, n_bands, 10, t_range) 
+            rect = pygame.Rect(left_x, top_y, bandwidth_width, 20)
             pygame.draw.rect(self.window, final_color, rect)
             
-        return
-
 
     def draw_positions(self):
-        superposition = Wave("Superposition", 0.0, 0)
+        
+        n_bands = self.resolution.subdivisions()
+
+        for sample in self.superposition.samples:
+            (top_shelf_x, top_shelf_y) = self.top_shelf.wavelength_offset(self.super_index, len(self.superposition.samples), sample.y, self.max_amplitude)
+            pygame.draw.circle(self.window, Color.GRAY.value, (top_shelf_x + self.frame_spacing, top_shelf_y), 1)
+
+            (bottom_left_x, bottom_left_y) = self.bottom_left.radial_offset(sample.x, self.max_amplitude, sample.y, self.max_amplitude)
+            pygame.draw.circle(self.window, Color.GRAY.value, (bottom_left_x + self.frame_spacing, bottom_left_y), 1)
+
 
         for wave in self.waveforms:
+            for sample in wave.samples:
+                sample_index = wave.samples.index(sample)
+                (top_shelf_x, top_shelf_y) = self.top_shelf.wavelength_offset(sample_index, len(wave.samples), sample.y, self.max_amplitude)
+                pygame.draw.circle(self.window, wave.color_value(), (top_shelf_x + self.frame_spacing, top_shelf_y), 1)
 
-            superposition.add(wave)
+                (bottom_left_x, bottom_left_y) = self.bottom_left.radial_offset(sample.x, self.max_amplitude, sample.y, self.max_amplitude)
+                pygame.draw.circle(self.window, wave.color_value(), (bottom_left_x + self.frame_spacing, bottom_left_y), 1)
 
-            # alpha_index = self.samples.index(alpha)
-            # (top_shelf_x, top_shelf_y) = self.top_shelf.wavelength_offset(alpha_index, self.top_tally, alpha[0], self.max_amplitude)
-            # # TODO: Add Color based on phase
-            # pygame.draw.circle(self.window, (255, 255, 255), (top_shelf_x + self.frame_spacing, top_shelf_y), 1)
-            
-            # (bottom_left_x, bottom_left_y) = self.bottom_left.radial_offset(alpha[0], self.max_amplitude, alpha[1], self.max_amplitude)
-            # pygame.draw.circle(self.window, (255, 255, 255), (bottom_left_x + self.frame_spacing, bottom_left_y), 1)
+            sample = wave.next_sample()
+            active_color = Color.BLUE.lerp(wave.color, 0.3)
+            active_color = Color.WHITE.lerp(active_color, 0.3)
+
+            # This draws the top shelf
+            (top_shelf_x, top_shelf_y) = self.top_shelf.wavelength_offset(wave.phase_index, len(wave.samples), sample.y, self.max_amplitude)
+            pygame.draw.circle(self.window, active_color, (top_shelf_x + self.frame_spacing, top_shelf_y), 1)
+
+            # This draws the bottom left
+            (bottom_left_x, bottom_left_y) = self.bottom_left.radial_offset(sample.x, self.max_amplitude, sample.y, self.max_amplitude)
+            pygame.draw.circle(self.window, active_color, (bottom_left_x + self.frame_spacing, bottom_left_y), 1)
 
 
-        # Draw the superposition
-        for i in range(len(superposition.samples)):
-            (top_shelf_x, top_shelf_y) = self.top_shelf.wavelength_offset(i, len(superposition.samples), superposition.samples[i], self.max_amplitude)
-            
-            # factor color by amplitude and phase
-            pygame.draw.circle(self.window, Color.WHITE.value, (top_shelf_x + self.frame_spacing, top_shelf_y), 1)
+        # Draw the current superposition
+        super_sample = self.superposition.samples[self.super_index]
 
-            i_i = 2 * math.pi * i / len(superposition.samples)
-            (bottom_left_x, bottom_left_y) = self.bottom_left.radial_offset(i_i, self.max_amplitude, superposition.samples[i], self.max_amplitude)
-            pygame.draw.circle(self.window, Color.WHITE.value, (bottom_left_x + self.frame_spacing, bottom_left_y), 1)
+        (top_shelf_x, top_shelf_y) = self.top_shelf.wavelength_offset(self.super_index, len(self.superposition.samples), super_sample.y, self.max_amplitude)
+        pygame.draw.circle(self.window, Color.BLUE.value, (top_shelf_x + self.frame_spacing, top_shelf_y), 1)
+
+        (bottom_left_x, bottom_left_y) = self.bottom_left.radial_offset(super_sample.x, self.max_amplitude, super_sample.y, self.max_amplitude)
+        pygame.draw.circle(self.window, Color.BLUE.value, (bottom_left_x + self.frame_spacing, bottom_left_y), 1)
+        self.super_index = (self.super_index + 1) % len(self.superposition.samples)
 
         self.draw_bands()
 
@@ -202,3 +222,4 @@ class Engine:
             if self.update():
                 self.draw()
             
+            #self.clock.tick(60)

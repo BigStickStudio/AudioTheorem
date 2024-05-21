@@ -4,7 +4,7 @@ class Color(Enum):
     BLACK = (33, 33, 33)
     GRAY = (128, 128, 128) 
     WHITE = (222, 222, 222)
-    BLUE = (11, 33, 128)
+    BLUE = (33, 128, 222)
     
     O1 = (102, 6, 120)
     O2 = (61, 20, 99)
@@ -18,11 +18,14 @@ class Color(Enum):
     O10 = (163, 154, 47)
     O11 = (150, 71, 2)
 
+    def val(self):
+        return self.value if isinstance(self.value, tuple) else self
 
     def lerp(self, other, t):
-        r = self.value[0] + (other.value[0] - self.value[0]) * t
-        g = self.value[1] + (other.value[1] - self.value[1]) * t
-        b = self.value[2] + (other.value[2] - self.value[2]) * t
+        value = other.val() if isinstance(other, Color) else other
+        r = self.value[0] + (value[0] - self.value[0]) * t
+        g = self.value[1] + (value[1] - self.value[1]) * t
+        b = self.value[2] + (value[2] - self.value[2]) * t
         return (r, g, b)
     
     @staticmethod
