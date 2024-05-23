@@ -18,8 +18,8 @@ License is a Combination of Proprietary and Apache per the original source code 
  - [x] Reading MIDI
  - [x] Synthesize Audio (Still In Progress)
  - [x] Parallelism in IO Loops
- - [ ] MIDI Playing in Concurrency with GUI and Analysis - Full Integration
  - [x] Pitchgroup Analysis with +/- Octave Representation in GUI
+ - [ ] MIDI Playing in Concurrency with GUI and Analysis - Full Integration
  - [ ] Scale Mode in GUI
  - [ ] Tonic Analysis and Chord / Inversions Chart
  - [ ] Combined Pitchgroup & Scale/Chord Analysis + Tonic Cursor
