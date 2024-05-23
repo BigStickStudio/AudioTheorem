@@ -31,6 +31,24 @@ License is a Combination of Proprietary and Apache per the original source code 
  - [ ] Incorporate File Drag and Drop
  - [ ] Smooth and Intuitive UI for GFX Analysis
 
+### Working Samples
+All Working Samples are Subject to change. If anyone wishes to go through the history you can find a history of the evolution of this project nested in the history of this readme. Results may vary. 
+
+## Proto 
+Proto has a python version of a graphical 'simulation' to help me better understand how to handle various sync and compute buffers for this problem set. Depending on the state of testing, this application can be ran using `python main.py`
+
+![image](https://github.com/alephpt/AudioTheorem/assets/87874714/e557bba1-96d0-44fa-92f2-6ebff60e19df)
+![image](https://github.com/alephpt/AudioTheorem/assets/87874714/e9b5b294-98c7-4584-90c0-1c3e7075e212)
+
+## AudioTheorem
+The AudioTheorem app can be ran from an executable, through `cargo run` and many of the examples and unit tests. The original documentation is filled with various examples as well.
+
+The application takes midi input, and it is in the process of being able to write to an output. 
+(This is on hold as I study more about handling buffers and queues)
+![image](https://github.com/alephpt/AudioTheorem/assets/87874714/3b746d84-bb10-4d97-b645-005d41b7c1fa)
+![image](https://github.com/alephpt/AudioTheorem/assets/87874714/2f3c81bb-82a8-4cb5-a110-c3a8962145f4)
+
+
 ### Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as 
