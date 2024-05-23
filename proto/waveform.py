@@ -33,7 +33,7 @@ class WaveForm:
             x = self.amplitude * math.cos(self.phase)
             y = self.amplitude * math.sin(self.phase)
             self.samples.append(Wave(x, y))
-            self.phase += 2 * math.pi * self.frequency * (self.sample_count / self.sample_rate)
+            self.phase += 2 * math.pi * self.frequency * (1 / self.sample_rate)
             self.sample_count += 1
 
     def next_sample(self):

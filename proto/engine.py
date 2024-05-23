@@ -62,12 +62,6 @@ class Engine:
         self.wait_time = 0
         self.last_time = self.now
 
-    def cyclic_time(self):
-        # returns true if the delta time is greater than the sample rate
-        self.wait_time += self.delta_time
-        return self.wait_time > 1 / self.SAMPLE_RATE
-
-
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -99,7 +93,8 @@ class Engine:
         self.last_time = self.now
 
         # If we haven't reached the sample rate, we don't want to update the waveforms
-        if not self.cyclic_time():
+        if self.wait_time + self.delta_time < 1 / self.SAMPLE_RATE:
+            self.current_wave = self.superposition.next_sample()
             return False
 
         # TODO: Update the waveforms here?
@@ -114,7 +109,7 @@ class Engine:
 
         return True
 
-    def draw_shapes(self):
+    def draw_bounds(self):
         # Draw the top shelf
         self.top_shelf.draw_midline()
         self.top_shelf.draw_frame()
@@ -147,7 +142,6 @@ class Engine:
             octave_color = Color.get(n // 12)
             pitchclass_color = Color.get(n % 12)
             final_color = octave_color.lerp(pitchclass_color, 0.56)
-            amplitude = 100
             t_range = 100
 
             if some_wave is not None:
@@ -211,7 +205,7 @@ class Engine:
         self.window.fill((0, 0, 0))
 
         self.draw_positions()
-        self.draw_shapes()
+        self.draw_bounds()
 
         pygame.display.update()
 
