@@ -14,22 +14,22 @@ License is a Combination of Proprietary and Apache per the original source code 
 
 
 ### Ancillary TODO'S
-[x] GUI Representation of 144 Grid
-[x] Reading MIDI
-[x] Synthesize Audio (Still In Progress)
-[x] Parallelism in IO Loops
-[] MIDI Playing in Concurrency with GUI and Analysis - Full Integration
-[] Pitchgroup Analysis with +/- Octave Representation in GUI
-[] Scale Mode in GUI
-[] Tonic Analysis and Chord / Inversions Chart
-[] Combined Pitchgroup & Scale/Chord Analysis + Tonic Cursor
-[] Abstracting Main Class and Decoupling AudioTheorem (NeoTec)
-[] Develop GUI Framework (Big Stick)
-[] Abstract out WGPU Engine (NeoTec)
-[] Incorporate Live Analysis on Mobile
-[] Incorporate Batch Analysis on Server
-[] Incorporate File Drag and Drop
-[] Smooth and Intuitive UI for GFX Analysis
+ - [x] GUI Representation of 144 Grid
+ - [x] Reading MIDI
+ - [x] Synthesize Audio (Still In Progress)
+ - [x] Parallelism in IO Loops
+ - [ ] MIDI Playing in Concurrency with GUI and Analysis - Full Integration
+ - [x] Pitchgroup Analysis with +/- Octave Representation in GUI
+ - [ ] Scale Mode in GUI
+ - [ ] Tonic Analysis and Chord / Inversions Chart
+ - [ ] Combined Pitchgroup & Scale/Chord Analysis + Tonic Cursor
+ - [ ] Abstracting Main Class and Decoupling AudioTheorem (NeoTec)
+ - [ ] Develop GUI Framework (Big Stick)
+ - [ ] Abstract out WGPU Engine (NeoTec)
+ - [ ] Incorporate Live Analysis on Mobile
+ - [ ] Incorporate Batch Analysis on Server
+ - [ ] Incorporate File Drag and Drop
+ - [ ] Smooth and Intuitive UI for GFX Analysis
 
 ### Contribution
 
