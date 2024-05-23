@@ -24,9 +24,12 @@ class Engine:
         self.running = True
         self.waveforms = []
         self.max_amplitude = 150 # TODO: Make this more dynamic
-        self.waveforms.append(WaveForm("Sine", len(self.waveforms), 220.0, 20, self.SAMPLES, self.SAMPLE_RATE))
-        self.waveforms.append(WaveForm("Sine", len(self.waveforms), 440.0, 40, self.SAMPLES, self.SAMPLE_RATE))
-        self.waveforms.append(WaveForm("Sine", len(self.waveforms), 880.0, 60, self.SAMPLES, self.SAMPLE_RATE))
+        self.waveforms.append(WaveForm("Sine", len(self.waveforms), 43.25, 90, self.SAMPLES, self.SAMPLE_RATE))
+        self.waveforms.append(WaveForm("Sine", len(self.waveforms), 86.50, 60, self.SAMPLES, self.SAMPLE_RATE))
+        self.waveforms.append(WaveForm("Sine", len(self.waveforms), 345.50, 45, self.SAMPLES, self.SAMPLE_RATE))
+        self.waveforms.append(WaveForm("Sine", len(self.waveforms), 691.0, 37, self.SAMPLES, self.SAMPLE_RATE))
+        self.waveforms.append(WaveForm("Sine", len(self.waveforms), 1382.0, 22, self.SAMPLES, self.SAMPLE_RATE))
+        self.waveforms.append(WaveForm("Sine", len(self.waveforms), 2764.0, 15, self.SAMPLES, self.SAMPLE_RATE))
         
         self.superposition = WaveForm("Superposition", 999, 0.0, 0)
         self.super_index = 0
@@ -159,7 +162,8 @@ class Engine:
         n_bands = self.resolution.subdivisions()
 
         for sample in self.superposition.samples:
-            (top_shelf_x, top_shelf_y) = self.top_shelf.wavelength_offset(self.super_index, len(self.superposition.samples), sample.y, self.max_amplitude)
+            sample_index = self.superposition.samples.index(sample)
+            (top_shelf_x, top_shelf_y) = self.top_shelf.wavelength_offset(sample_index, len(self.superposition.samples), sample.y, self.max_amplitude)
             pygame.draw.circle(self.window, Color.GRAY.value, (top_shelf_x + self.frame_spacing, top_shelf_y), 1)
 
             (bottom_left_x, bottom_left_y) = self.bottom_left.radial_offset(sample.x, self.max_amplitude, sample.y, self.max_amplitude)
