@@ -1,7 +1,8 @@
 # Musical Theory Library
 
 License is a Combination of Proprietary and Apache per the original source code below, as this project is a combination and evolution of 3 parts, or 2.5 projects..
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+[![Original Collaborative License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 <!---[![Build Status](https://travis-ci.org/huhlig/musictheory-rs.svg?branch=master)](https://travis-ci.org/huhlig/musictheory-rs) -->
 <!---[![Coverage Status](https://coveralls.io/repos/github/huhlig/musictheory-rs/badge.svg?branch=master)](https://coveralls.io/github/huhlig/musictheory-rs?branch=master) -->
 
