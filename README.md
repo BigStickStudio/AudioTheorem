@@ -23,9 +23,9 @@ License is a Combination of Proprietary and Apache per the original source code 
  - [ ] Scale Mode in GUI
  - [ ] Tonic Analysis and Chord / Inversions Chart
  - [ ] Combined Pitchgroup & Scale/Chord Analysis + Tonic Cursor
- - [ ] Abstracting Main Class and Decoupling AudioTheorem (NeoTec)
- - [ ] Develop GUI Framework (Big Stick)
- - [ ] Abstract out WGPU Engine (NeoTec)
+ - [ ] Abstracting Main Class and Decoupling AudioTheorem 
+ - [ ] Develop GUI Framework
+ - [ ] Abstract out WGPU Engine
  - [ ] Incorporate Live Analysis on Mobile
  - [ ] Incorporate Batch Analysis on Server
  - [ ] Incorporate File Drag and Drop
